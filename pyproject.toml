@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "project_root"
+version = "0.1.0"
+description = "Streamlit and PDF analysis project"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    # 必要なパッケージのみ記載。requirements.txtと重複しないよう注意。
+    "streamlit",
+    "torch==2.4.1",
+    "torchvision",
+    "faiss-cpu",
+    "transformers",
+    "sentence-transformers",
+    "pandas",
+    "openpyxl",
+    "pytesseract",
+    "pypdf",
+    "requests",
+    "tiktoken",
+    "PyMuPDF",
+    # 不要なもの・重複があれば整理推奨
+]
+
+[tool.pyright]
+# VS Codeの settings.json にあった設定をここに集約
+include = ["src"]
+extraPaths = ["./src"]
+typeCheckingMode = "basic"
+useLibraryCodeForTypes = true
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# phase19 は別環境向けのため通常の CI ではスキップ
+addopts = "--ignore=tests/phase19"
+pythonpath = ["src"]
+asyncio_mode = "auto"
+markers = [
+    "asyncio: marks tests as async (deselect with '-m \"not asyncio\"')",
+]

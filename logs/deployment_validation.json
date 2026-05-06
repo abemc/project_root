@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-04-13T08:21:45.455232",
+  "validation_results": {
+    "passed": 17,
+    "warnings": 1,
+    "failed": 2,
+    "details": []
+  },
+  "status": "FAIL"
+}

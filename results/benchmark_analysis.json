@@ -1,0 +1,91 @@
+{
+  "timestamp": "2026-04-19T10:03:16.752038",
+  "source_model": "Unknown",
+  "analysis": {
+    "accuracy": {
+      "metrics": [
+        {
+          "benchmark": "MMLU (Test)",
+          "accuracy": 0.7,
+          "f1_score": 0.7,
+          "bleu_score": 0.0,
+          "sample_count": 100
+        },
+        {
+          "benchmark": "GSM8K (Test)",
+          "accuracy": 0.7,
+          "f1_score": 0.7,
+          "bleu_score": 0.0,
+          "sample_count": 50
+        }
+      ],
+      "summary": {
+        "avg_accuracy": 0.7,
+        "max_accuracy": 0.7,
+        "min_accuracy": 0.7,
+        "std_accuracy": 0.0
+      }
+    },
+    "performance": {
+      "metrics": [
+        {
+          "benchmark": "MMLU (Test)",
+          "throughput": 454913.6659436009,
+          "latency": 0.0,
+          "total_time": 0.00021982192993164062
+        },
+        {
+          "benchmark": "GSM8K (Test)",
+          "throughput": 228697.05561613958,
+          "latency": 0.0,
+          "total_time": 0.0002186298370361328
+        }
+      ],
+      "summary": {
+        "avg_throughput": 341805.36077987024,
+        "max_throughput": 454913.6659436009,
+        "min_throughput": 228697.05561613958,
+        "total_time_sec": 0.00043845176696777344
+      }
+    },
+    "comparison": {
+      "benchmarks": [
+        {
+          "rank": 1,
+          "name": "MMLU (Test)",
+          "accuracy": 0.7,
+          "f1_score": 0.7,
+          "samples": 100,
+          "throughput": 454913.6659436009,
+          "time_sec": 0.00021982192993164062
+        },
+        {
+          "rank": 2,
+          "name": "GSM8K (Test)",
+          "accuracy": 0.7,
+          "f1_score": 0.7,
+          "samples": 50,
+          "throughput": 228697.05561613958,
+          "time_sec": 0.0002186298370361328
+        }
+      ],
+      "ranking_by_accuracy": [
+        {
+          "rank": 1,
+          "name": "MMLU (Test)",
+          "accuracy": 0.7
+        },
+        {
+          "rank": 2,
+          "name": "GSM8K (Test)",
+          "accuracy": 0.7
+        }
+      ]
+    }
+  },
+  "conclusions": [
+    "⚠️ 平均的な精度。改善の余地あり",
+    "📊 平均スループット: 341805 samples/sec",
+    "🏆 最高精度: MMLU (Test) (0.7000)"
+  ]
+}

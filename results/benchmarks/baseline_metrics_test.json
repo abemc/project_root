@@ -1,0 +1,32 @@
+{
+  "model_name": "test-model",
+  "timestamp": "2026-05-06T15:45:02.982530",
+  "results": [
+    {
+      "benchmark_name": "MMLU",
+      "task_type": "classification",
+      "num_samples": 5,
+      "metrics": {
+        "accuracy": 0.2,
+        "exact_match": 0.2,
+        "f1": 0.2
+      },
+      "timestamp": "2026-05-06T15:45:02.982311",
+      "model_name": "test-model",
+      "notes": "Massive Multitask Language Understanding"
+    },
+    {
+      "benchmark_name": "GSM8K",
+      "task_type": "math",
+      "num_samples": 5,
+      "metrics": {
+        "accuracy": 0.0,
+        "exact_match": 0.0,
+        "f1": 0.0
+      },
+      "timestamp": "2026-05-06T15:45:02.982481",
+      "model_name": "test-model",
+      "notes": "Grade School Math"
+    }
+  ]
+}

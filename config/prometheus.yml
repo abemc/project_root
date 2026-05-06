@@ -1,0 +1,232 @@
+# Prometheus Configuration
+# ファイル: /etc/prometheus/prometheus.yml
+# 説明: Prometheus スクレイプ・ジョブ設定
+# 更新日: 2026-04-17
+
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+  external_labels:
+    cluster: 'esp-prod'
+    environment: 'production'
+    team: 'security-operations'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
+      scheme: http
+
+rule_files:
+  - '/etc/prometheus/rules/security-platform-alerts.yml'
+  - '/etc/prometheus/rules/infrastructure-alerts.yml'
+
+scrape_configs:
+  # ============================================================
+  # Layer 1: 認証システム監視
+  # ============================================================
+  - job_name: 'authentication-engine'
+    metrics_path: '/metrics'
+    scheme: http
+    static_configs:
+      - targets: ['authentication-engine:8081']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - source_labels: [__scheme__]
+        target_label: scheme
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'auth_.*'
+        action: keep
+
+  # ============================================================
+  # Layer 2: 暗号化システム監視
+  # ============================================================
+  - job_name: 'encryption-engine'
+    metrics_path: '/metrics'
+    scheme: http
+    static_configs:
+      - targets: ['encryption-engine:8082']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+
+  # ============================================================
+  # Layer 3: ネットワークセキュリティ監視
+  # ============================================================
+  - job_name: 'zerotrust-engine'
+    metrics_path: '/metrics'
+    scheme: http
+    static_configs:
+      - targets: ['zerotrust-engine:8083']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+
+  # ============================================================
+  # Layer 4: SOC システム監視
+  # ============================================================
+  - job_name: 'soc-system'
+    metrics_path: '/metrics'
+    scheme: http
+    static_configs:
+      - targets:
+          - 'soc-event-processor:8084'
+          - 'soc-threat-classifier:8085'
+          - 'soc-auto-responder:8086'
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+
+  # ============================================================
+  # Layer 5: ML/脅威検知エンジン監視
+  # ============================================================
+  - job_name: 'threat-detection-engine'
+    metrics_path: '/metrics'
+    scheme: http
+    static_configs:
+      - targets:
+          - 'threat-detection-engine:8087'
+          - 'anomaly-detector:8088'
+          - 'behavior-profiler:8089'
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+
+  # ============================================================
+  # Layer 6: コンプライアンスエンジン監視
+  # ============================================================
+  - job_name: 'compliance-engine'
+    metrics_path: '/metrics'
+    scheme: http
+    static_configs:
+      - targets: ['compliance-engine:8090']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+
+  # ============================================================
+  # Layer 7: グローバルオーケストレータ監視
+  # ============================================================
+  - job_name: 'global-orchestrator'
+    metrics_path: '/metrics'
+    scheme: http
+    static_configs:
+      - targets: ['global-orchestrator:8091']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+
+  # ============================================================
+  # インフラストラクチャ監視
+  # ============================================================
+  
+  # Node Exporter (ノードメトリクス)
+  - job_name: 'node-exporter'
+    metrics_path: '/metrics'
+    scheme: http
+    static_configs:
+      - targets: ['node-exporter:9100']
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '([^:]+)(?::\d+)?'
+        replacement: '${1}:9100'
+        target_label: __address__
+
+  # Kubernetes API Server
+  - job_name: 'kubernetes-apiservers'
+    kubernetes_sd_configs:
+      - role: endpoints
+    scheme: https
+    tls_config:
+      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+        action: keep
+        regex: default;kubernetes;https
+
+  # Kubernetes Kubelet
+  - job_name: 'kubernetes-nodes'
+    kubernetes_sd_configs:
+      - role: node
+    scheme: https
+    tls_config:
+      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+  # Kubernetes Pods
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+
+  # Kubernetes Services
+  - job_name: 'kubernetes-services'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    kubernetes_sd_configs:
+      - role: service
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_probe]
+        action: keep
+        regex: true
+      - source_labels: [__address__]
+        target_label: __param_target
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # PostgreSQL (DB)
+  - job_name: 'postgresql'
+    metrics_path: '/metrics'
+    scheme: http
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+
+  # Redis (キャッシュ)
+  - job_name: 'redis'
+    metrics_path: '/metrics'
+    scheme: http
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+
+  # Nginx (API Gateway)
+  - job_name: 'nginx'
+    metrics_path: '/metrics'
+    scheme: http
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+
+  # Prometheus 自身
+  - job_name: 'prometheus'
+    metrics_path: '/metrics'
+    scheme: http
+    static_configs:
+      - targets: ['localhost:9090']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance

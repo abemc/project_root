@@ -1,0 +1,35 @@
+flowchart TD
+    A[User Input] -->|Streamlit/API/CLI| B[Request Router]
+    B -->|Validate & Route| C{Input Type}
+    
+    C -->|Query| D[LLM Inference Engine]
+    C -->|Search| E[RAG Retriever]
+    C -->|Config| F[Configuration Manager]
+    
+    D -->|Generate Answer| G[Post-Processing]
+    E -->|Search Corpus| H[Document Manager]
+    H -->|Embedding Lookup| I[Vector DB]
+    
+    G -->|Response| J[Collect Feedback]
+    J -->|User Rating| K[Feedback Manager]
+    J -->|Auto Metrics| L[Metric Tracker]
+    
+    K -->|Analyze| M[Prompt Optimizer]
+    L -->|Compute KPI| N[Dashboard]
+    
+    M -->|Generate A/B Test| O[Continuous Training]
+    O -->|Update Model| P[Checkpoint Manager]
+    
+    N -->|Visualize| Q[Display Metrics]
+    Q -->|Alert if Degraded| R[Anomaly Detection]
+    R -->|Trigger Rollback| S[Version Recovery]
+    
+    P -->|Next Request| D
+    S -->|Restore| P
+    
+    style A fill:#e1f5ff
+    style D fill:#fff3e0
+    style E fill:#f3e5f5
+    style K fill:#e8f5e9
+    style N fill:#fce4ec
+    style O fill:#e0f2f1

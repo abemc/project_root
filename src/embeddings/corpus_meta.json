@@ -1,0 +1,1047 @@
+[
+  {
+    "book": "cal-18",
+    "page": 1,
+    "text": "教養の微積 (18 回目)"
+  },
+  {
+    "book": "cal-18",
+    "page": 1,
+    "text": "18 広義積分\n\n今回は関数が発散する場合の積分や, 無限区間上の積分について考えます.\n\n(cid:19)\n\n(cid:16)\n\n定義 18-1(有界区間上の広義積分)\n\n区間 (a, b] 上の連続関数 f (x) に対して, 関数 S(t) =\n\nb\n\n∫\nt f (x) dx (a < t ≦ b) を考える.\n\nS(t) が収束するとき, その極限値を\n\nlim\nt ↓ a\n\n∫\n\nb\n\na\n\nf (x) dx = lim\nt ↓ a\n\nS(t)\n\nで表し, 広義積分\nると言う.\n\n∫\nb\na f (x) dx は収束すると言う. S(t) が収束しないとき,\n\n∫\n\nb\na f (x) dx は発散す\n\ny\n\ny = f (x)\n\na\n\nb\n\nx\n\n[注意]\n\n(i) lim\nt ↓ a\n\n( lim\nt ↑ a\n\n) は t > a ( t < a ) の条件下で t を a に近づけると言う意味.\n\n(ii) [a, b) 上の連続関数 f (x) の場合は極限値\n\n∫\n\nb\n\na\n\nf (x) dx = lim\nt ↑ b\n\n∫\n\nt\n\na\n\nf (x) dx\n\nを考えることで広義積分を定義する.\n\n(cid:18)\n\n(cid:17)\n\ncopyright © 大学数学の授業ノート\n\n1"
+  },
+  {
+    "book": "cal-18",
+    "page": 2,
+    "text": "(cid:19)\n\n例題 18-1\n\n次の積分を計算せよ.\n\n∫\n\n1\n\n0\n\n1√\nx\n\ndx\n\n(1)\n\n∫\n\n1\n\n(2)\n\nlog x dx\n\n(3)\n\n0\n\n∫\n\n1\n\n−1\n\n1\nx\n\ndx\n\n(cid:18)\n\n[解答]\n(1) 被積分関数は x = 0 で発散することに注意する. そこで, 関数\n\nS(t) =\n\n∫\n\n1\n\nt\n\n1√\nx\n\ndx (0 < t < 1)\n\n(cid:16)\n\n(cid:17)\n\nを考える. このとき, S(t) = 2 − 2\n∫\n\n√\n\nt なので,\n\n1\n\n1√\nx\n\ndx = lim\nt ↓ 0\n\nS(t) = 2.\n\n0\n\n(2) 被積分関数は x = 0 で発散することに注意する. 0 < t < 1 に対して,\n\nS(t) =\n\n∫\n\n1\n\nt\n\n[\n\nlog x dx =\n\nx log x − x\n\n]1\n\nt\n\n= −t log t + t − 1.\n\nロピタルの定理より,\n\nlim\nt ↓ 0\n\nt log t = lim\nt ↓ 0\n\n従って\n\nlog t\n1\nt\n\n∫\n\n1\n\n0\n\n= lim\nt ↓ 0\n\n(log t)′\n(\n1\nt\n\n)′ = lim\nt ↓ 0\n\n1\nt\n−1\nt2\n\n= lim\nt ↓ 0\n\n(−t) = 0.\n\nlog x dx = lim\nt ↓ 0\n\nS(t) = −1.\n\n(3) 被積分関数は x = 0 で発散するので, 次のように分けて考える (下記のコメントを参考のこと).\n\n∫\n\n1\n\n−1\n\n1\nx\n\ndx =\n\n∫\n\n1\n\n0\n\n1\nx\n\ndx +\n\n∫\n\n0\n\n−1\n\n1\nx\n\ndx.\n\nここで,\n\n∫\n\n1\n\n0\n\n1\nx\n\ndx = lim\nt ↓ 0\n\n∫\n\n1\n\nt\n\nより,\n\n∫\n\n1\n0\n\n1\nx dx は発散する. 従って\n\n1\nx\n∫\n\n[\n\ndx = lim\nt ↓ 0\n\nlog |x|\n\n]1\n\nt\n\n= lim\nt ↓ 0\n\n(− log |t|) = ∞\n\n1\n−1\n\n1\nx dx も発散する.\n\n[コメント] 積分\n\n∫\n\nb\na f (x) dx について, f (x) が (a, b) 上の点 c で発散する場合は\n\n∫\n\nb\n\na\n\n∫\n\nc\n\n∫\n\nb\n\nf (x) dx =\n\nf (x) dx +\n\nf (x) dx\n\na\n\nc\n\n2"
+  },
+  {
+    "book": "cal-18",
+    "page": 3,
+    "text": "と二つに分けて考えます.\n\n∫\n\n∫\n\nc\na f (x) dx,\n∫\n\nb\n\nb\nc f (x) dx の両方が収束するときに限り,\n∫\n\n∫\n\nc\n\nb\n\nf (x) dx =\n\nf (x) dx +\n\nf (x) dx\n\na\n\na\n\nc\n\nで積分値を定義します. どちらか一方でも発散するとき,\n18-1 (3) において,\n\n∫\n\n1\n\n1\nx\n\n[\n\n]1\n\n−1\n\ndx =\n\nlog |x|\n\n= log 1 − log | − 1| = 0\n\n∫\n\nb\na f (x) dx は発散すると言います. 例題\n\nとするのは誤りです.\n\n−1\n\n問題 18-1 次の積分を求めよ.\n\n∫\n\n1\n\n0\n\n(1)\n\n√\n3\n\n1"
+  },
+  {
+    "book": "cal-18",
+    "page": 3,
+    "text": "1 − x\n\ndx\n\n∫\n\n1\n\n0\n\n(2)\n\n1\nx(x + 2)\n\ndx\n\n∫\n\n1\n\n(3)\n\n(log x)2 dx\n\n0\n\n(cid:19)\n\n(cid:16)\n\n定義 18-2 (無限区間上の広義積分)\n\n区間 [a, ∞) 上の連続関数 f (x) に対して, 関数 S(t) =\n\nt\n\n∫\na f (x) dx (a < t < ∞) を考える.\n\nlim\nt→∞\n\nS(t) が収束するとき, その極限値を\n\n∫ ∞\n\na\n\nf (x) dx = lim\nt→∞\n\nS(t)\n\nで表し, 広義積分\n発散すると言う.\n\n∫ ∞\na f (x) dx は収束すると言う.\n\nlim\nt→∞\n\nS(t) が収束しないとき,\n\n∫ ∞\na f (x) dx は\n\ny\n\ny = f (x)\n\na\n\nx\n\n(−∞, b] 上の連続関数 f (x) の場合は, 極限値\n\n∫\n\nb\n\nf (x) dx = lim\n\nt→−∞\n\n−∞\n\n∫\n\nb\n\nt\n\nf (x) dx\n\nを考えることで広義積分を定義する.\n\n(cid:18)\n\n(cid:17)\n\n3"
+  },
+  {
+    "book": "cal-18",
+    "page": 4,
+    "text": "(cid:19)\n\n例題 18-2\n\n次の積分を計算せよ.\n\n∫ ∞\n\n(1)\n\n0\n\ne−x dx\n\n∫ ∞\n\n−∞\n\n(2)\n\n1"
+  },
+  {
+    "book": "cal-18",
+    "page": 4,
+    "text": "1 + x2 dx\n\n∫ ∞\n\n(3)\n\n2\n\nx\nx2 − 1\n\ndx\n\n(cid:18)\n\n[解答]\n(1) 関数\n\n(cid:16)\n\n(cid:17)\n\n∫\n\nt\n\nS(t) =\n\ne−x dx (t > 0)\n\n0\nを考える. このとき, S(t) = 1 − e−t なので,\n\n∫ ∞\n\n0\n\ne−x dx = lim\nt→∞\n\nS(t) = 1.\n\n(2) 積分を (−∞, 0] と [0, ∞) の二つの区間に分けて考える.\n\n∫ ∞\n\n0\n\n1"
+  },
+  {
+    "book": "cal-18",
+    "page": 4,
+    "text": "1 + x2 dx = lim\n\nt→∞\n\n∫\n\nt\n\n0\n\n1"
+  },
+  {
+    "book": "cal-18",
+    "page": 4,
+    "text": "1 + x2 dx = lim\n\nt→∞\n\narctan t =\n\nπ\n2\n\n.\n\n同様に,\n\n∫\n\n0\n\n−∞\n\n1"
+  },
+  {
+    "book": "cal-18",
+    "page": 4,
+    "text": "1 + x2 dx = lim\n\nt→−∞\n\n以上より\n\n∫ ∞\n−∞\n\n1\n\n1+x2 dx = π.\n\n(3) t > 2 に対して,\n\n∫\n\n0\n\nt\n\n1"
+  },
+  {
+    "book": "cal-18",
+    "page": 4,
+    "text": "1 + x2 dx = lim\n\nt→−∞\n\n{− arctan t} =\n\nπ\n2\n\n.\n\n∫\n\nt\n\n2\n\nx\nx2 − 1\n\ndx =\n\n∫\n\nt\n\n2\n\n1\n2\n\n· (x2 − 1)′\nx2 − 1\n\ndx =\n\n[\n\nlog(x2 − 1)\n2\n\n]t\n\n2\n\n=\n\nlog(t2 − 1)\n2\n\n− log 3\n2\n\n.\n\nここで,\n\nより\n\n∫ ∞\n2\n\nx\n\nx2−1 dx は発散する.\n\nlim\nt→∞\n\nlog(t2 − 1)\n2\n\n= ∞\n\n問題 18-2 次の積分を計算せよ.\n\n∫ ∞\n\n(1)\n\n1\n\ne−2x dx\n\n(2)\n\n∫ ∞\n\n−∞\n\nxe−x2\n\ndx\n\n∫ ∞\n\n(3)\n\n0\n\nex"
+  },
+  {
+    "book": "cal-18",
+    "page": 4,
+    "text": "1 + ex dx\n\n問題 18-3 α > 0 に対して次の積分を計算せよ.\n\n∫\n\n1\n\n0\n\n1\nxα dx\n\n(1)\n\n∫ ∞\n\n1\n\n1\nxα dx\n\n(2)\n\n4"
+  },
+  {
+    "book": "cal-13",
+    "page": 1,
+    "text": "教養の微分 (13 回目)\n\n13. 不定積分の定義と例\n\n今回から積分に入ります. まずは, 原始関数の定義と性質について説明します.\n\n(cid:19)\n\n定義 13-1 (原始関数)\n\n関数 f (x) に対して, P ′(x) = f (x) を満たす関数 P (x) を f (x) の原始関数と呼ぶ.\n\n(cid:18)\n\n例えば,\n\n(\n\n)′\n\nx3 + x\n\n= 3x2 + 1,\n\n′\n(sin x)\n\n= cos x\n\nより, x3 + x は 3x2 + 1 の原始関数, sin x は cos x の原始関数と分かります.\n\n問題 13-1 次の関数の原始関数を一つ見つけよ.\n\n(1) x + 1\n\n(2) e−x\n\n(3) sin(2x + 1)\n\n(cid:19)\n\n定理 13-1\n\n関数 f (x) に対して, 関数 F (x), G(x) は共に f (x) の原始関数とする. このとき, ある定数 C\n\nが取れて\n\nと表せる.\n\n(cid:18)\n\nG(x) = F (x) + C\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n定理 13-1 から f (x) の原始関数 F (x) が一つ分かると, 他の原始関数は F (x) + C (C : 定数)\n\nと表せます. そこで, 原始関数をまとめて\n\n∫\n\nf (x)dx = F (x) + C\n\n∫\nと表し, f (x) の不定積分と言います (\nするといい, f (x) を被積分関数, C を積分定数と言います.\n\nはインテグラルと呼びます). 不定積分を求めることを積分\n\ncopyright © 大学数学の授業ノート\n\n1"
+  },
+  {
+    "book": "cal-13",
+    "page": 2,
+    "text": "(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n(cid:19)\n\n定理 13-2\n\n∫\n\n∫\n\n∫\n\n∫\n\n∫\n\n∫\n\n∫\n\n(1)\n\n(2)\n\n(3)\n\n(4)\n\n(5)\n\n(6)\n\n(7)\n\n(cid:18)\n\nxα dx =\n\n\n\n\n\n\n1\n\nα+1 xα+1 + C (α ̸= −1 のとき),\n(α = −1 のとき).\nlog |x| + C\n\nex dx = ex + C.\n\nsin x dx = − cos x + C.\n\ncos x dx = sin x + C.\n\n1\n\n(cos x)2 dx = tan x + C.\n)\n\n(\n\n1√\na2−x2 dx = arcsin\n\n1\n\na2+x2 dx = 1\n\na arctan\n\nx\na\n\nx\na\n(\n\n+ C (a > 0).\n)\n\n+ C (a > 0).\n\n定理 13-2 は右辺の関数を微分すると, 左辺の被積分関数になることから従います. また積分\n\nについて次が成り立ちます.\n\n(cid:19)\n\n定理 13-3\n\n∫\n\n∫\n\n(1)\n\n(2)\n\n(cid:18)\n\nf (x) + g(x) dx =\n\n∫\n\nf (x) dx +\n\n∫\n\ng(x) dx.\n\n∫\n\ncf (x) dx = c\n\nf (x) dx (c : 定数).\n\n定理 13-2, 13-3 を使って具体的な関数の積分を計算してみます.\n\n(cid:19)\n\n例題 13-1\n\n次の積分を求めよ.\n\n∫\n\n(1)\n\nx2 + x + 2\nx\n\n∫\n\n∫\n\ndx\n\n(2)\n\nex + e−x dx\n\n(3)\n\n(cos x)2 dx\n\n(cid:18)\n\n[解答]\n(1) 定理 13-3 より\n\n∫\n\nx2 + x + 2\nx\n\n∫\n\ndx =\n\nx + 1 +\n\n2\nx\n\n∫\n\n∫\n\n∫\n\ndx =\n\nx dx +"
+  },
+  {
+    "book": "cal-13",
+    "page": 2,
+    "text": "1 dx + 2\n\n1\nx\n\ndx.\n\n定理 13-2 (1) より\n\n∫\n\nx2 + x + 2\nx\n\ndx =\n\nx2\n2\n\n+ x + 2 log |x| + C.\n\n2"
+  },
+  {
+    "book": "cal-13",
+    "page": 3,
+    "text": "(2) について.\n\n∫\n\n∫\n\n∫\n\nex + e−x dx =\n\nex dx +\n\ne−x dx = ex − e−x + C.\n\n(3) cos(2x) = 2(cos x)2 − 1 より\n\n∫\n\n(cos x)2 dx =\n\n∫\n\n1\n2\n\n∫\n\n従って\n\n{1 + cos(2x)} dx =\n\n∫\n\n1\n2"
+  },
+  {
+    "book": "cal-13",
+    "page": 3,
+    "text": "1 dx +\n\n∫\n\n1\n2\n\ncos(2x) dx.\n\n(cos x)2 dx =\n\nx\n2\n\n+\n\n1\n4\n\nsin(2x) + C.\n\n問題 13-2 次の積分を求めよ.\n∫\n\n∫\n\n(1)\n\n(x + 1)2 dx\n\n(2)\n\nsin x cos x dx\n\n(3)\n\n∫\n\n1"
+  },
+  {
+    "book": "cal-13",
+    "page": 3,
+    "text": "1 + 4x2 dx,\n\n∫\n\n(4)\n\n1\n(sin x)2 dx\n\n次は微分不可能な点を持つ関数の積分について考えてみます.\n\n(cid:19)\n\n例題 13-2\n\n次の関数の原始関数を一つ求めよ.\n\n\n\nf (x) =\n\n−x\n\n\n\nx\n\n(x ≦ 0 のとき),\n\n(x > 0 のとき).\n\n＊この関数は x = 0 で微分不可能である.\n\n(cid:18)\n\n[解答]\n\n関数 P (x) を次で定める.\n\nP (x) =\n\n\n\n\n\n\n− 1"
+  },
+  {
+    "book": "cal-13",
+    "page": 3,
+    "text": "2 x2\n\n1"
+  },
+  {
+    "book": "cal-13",
+    "page": 3,
+    "text": "2 x2\n\n(x ≦ 0 のとき),\n\n(x > 0 のとき).\n\n(cid:16)\n\n(cid:17)\n\nこのとき, P (x) が f (x) の原始関数であることを示す. x < 0 および x > 0 のとき, P ′(x) = f (x) で\nある. 次に x = 0 における P (x) の微分可能性をみる. P (0) = 0 に注意して,\n\nP (x) − P (0)\nx − 0\n\nlim\nx ↑ 0\n\n= lim\nx ↑ 0\n\n−x\n2\n\n= 0 = f (0),\n\nP (x) − P (0)\nx − 0\n\nlim\nx ↓ 0\n\n= lim\nx ↓ 0\n\nx\n2\n\n= 0 = f (0).\n\n3"
+  },
+  {
+    "book": "cal-13",
+    "page": 4,
+    "text": "よって\n\nP (x) − P (0)\nx − 0\n従って P (x) は x = 0 で微分可能で P ′(x) = f (0). 以上より, P (x) は f (x) の原始関数である.\n\n= f (0).\n\nlim\nx→0\n\n例題 13-2 の f (x) は x = 0 で微分不可能ですが, 連続にはなります. 実は連続関数は常に原始関\n数を持つことが知られています. このことは次回以降に説明します. 一方, 不連続関数は原始関数\nを持たない場合があります (問題 13-3 (2) を参照).\n\n問題 13-3\n\n(1) 次の関数を積分せよ.\n\n\n\n\n\n\n0\n\nx\n\nf (x) =\n\n(x ≦ 0 のとき),\n\n(x > 0 のとき).\n\n(2) 次の関数は原始関数を持たないことを示せ.\n\n\n\n\n\n\n0\n\n1\n\nf (x) =\n\n(x ̸= 0 のとき),\n\n(x = 0 のとき).\n\n4"
+  },
+  {
+    "book": "cal-4",
+    "page": 1,
+    "text": "教養の微積 (4 回目)\n\n4. 微分係数と導関数\n\n今回から関数の微分についてみていきます.\n\n(cid:19)\n\n定義 4-1 (微分係数)\n\n関数 f (x) と実数 a に対して\n\nf (x) − f (a)\nx − a\n\nlim\nx→a\n\nが存在するとき, f (x) は x = a で微分可能という. また, この極限値を x = a における微分係数と言い,\nf ′(a) で表す.\n\n(cid:18)\n\n微分の意味について考えます. 下図における赤線は x = a における y = f (x) の接線を表してい\n\nます. 左下図の黒の直線は (a, f (a)) と (x, f (x)) を通る直線で傾きは\n\nf (x) − f (a)\nx − a\nで与えられます. ここで, x を a に近づけると, 右下図のようにこの直線は接線に近づきます. つまり, 微分\n\n係数\n\nf ′(a) = lim\nx→a\n\nf (x) − f (a)\nx − a\n\n(eq1)\n\nは f (x) の x = a での接線の傾きを与えることが分かります.\n\ny\n\ny\n\n(cid:16)\n\n(cid:17)\n\nf (x)\n\nf (a)\n\nx\n\na\n\nx\n\nx\n\na x\n\n[補足] h = x − a と置く. x → a のとき h → 0 より, 等式 (eq1) は\n\ncopyright © 大学数学の授業ノート\n\nf ′(a) = lim\nh→0\n\nf (a + h) − f (a)\nh\n\n1"
+  },
+  {
+    "book": "cal-4",
+    "page": 2,
+    "text": "と書き換えられる.\n\n関数 f (x) = x2 に対して f ′(1) を計算してみます.\n\nf (x) − f (1)\nx − 1\n\nlim\nx→1\n\n= lim\nx→1\n\nx2 − 1\nx − 1\n\n= lim\nx→1\n\n(x + 1) = 2.\n\n従って f ′(1) = 2 となります.\n\n(cid:19)\n\n例題 4-1\n\n関数 f (x) = 1\nx\n\nを考える.\n\n(1) f ′(2) を求めよ.\n(2) f (x) の x = 2 での接線を求めよ.\n\n(cid:18)\n\n[解答]\n\n(1) について.\n\nf ′(2) = lim\nx→2\n\nf (x) − f (2)\nx − 2\n\n= lim\nx→2\n\n− 1\n1\nx\n2\nx − 2\n\n= lim\nx→2\n\n−1\n2x\n\n= − 1\n4\n\n.\n\n(2) f (x) の x = 2 における接線は傾き − 1\n4\n\nで, また点 (2, f (2)) =\n\n)\n\n(\n\n2, 1\n2\n\nを通るので,\n\ny − 1\n2\n\n= − 1\n4\n\n(x − 2) ⇐⇒ y = − x\n4\n\n+ 1.\n\n問題 4-1 関数 f (x) =\n\n√\n\nx を考える.\n\n(1) f ′(3) を求めよ.\n(2) f (x) の x = 3 での接線を求めよ.\n\n(cid:19)\n\n例 4-1\n\n関数 f (x) = xn (n : 自然数) と実数 a に対して f ′(a) = nan−1 が成り立つ.\n\n(cid:18)\n\n[証明]\n\n次のように変形する.\n\nf (x) − f (a)\nx − a\n\n=\n\nxn − an\nx − a\n\n=\n\n(x − a)(xn−1 + xn−2a + · · · + an−1)\nx − a\n\n= xn−1 + xn−2a + · · · + an−1.\n\n2\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-4",
+    "page": 3,
+    "text": "f ′(a) = lim\nx→a\n\nf (x) − f (a)\nx − a\n\n= lim\nx→a\n\n(\n\nxn−1 + xn−2a + · · · + an−1\n\n)\n\n= nan−1.\n\n従って\n\n問題 4-2\n\n(1) 定数関数 f (x) = c (c は実数) と実数 a に対して, f ′(a) = 0 を証明せよ.\n(2) 関数 f (x) = xn (n は負の整数) と実数 a に対して, f ′(a) = nan−1 を証明せよ.\n\n(cid:19)\n\n例題 4-2\n\n関数\n\n\n\n\n\n\nf (x) =\n\nx2\n\nx > 0 のとき,\n\n0\n\nx ≦ 0 のとき.\n\nこのとき, f (x) は x = 0 で微分可能であることを示せ. さらに f ′(0) を求めよ.\n\n(cid:18)\n\n[解答]\n\nx = 0 における微分係数を計算する.\n\nf (x) − f (0)\nx − 0\n\nlim\nx ↓ 0\n\n= lim\nx ↓ 0\n\nx2 − 0\nx − 0\n\n= lim\nx ↓ 0\n\nx = 0,\n\nf (x) − f (0)\nx − 0\n\nlim\nx ↑ 0\n\n= lim\nx ↑ 0"
+  },
+  {
+    "book": "cal-4",
+    "page": 3,
+    "text": "0 − 0\nx − 0\n\n= 0\n\nより\n\nf (x) − f (0)\nx − 0\n\nlim\nx→0\n\n= 0.\n\n従って f (x) は x = 0 で微分可能であり, f ′(0) = 0.\n\n問題 4-3 f (x) = x|x| は x = 0 で微分可能であることを示せ. また f ′(0) を求めよ.\n\n次に関数の連続性と微分可能性の関係をみます.\n\n(cid:19)\n\n定理 4-2\n\n関数 f (x) が x = a で微分可能ならば, f (x) は x = a で連続である.\n\n(cid:18)\n\n3\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-4",
+    "page": 4,
+    "text": "[証明]\n\nf (x) は x = a で微分可能なので極限値\n\nが存在します. よって\n\nf ′(a) = lim\nx→a\n\nf (x) − f (a)\nx − a\n\nlim\nx→a\n\n{f (x) − f (a)} = lim\nx→a\n\n{\n\n(x − a) × f (x) − f (a)\n\nx − a\n\n}\n\n= lim\nx→a\n\n(x − a) × lim\nx→a\n\nf (x) − f (a)\nx − a\n\n= 0 × f ′(a)\n\n= 0.\n\nよって lim\nx→a\n\nf (x) = f (a) であり, f (x) は x = a で連続である.\n\n[補足] 定理 4-2 の逆は一般的には成立しません. 例えば, f (x) = |x| は連続関数ですが, f (x) は x = 0 で微分\nできません. 実際,\n\nf (x) − f (0)\nx − 0\n\nlim\nx ↓ 0\n\n= lim\nx ↓ 0\n\nx − 0\nx − 0\n\n= 1,\n\nf (x) − f (0)\nx − 0\n\nlim\nx ↑ 0\n\n= lim\nx ↑ 0\n\n−x − 0\nx − 0\n\n= −1\n\nより, lim\nx→0\n\nf (x) − f (0)\nx − 0\n\nは存在しません.\n\n(cid:19)\n\n定義 4-2 (導関数)\n\n関数 f (x) が区間 I 上のすべての点で微分可能とする. このとき, 区間 I 上の関数を\n\nで定める. 関数 f ′(x) を f (x) の導関数 (または f (x) の微分) と呼ぶ.\n\nf ′(x) = lim\nh→0\n\nf (x + h) − f (x)\nh\n\n(cid:18)\n\n関数 f (x) = xn (n:整数) を考えます. 例 4-1 と問題 4-2 より, f ′(x) = nxn−1 となります.\n\n(cid:19)\n\n例題 4-3\n\nf (x) =\n\n√\n\n(cid:18)\n\nx の導関数を求めよ.\n\n4\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-4",
+    "page": 5,
+    "text": "[解答]\n\n次のように変形する.\n\nf (x + h) − f (x)\nh\n\n=\n\n√\n\nx + h −\nh\n\n√\n\nx\n\n√\n\n(\n\n=\n\nx + h −\n√\nh(\n\n√\n\n√\n\nx)(\nx + h +\n\nx + h +\nx)\n\n√\n\n√\n\nx)\n\n√\n\n=\n\n1\nx + h +\n\n√\n\n.\n\nx\n\n従って\n\nf ′(x) = lim\nh→0\n\nf (x + h) − f (x)\nh\n\n=\n\n1\n√\n\n.\n\nx\n\n2\n\n問題 4-4 次の関数の導関数を求めよ.\n\n(1) f (x) = x2 + x\n\n√\n\n(2) f (x) =\n\n2x + 1\n\n5"
+  },
+  {
+    "book": "cal-11",
+    "page": 1,
+    "text": "教養の微積 (11 回目)\n\n11. テイラーの定理とその応用\n\n今回はテイラーの定理の証明と使い方について解説します.\n\n(cid:19)\n\n定理 11-1 (テイラーの定理)\n\nf (x) は開区間 I 上の C n 級関数とする. a, b を I の異なる点とするとき,\n\nf (b) =\n\nn−1∑\n\nk=0\n\nf (k)(a)\nk!\n\n(b − a)k +\n\nf (n)(c)\nn!\n\n(b − a)n\n\n(1)\n\nを満たす c が a と b の間に存在する.\n\n※ n = 1 のとき, 等式 (1) は f (b) = f (a) + f ′(c)(b − a) となり, 平均値の定理と一致する.\n\n(cid:18)\n\n[証明]\n\n実数 K を次を満たすようにとる.\n\nf (b) =\n\nn−1∑\n\nk=0\n\nf (k)(a)\nk!\n\n(b − a)k +\n\nK\nn!\n\n(b − a)n.\n\n(2)\n\nこのとき, K = f (n)(c) を満たす c が a と b の間にあることを示せばよい. 関数\n\nF (x) = f (x) − f (b) +\n\nn−1∑\n\nk=1\n\nf (k)(x)\nk!\n\n(b − x)k +\n\nK\nn!\n\n(b − x)n\n\nを考える. このとき, F (a) = F (b) = 0 である. よって平均値の定理から\n\nを満たす c が a と b の間にとれる.\n\nF ′(c) =\n\nF (b) − F (a)\nb − a\n\n= 0\n\n(cid:16)\n\n(cid:17)\n\ncopyright © 大学数学の授業ノート\n\n1"
+  },
+  {
+    "book": "cal-11",
+    "page": 2,
+    "text": "また, F (x) の微分は次のように計算される.\n{\n\nF ′(x) = f (1)(x) +\n\nf (2)(x)(b − x) − f (1)(x)\n\n}\n\n(b − x)2 − f (2)(x)(b − x)\n\n}\n\n{\n\n+\n\nf (3)(x)\n2!\n\n+ · · ·\n\n{\n\n+\n\nf (n)(x)\n(n − 1)!\n\n(b − x)n−1 − f (n−1)(x)\n(n − 2)!\n\n(b − x)n−2\n\n}\n\n− K\n\n(n − 1)!\n\n=\n\nf (n)(x)\n(n − 1)!\n\n(b − x)n−1\n\n(b − x)n−1 − K\n\n(n − 1)!\n\n(b − x)n−1.\n\nF ′(c) = 0 より f (n)(c) = K が従う.\n\n(cid:19)\n\n定義 11-1\n\n定理 11-1 において, a を固定し, x = b とすると,\n\nf (x) =\n\nn−1∑\n\nk=0\n\nf (k)(a)\nk!\n\n(x − a)k +\n\nf (n)(cx)\nn!\n\n(x − a)n\n\nを満たす cx が a と x の間にとれる. このとき,\n\nPn−1(x, a) =\n\nn−1∑\n\nk=0\n\nf (k)(a)\nk!\n\n(x − a)k\n\nを f (x) の x = a における n − 1 次近似多項式と呼び,\n\nRn(x, a) =\n\nf (n)(cx)\nn!\n\n(x − a)n\n\nを n 次剰余項と呼ぶ.\n\n※ Rn(x, a) は (x − a)n という因子を持つので, x = a の近くでは小さくなる. つまり, x = a の近くにお\nいて f (x) は Pn−1(x, a) で近似される. 例えば, n = 2 の場合を考えると,\n\nP1(x, a) = f (a) + f ′(a)(x − a)\n\nであり, これは f (x) の x = a での接線の式を表す. つまり, f (x) は x = a の近くで接線で近似でき, そ\n\nの誤差は R2(x, a) となる.\n\n(cid:18)\n\n2\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-11",
+    "page": 3,
+    "text": "f (x) = x2 を考えると,\n\nよって\n\nf (1)(x) = 2x,\n\nf (2)(x) = 2,\n\nf (3)(x) = 0.\n\nf (0)(1) = f (1) = 1,\n\nf (1)(1) = 2,\n\nf (2)(1) = 2.\n\n従って, x = 1 における f (x) の 2 次近似多項式は\n\nP2(x, 1) =\n\n2∑\n\nk=0\n\nf (k)(1)\nk!\n\n(x − 1)k = 1 + 2(x − 1) + (x − 1)2\n\nR3(x, 1) =\n\nf (3)(cx)\n3!\n\n(x − 1)3 = 0\n\nであり, 3 次剰余項は\n\nとなります.\n\n問題 11-1\n\nf (x) = ex を考える.\n\n(1) f (k)(x) (k = 1, 2, 3) を求めよ.\n\n(2) f (x) の x = 0 における 2 次近似多項式 P2(x, 0) と 3 次剰余項 R3(x, 0) を求めよ.\n\nテイラーの定理を用いて sin x の近似式を与えます.\n\n(cid:19)\n\n例題 11-1\n\nf (x) = sin x を考える.\n\n(1) f (k)(x) (k = 1, 2, 3) を求めよ.\n\n(2) f (x) の x = 0 における 2 次近似多項式 P2(x, 0) を求めよ.\n(3) −0.1 < x < 0.1 のとき, | sin x − x| < 0.001 を示せ.\n\n(cid:18)\n\n[解答]\n\n(1) について.\n\n(2) について.\n\nより,\n\nf (1)(x) = cos x,\n\nf (2)(x) = − sin x,\n\nf (3)(x) = − cos x.\n\nf (0)(0) = f (0) = 0,\n\nf (1)(0) = 1,\n\nf (2)(0) = 0\n\nP2(x, 0) =\n\n2∑\n\nk=0\n\nf (k)(0)\nk!\n\nxk = x.\n\n(3) テイラーの定理より,\n\nsin x = P2(x, 0) + R3(x, 0) = x + R3(x, 0).\n\n3\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-11",
+    "page": 4,
+    "text": "と表せる. ここで,\n\nR3(x, 0) =\n\nf (3)(cx)\n3!\n\nx3 =\n\n− cos(cx)\n6\n\nx3.\n\nただし, cx は x と 0 の間にある. |x| < 0.1 かつ | cos(cx)| ≦ 1 なので,\n\n| sin x − x| = |R3(x, 0)| =\n\n| cos(cx)|\n6\n\n|x|3 <\n\n1\n6\n\n× (0.1)3 < 0.001.\n\n問題 11-2 f (x) = log(1 + x) を考える.\n\n(1) f (k)(x) (k = 1, 2, 3) を求めよ.\n\n(2) f (x) の x = 0 における 2 次近似多項式 P2(x, 0) を求めよ.\n(3) 次を示せ.\n\n(\n\n)"
+  },
+  {
+    "book": "cal-11",
+    "page": 4,
+    "text": "0.095 < log\n\n< 0.096.\n\n11\n10\n\nテイラーの定理を応用して, 前回の定理 10-2 の証明をします.\n\n(cid:19)\n\n定理 10-2\n\nf (x) を C 2 級関数とする.\n\n(1) f ′(a) = 0, f ′′(a) > 0 のとき, f (x) は x = a で極小となる.\n(2) f ′(a) = 0, f ′′(a) < 0 のとき, f (x) は x = a で極大となる.\n\n(cid:18)\n\n[証明]\n\n(1) f (x) が x = a で極小であるためには, a の十分近いところで f (a) が唯一の最小値となればよい.\n\ny\n\ny = f (x)\n\n(cid:16)\n\n(cid:17)\n\nx\n\na\n\nテイラーの定理より,\n\nf (x) = f (a) + f (1)(a)(x − a) +\n\nf (2)(cx)\n2\n\n(x − a)2 = f (a) +\n\nf (2)(cx)\n2\n\n(x − a)2.\n\nただし, cx は x と a の間にある. f (2)(a) > 0 より, x が a に十分近いところで f (2)(cx) > 0. 従って\n\nf (x) = f (a) +\n\nf (2)(cx)\n2\n\n(x − a)2 > f (a)\n\n(x ̸= a).\n\n4"
+  },
+  {
+    "book": "cal-11",
+    "page": 5,
+    "text": "よって a の十分近くにおいて, f (a) は唯一の最小値となる.\n\n(2) も同様である.\n\n問題 11-3 f (x) = cos x + x2\n2\n\nが x = 0 で極小となることを示せ.\n\n5"
+  },
+  {
+    "book": "cal-8",
+    "page": 1,
+    "text": "教養の微積 (第 8 回)\n\n8. 指数関数と対数関数の微分\n\n今回は指数関数と対数関数の微分について調べます. まず, 対数関数の微分からみます. a > 0 に対して,\n\nloga x の x = 1 での微分係数は\n\nloga(1 + h) − loga(1)\nh\n\nlim\nh→0\n\n= lim\nh→0\n\nloga(1 + h)\nh\n\n= lim\nh→0\n\nloga(1 + h)\n\n1\nh .\n\n(e1)\n\nここで, lim\nh→0\n\n(1 + h)\n\n1\n\nh は収束することが知られており, その近似値は\n\n(1 + h)\n\n1\n\nh = 2.71828 · · ·\n\nlim\nh→0\n\nとなります (参考文献 [1] 定理 4-2). この値は e で表され, ネピア数と呼ばれています. 式 (e1) で a = e とす\nると, loge x の x = 1 での微分係数が 1 と分かります. loge x を単に log x で表し, 自然対数と言います.\n\n(cid:19)\n\n定理 8-1 (対数関数の微分)\n\n(1) (log x)′ = 1\nx .\n\n(2) (loga x)′ = 1\n\nlog a\n\n· 1\nx .\n\n(cid:18)\n\n(cid:16)\n\n(cid:17)\n\n[証明]\n\n(1) について.\n\nk = h\nx\n\nとおくと,\n\nlog(x + h) − log x\nh\n\nlim\nh→0\n\n= lim\nh→0\n\n1\nh\n\n(\n\n· log"
+  },
+  {
+    "book": "cal-8",
+    "page": 1,
+    "text": "1 +\n\n)\n\nh\nx\n\n= lim\nh→0\n\n1\nx\n\n(\n\n· log"
+  },
+  {
+    "book": "cal-8",
+    "page": 1,
+    "text": "1 +\n\n) x\n\nh\n\n.\n\nh\nx\n\n(\n\nlim\nh→0\n\nlog"
+  },
+  {
+    "book": "cal-8",
+    "page": 1,
+    "text": "1 +\n\n) x\n\nh\n\nh\nx\n\n= lim\nk→0\n\nlog (1 + k)\n\n1\nk = log e = 1.\n\n従って (log x)′ = 1\nx .\n\n(2) 底の変換公式と (1) より\n\n(loga x)′ =\n\n)′\n\n(\n\nlog x\nlog a\n\n=\n\n1\nlog a\n\n· 1\nx\n\n.\n\ncopyright © 大学数学の授業ノート\n\n1"
+  },
+  {
+    "book": "cal-8",
+    "page": 2,
+    "text": "(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n(cid:19)\n\n例題 8-1\n\n次の関数の導関数を求めよ.\n\n(cid:18)\n\n[解答]\n\n(1) について.\n\n(2) について.\n\n(1) x log x\n\n(2) log2(x2 + x + 1)\n\n(x log x)′ = (x)′ · log x + x · (log x)′ = log x + x · 1\nx\n\n= log x + 1.\n\n(log2(x2 + x + 1))′ = (x2 + x + 1)′ ·\n\n1\nlog 2\n\n·\n\n1\nx2 + x + 1\n\n=\n\n2x + 1\n(x2 + x + 1) log 2\n\nα が有理数のとき, (xα)′ = αxα−1 でした (問題 6-3). 対数関数を用いると, この公式を α が実数の場合に\n\n一般化できます.\n\n(cid:19)\n\n定理 8-2\n\n実数 α に対して,\n\n(cid:18)\n\n(xα)′ = αxα−1.\n\n[証明]\nf (x) = xα と置く. 合成関数の微分より\n\n一方,\n\n(log f (x))′ =\n\nf ′(x)\nf (x)\n\n=\n\n(xα)′\nxα .\n\n(log f (x))′ = (log xα)′ = (α log x)′ =\n\nα\nx\n\n.\n\nよって (xα)′ = αxα−1.\n\n問題 8-1 次の関数の導関数を求めよ.\n\n(1)\n\nx\nlog x\n\n(2) log3(x2 + 1)\n\n(3) xx\n\n次に指数関数の導関数について調べます.\n\n2"
+  },
+  {
+    "book": "cal-8",
+    "page": 3,
+    "text": "(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n(cid:19)\n\n定理 8-3 (指数関数の微分)\n\na > 0 に対して,\n\n特に\n\n(cid:18)\n\n(ax)′ = ax log a.\n\n(ex)′ = ex log e = ex.\n\n[証明]\nf (x) = ax とする. log f (x) = x log a なので\n\nf ′(x)\nf (x)\n\n= log a.\n\n従って f ′(x) = ax log a.\n\n(cid:19)\n\n例題 8-2\n\n次の関数の導関数を求めよ.\n\n(cid:18)\n\n[解答]\n\n(1) について.\n\n(2) について.\n\n(3) について.\n\n(1) xex\n\n(2) e−x2\n\n(3)\n\n2x\nex + 1\n\n(xex)′ = (x)′ · ex + x · (ex)′ = ex + xex = (1 + x)ex.\n\n(e−x2\n\n)′ = (−x2)′ · e−x2\n\n= −2xe−x2\n\n.\n\n)′\n\n(\n\n2x\nex + 1\n\n=\n\n=\n\n=\n\n(2x)′ · (ex + 1) − 2x · (ex + 1)′\n(ex + 1)2\n\n2x log 2 · (ex + 1) − 2x · ex\n(ex + 1)2\n\n2x(ex log 2 + log 2 − ex)\n(ex + 1)2\n\n.\n\n問題 8-2 次の関数の導関数を求めよ.\n\n(1) e2x\n\n(2) 3x2\n\n(3) ex sin x\n\n3"
+  },
+  {
+    "book": "cal-8",
+    "page": 4,
+    "text": "対数関数や指数関数の微分を利用して極限値を計算してみます.\n\n(cid:19)\n\n例題 8-3\n\n次の極限値を求めよ.\n\n(cid:18)\n\n(1)\n\nlim\nx→0\n\ne2x − 1\nx\n\n("
+  },
+  {
+    "book": "cal-8",
+    "page": 4,
+    "text": "1 + x2\n\n) 1\n\nx\n\n(2)\n\nlim\nx→0\n\n(cid:16)\n\n(cid:17)\n\n[解答]\n(1) f (x) = e2x とおくと, f ′(x) = 2e2x. ここで\n\nより\n\nf (0 + x) − f (0)\nx\n\n=\n\ne2x − 1\nx\n\ne2x − 1\nx\n\nlim\nx→0\n\n= f ′(0) = 2.\n\n(2) f (x) = log(1 + x2) とおくと, f ′(x) = 2x\n\nx2+1 . ここで,\n\nf (0 + x) − f (0)\nx\n\n=\n\nlog(1 + x2)\nx\n\n("
+  },
+  {
+    "book": "cal-8",
+    "page": 4,
+    "text": "1 + x2\n\n) 1\n\nx .\n\n= log\n\n("
+  },
+  {
+    "book": "cal-8",
+    "page": 4,
+    "text": "1 + x2\n\n) 1\nx = f ′(0) = 0.\n\nlim\nx→0\n\nlog\n\nよって\n\n従って lim\nx→0\n\n("
+  },
+  {
+    "book": "cal-8",
+    "page": 4,
+    "text": "1 + x2\n\n) 1\n\nx = 1.\n\n問題 8-3 次の極限値を求めよ.\n\n(1)\n\nlim\nx→0\n\n5x − 5−x\nx\n\n(2)\n\nlim\nx→0\n\n(1 + sin x)\n\n1\nx\n\n問題 8-4 微分可能な関数 f (x) と実数 a について, 次の極限値を求めよ.\n\naef (x) − xef (a)\nx − a\n\nlim\nx→a\n\n参考文献\n\n[1] 山形大学数理科学科編, 「微分積分入門」, 裳華房.\n\n4"
+  },
+  {
+    "book": "cal-12",
+    "page": 1,
+    "text": "教養の微積 (12 回目)\n\n12. テイラー展開の性質と例\n\n今回はテイラー展開について説明します. また応用として, 級数や高次導関数の値について調べます.\n\n(cid:19)\n\n定義 12-1 (テイラー展開)\n\nf (x) は a を含む開区間 I 上の C∞ 級関数とする. このとき, 級数\n\n∞X\n\nn=0\n\nf (n)(a)\nn!\n\n(x − a)n\n\n(1)\n\nを f (x) の x = a でのテイラー級数という. また I 上で級数 (1) が収束して f (x) と一致するとき, f (x)\n\nは x = a でテイラー展開可能という.\n\n(cid:18)\n\nf (x) = 1\n1−x\n\nを考えます. このとき,\n\n(cid:16)\n\n(cid:17)\n\nf (n)(x) =\n\nn!\n(1 − x)n+1\n\n(n = 1, 2, 3, ...).\n\nf (n)(0) = n! より, f (x) の x = 0 でのテイラー級数は\n\n∞X\n\nn=0\n\nf (n)(0)\nn!\n\nxn =\n\n∞X\n\nn=0\n\nxn = 1 + x + · · · + xn + · · ·\n\n(2)\n\nとなります. 等比級数の公式から, 級数 (2) は開区間 (−1, 1) で収束して f (x) と一致します. 従って f (x) は\nx = 0 でテイラー展開可能です.\n\n問題 12-1\n\nf (x) = 1\n\n1+2x\n\nの x = 0 でのテイラー級数を求めよ.\n\ncopyright © 大学数学の授業ノート\n\n1"
+  },
+  {
+    "book": "cal-12",
+    "page": 2,
+    "text": "(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n(cid:19)\n\n定理 12-1\n\nf (x) は a を含む開区間 I 上の C∞ 級関数とする. I 上の任意の点 x に対して,\n\nのとき, f (x) は x = a でテイラー展開可能である. ここで,\n\nlim\nn→∞\n\nRn(x, a) = 0\n\nRn(x, a) =\n\nf (n)(cx)\nn!\n\n(x − a)n\n\nであり, cx は x と a の間にある実数である.\n\n(cid:18)\n\n[証明]\n\nテイラーの定理より,\n\nlim\nn→∞\n\nRn(x, a) = 0 より,\n\nf (x) =\n\nn−1X\n\nk=0\n\nf (k)(a)\nk!\n\n(x − a)k + Rn(a, x).\n\nf (x) =\n\n∞X\n\nn=0\n\nf (n)(a)\nn!\n\n(x − a)n.\n\n(cid:19)\n\n例題 12-1\n\nf (x) = ex とする.\n\n(1) 実数 a に対して次を示せ.\n\nlim\nn→∞\n\nan\nn!\n\n= 0.\n\n(2) f (x) の x = 0 でのテイラー級数 P (x) を求めよ.\n\n(3) f (x) = P (x)\n\n(−∞ < x < ∞) を示せ.\n\n(cid:18)\n\n[解答]\n(1) l > 2|a| を満たす自然数 l を取る. m ≧ l のとき, m > 2|a| だから\n\n|a|\nm < 1"
+  },
+  {
+    "book": "cal-12",
+    "page": 2,
+    "text": "2 . また\n\nと置く. n > l のとき,\n\nこれより\n\nK =\n\n|a|\nl − 1\n\n×\n\n|a|\nl − 2\n\n× · · · ×\n\n|a|\n1\n\n(cid:12)\n(cid:12)\n(cid:12)\n(cid:12)\n\nan\nn!\n\n(cid:12)\n(cid:12)\n(cid:12)\n(cid:12) =\n\n|a|\nn\n\n×\n\n|a|\nn − 1\n\n× · · · ×\n\n|a|\nl\n\n× K ≦\n\n(cid:18)\n\n1\n2\n\n(cid:19)n−l+1\n\n× K.\n\n= 0.\n\nlim\nn→∞\n\nan\nn!\n\n2"
+  },
+  {
+    "book": "cal-12",
+    "page": 3,
+    "text": "(2) f (n)(x) = ex より f (n)(0) = 1. よって\n\nP (x) =\n\n∞X\n\nn=0\n\nf (n)(0)\nn!\n\nxn =\n\n∞X\n\nn=0\n\nxn\nn!\n\n= 1 + x +\n\nx2\n2\n\n+\n\nx3\n6\n\n+ · · · .\n\n(3) −∞ < x < ∞ に対して,\n\nRn(x, 0) =\n\necx\nn!\n\nxn.\n\nただし, cx は x と 0 の間にある. ecx ≦ e|x| より,\n\n(1) より"
+  },
+  {
+    "book": "cal-12",
+    "page": 3,
+    "text": "0 ≦ |Rn(x, 0)| =\n\necx\nn!\n\n|x|n ≦ e|x| ·\n\n|x|n\nn!\n\n.\n\nlim\nn→∞\n\n|x|n\nn!\n\n= 0.\n\n従って lim\nn→∞\n\nRn(x, 0) = 0. 定理 12-1 より,\n\nex =\n\n∞X\n\nn=0\n\nxn\nn!\n\n.\n\n(3)\n\n[補足] 級数 (3) に x = 1 を代入すると次が得られる.\n\ne =\n\n∞X\n\nn=0\n\n1\nn!\n\n.\n\n問題 12-2\n\nf (x) = sin x とする.\n\n(1) f (x) の x = 0 でのテイラー級数 P (x) を求めよ.\n\n(2) f (x) = P (x)\n\n(−∞ < x < ∞) を示せ.\n\n問題 12-3 f (x) = log(1 + x) とする.\n\n(1) f (x) の x = 0 でのテイラー級数 P (x) を求めよ.\n\n(2) f (x) = P (x)\n\n(− 1"
+  },
+  {
+    "book": "cal-12",
+    "page": 3,
+    "text": "2 < x ≦ 1) を示せ.\n\n(3) 次の級数の値を求めよ.\n\n∞X\n\nn=1\n\n(−1)n\nn\n\n.\n\n3"
+  },
+  {
+    "book": "cal-12",
+    "page": 4,
+    "text": "(cid:16)\n\n(cid:17)\n\n(cid:19)\n\n定理 12-2\n\nf (x) が a を含む開区間 I 上で\n\nf (x) =\n\n∞X\n\nn=0\n\ncn(x − a)n\n\nと表せるとき, 右辺の級数は f (x) の x = a でのテイラー級数と一致する. つまり,\n\ncm =\n\nf (m)(a)\nm!\n\n(m = 0, 1, 2, ...)\n\n(4)\n\nが成り立つ.\n\n(cid:18)\n\n[証明]\n\n証明のアイデアを述べる. まず,\n\nf (x) =\n\n∞X\n\nn=0\n\ncn(x − a)n = c0 + c1(x − a) + c2(x − a)2 + · · ·\n\n(5)\n\nより f (a) = c0. 次に (5) を微分すると\n\nf (1)(x) = c1 + 2c2(x − a) + 3c3(x − a)2 + · · · .\n\n(6)\n\nよって f (1)(a) = c1. さらに (6) を微分すると\n\nf (2)(x) = 2c2 + {3 × 2} · c3(x − a) + · · ·\n\nより f (2)(a) = 2c2 = 2! × c2. 一般的に (5) を m 回微分すると\n\nf (m)(x) = m!cm + {(m + 1) × m · · · × 2} · cm+1(x − a) + · · ·\n\nよって f (m)(a) = m! × cm. これより等式 (4) を得る.\n\n[補足] 級数 (5) の微分が級数 (6) に一致することの証明は, 厳密には項別微分を考える必要がある (文献 [1]\n\n定理 12.10).\n\n定理 12-2 を利用して関数の n 回微分の値を求めてみます.\n\n(cid:19)\n\n例題 12-2\n\nf (x) = ex2\n\nのとき, f (n)(0) を求めよ.\n\n(cid:18)\n\n[解答]\n\n例題 12-1 より,\n\nex =\n\n∞X\n\nn=0\n\nxn\nn!\n\n(−∞ < x < ∞).\n\n4\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-12",
+    "page": 5,
+    "text": "この式に x2 を代入すると,\n\nex2\n\n=\n\n∞X\n\nn=0\n\nx2n\nn!\n\n(−∞ < x < ∞).\n\n(7)\n\n定理 12-2 より級数 (7) は ex2\n\nの x = 0 でのテイラー展開と一致するので,\n\n8\n><\n\n>:\n\nf (n)(0)\nn!\n\n=\n\n1\nn"
+  },
+  {
+    "book": "cal-12",
+    "page": 5,
+    "text": "2 !\n\n(n が偶数のとき)\n\n0\n\n(n が奇数のとき)\n\nよって\n\n(n が偶数のとき)\n\n(n が奇数のとき)\n\n8\n><\n\nnC n\n\n2\n\nf (n)(0) =\n\n>:\n0\n\n問題 12-4\n\nf (x) = x\n\n1−x2 とする.\n\n(1) f (x) の x = 0 でのテイラー級数を求めよ.\n\n(2) f (n)(0)\n\n(n = 0, 1, 2, ...) を求めよ.\n\n参考文献\n\n[1] 山形大学数理科学科編, 「微分積分入門」, 裳華房.\n\n5"
+  },
+  {
+    "book": "cal-14",
+    "page": 1,
+    "text": "教養の微分 (14 回目)"
+  },
+  {
+    "book": "cal-14",
+    "page": 1,
+    "text": "14 リーマン和と定積分\n\n今回はリーマン和を用いた定積分の定義について紹介しましす. 内容の詳細や定理の証明は文献\n\n(cid:16)\n\n[1] を参照にしてください.\n\n(cid:19)\n\n定義 14-1 (リーマン和)\n\n閉区間 [a, b] 上の関数 f (x) を考える. 閉区間 [a, b] 上に点\n\nxk = a +\n\n(b − a)k\nn\n\n(k = 0, 1, ..., n)\n\nを取り, [a, b] を n 分割する.\n\n[a, b] = [x0, x1] ∪ [x1, x2] ∪ [x2, x3] ∪ · · · ∪ [xn−1, xn]\n\nこの分割を ∆n で表す. また各区間 [xk−1, xk] から点 αk を取り, 次の和を考える.\n\nR(f, ∆n, {αk}) =\n\nn∑\n\nk=1\n\nf (αk)\n\nb − a\nn\n\nこれを関数 f (x) の分割 ∆n と点列 {αk} に対するリーマン和という.\n\n※ f (x) ≧ 0 の場合を考えます. αk = xk−1 として選ぶと, リーマン和 R(f, ∆n, {αk}) は下記\nの長方形の面積の和になります.\n\n(cid:18)\n\n(cid:17)\n\ncopyright © 大学数学の授業ノート\n\n1"
+  },
+  {
+    "book": "cal-14",
+    "page": 2,
+    "text": "(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n(cid:19)\n\n例題 14-1\n\n関数 f (x) = x (0 ≦ x ≦ 1) を考える. このとき, 2 分割\n\n[0, 1] =\n\n[\n0,\n\n1\n2\n\n]\n\n[\n\n∪\n\n]\n, 1\n\n1\n2\n\nと点列 α1 = 1"
+  },
+  {
+    "book": "cal-14",
+    "page": 2,
+    "text": "2 , α2 = 1 に対して, リーマン和 R(f, ∆2, {αk}) を計算せよ.\n\nR(f, ∆2, {αk}) =\n\n2∑\n\nk=1\n\nf (αk)"
+  },
+  {
+    "book": "cal-14",
+    "page": 2,
+    "text": "1 − 0\n2\n\n=\n\n1\n2\n\n× 1\n2\n\n+ 1 × 1\n2\n\n=\n\n3\n4\n\n.\n\n(cid:18)\n\n[解答]\n\n(cid:19)\n\n例題 14-2\n\n関数 f (x) = sin x (0 ≦ x ≦ π"
+  },
+  {
+    "book": "cal-14",
+    "page": 2,
+    "text": "2 ) を考える. このとき, 3 分割\n[\n\n[\n\n]\n\n]\n\n]\n\n[\n0,\n\nπ\n2\n\n[\n0,\n\n=\n\nπ\n6\n\n∪\n\nπ\n6\n\n,\n\n2π\n6\n\n∪\n\n]\n\n,\n\nπ\n2\n\n2π\n6\n\nと点列 α1 = 0, α2 = π"
+  },
+  {
+    "book": "cal-14",
+    "page": 2,
+    "text": "6 , α3 = 2π\n\n6\n\n(cid:18)\n\n[解答]\n\nに対して, リーマン和 R(f, ∆3, {αk}) を計算せよ.\n\nR(f, ∆3, {αk}) =\n\n3∑\n\nk=1\n\nf (αk) ×\n\nπ\n2\n\n− 0\n3\n\n= sin(0) × π\n6\n(\n√\n\n="
+  },
+  {
+    "book": "cal-14",
+    "page": 2,
+    "text": "1 +\n\nπ\n12\n\n)\n\n(\n\nπ\n6\n\n× π\n6\n\n+ + sin\n\n)\n\n(\n\n2π\n6\n\n× π\n6\n\n+ sin\n)\n3\n\n.\n\n問題 14-1 f (x) = 2x + 1 (0 ≦ x ≦ 2) とおく. 閉区間 [0, 2] の 4 分割 ∆4 と点列\n\nα1 = 0, α2 =\n\n2\n3\n\n, α3 =\n\n3\n2\n\n, α4 = 2\n\nに対して, R(f, ∆4, {αi}) を求めよ.\n\n2"
+  },
+  {
+    "book": "cal-14",
+    "page": 3,
+    "text": "(cid:19)\n\n定義 14-2 (定積分)\n\n閉区間 [a, b] 上の関数 f (x) を考える. n → ∞ のとき, R(f, ∆n, {αk}) が {αk} の取り方に依\nb\na f (x) dx で表す.\n\nらず一定の値に収束するとき, f (x) は [a, b] 上で積分可能と言い, その値を\n\n∫\n\n(cid:18)\n\n与えられた関数が積分可能かどうかの判定は一般的には難しい問題です. しかし, f (x) が連\n\n続のときは, 常に積分可能であることが知られています.\n\n(cid:19)\n\n定理 14-1\n\n閉区間 [a, b] 上の連続関数 f (x) は [a, b] 上で積分可能である.\n\n(cid:18)\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n定理 14-1 から閉区間 [a, b] 上の連続関数 f (x) に対して積分値\n\n∫\n\na\na f (x) dx = 0 とし, さらに\n\na\n\n∫\nb f (x) dx を −\n\n∫\n\n∫\nb\na f (x) dx が定まります. ま\n\nb\na f (x) dx で定めることにします.\n\n∫\n\n1"
+  },
+  {
+    "book": "cal-14",
+    "page": 3,
+    "text": "0 f (x) dx を計算せよ.\n\n(cid:16)\n\n(cid:17)\n\nた, 形式的に\n\n(cid:19)\n\n例題 14-3\n\n関数 f (x) = x (0 ≦ x ≦ 1) を考える. このとき,\n\n(cid:18)\n\n[解答]\n[0, 1] の n 分割を考える.\n\nまた点列\n\nをとる. このとき,\n\n従って\n\n[\n\n[\n\n0, 1] =\n\n0,\n\n1\nn\n\n] ∪ [\n\n1\nn\n\n,\n\n2\nn\n\n] ∪\n\n· · ·\n\n∪ [\n\n]\n, 1\n\n.\n\nn − 1\nn\n\nα1 =\n\n1\nn\n\n, α2 =\n\n2\nn\n\n, · · · , αk =\n\nk\nn\n\n, · · · , αn = 1\n\nR(f, ∆n, {αk}) =\n\nn∑\n\nk=1\n\nf (αk) × 1 − 0\nn\n\n=\n\nn∑\n\nk=1\n\nk\nn2 =\n\nn + 1\n2n\n\n.\n\n∫\n\n1\n\n0\n\nf (x) dx = lim\nn→∞\n\nR(f, ∆n, {αk}) =\n\n1\n2\n\n.\n\n問題 14-2\n\nf (x) = x2 (0 ≦ x ≦ 1) を考える.\n\n(1) αk = k\n\nn (k = 1, 2, ..., n) のとき, R(f, ∆n, {αk}) を求めよ.\n\n(2) 定積分の定義に基づいて\n\n∫\n\n1"
+  },
+  {
+    "book": "cal-14",
+    "page": 3,
+    "text": "0 f (x) dx を求めよ.\n\n3"
+  },
+  {
+    "book": "cal-14",
+    "page": 4,
+    "text": "定積分の性質を見ておきます.\n\n(cid:19)\n\n定理 14-2\n\nf (x), g(x) を連続関数とし, k を実数とする.\n\n∫\n\n∫\n\n∫\n\n(1)\n\n(2)\n\n(3)\n\nb\n\na k dx = k(b − a).\n\nb\na f (x) + g(x) dx =\n\n∫\n\nb\na f (x) dx +\n\n∫\nb\na g(x) dx.\n\nb\na kf (x) dx = k\n\n∫\n\nb\na f (x) dx.\n\n(4) a < c < b のとき,\n\n(cid:18)\n\n∫\n\nb\n\na\n\n∫\n\nc\n\n∫\n\nb\n\nf (x) dx =\n\nf (x) dx +\n\nf (x) dx.\n\na\n\nc\n\n問題 14-3 定積分の定義に基づいて定理 14-2 (2) を証明せよ.\n\n(cid:16)\n\n(cid:17)\n\n積分の幾何学的な意味について考えます. 閉区間 [a, b] 上の連続関数 f (x) で f (x) ≧ 0 を満たす\nものとします. このとき, リーマン和 R(f, ∆n, {αk}) は n → ∞ のとき, 下記の斜線部分 D の面積\nに近づくことが知られています.\n\n従って, 次が成り立ちます.\n\n(cid:19)\n\n定理 14-3\n\n閉区間 [a, b] 上の連続関数 f (x) を考える. f (x) ≧ 0 のとき, S =\n\n分 D の面積と一致する.\n\n(cid:18)\n\n∫\n\nb\na f (x) dx は上記の斜線部\n\n(cid:16)\n\n(cid:17)\n\n4"
+  },
+  {
+    "book": "cal-14",
+    "page": 5,
+    "text": "問題 14-4 f (x) = x2 + x (0 ≦ x ≦ 1) と x 軸と x = 1 で囲まれる図形の面積 S を定積分の定義\nに基づいて計算せよ.\n\n参考文献\n\n[1] 微分積分入門 1 変数 (山形大学 数理科学科編), 裳華房.\n\n5"
+  },
+  {
+    "book": "cal-17",
+    "page": 1,
+    "text": "(cid:16)\n\n(cid:17)\n\n教養の微分 (17 回目)\n\n17. 部分積分\n(cid:19)\n\n定理 17-1(部分積分)\n\n微分可能な関数 f (x), g(x) に対して次が成り立つ.\n\nZ\n\nZ\n\n(1)\n\nf (x)g′(x) dx = f (x)g(x) −\n\nf ′(x)g(x) dx.\n\n(2)\n\nZ\n\nb\n\na\n\nf (x)g′(x) dx =\n\n(cid:18)\n\nh\nf (x)g(x)\n\nib\n\nZ\n\nb\n\n−\n\na\n\na\n\nf ′(x)g(x) dx.\n\n[証明]\n(1) 積の微分の公式から\n\n両辺に積分をとると,\n\n(f (x)g(x))′ = f (x)g′(x) + f ′(x)g(x).\n\nZ\n\nZ\n\nZ\n\n(f (x)g(x))′ dx =\n\nf (x)g′(x) dx +\n\nf ′(x)g(x) dx.\n\nここで, (f (x)g(x))′ の原始関数は f (x)g(x) なので,\nZ\n\nZ\n\nf (x)g′(x) dx = f (x)g(x) −\n\nf ′(x)g(x) dx.\n\n(2) (1) と同様にして,\nZ\n\na\n\nb\n\n(f (x)g(x))′ dx =\n\nZ\n\nb\n\na\n\nf (x)g′(x) dx +\n\nZ\n\nb\n\na\n\nf ′(x)g(x) dx.\n\nここで,\n\nなので\n\nZ\n\nb\n\na\n\n(f (x)g(x))′ dx =\n\nh\nf (x)g(x)\n\nib\n\na\n\nh\n\nf (x)g′(x) dx =\n\nZ\n\nb\n\na\n\nf (x)g(x)\n\nib\n\nZ\n\nb\n\n−\n\na\n\na\n\nf ′(x)g(x) dx.\n\ncopyright © 大学数学の授業ノート\n\n1"
+  },
+  {
+    "book": "cal-17",
+    "page": 2,
+    "text": "(cid:19)\n\n例題 17-1\n\n次の積分を計算せよ.\n\nZ\n\nZ\n\nZ\n\n(1)\n\nxex dx\n\n(2)\n\nx sin(2x) dx\n\n(3)\n\nlog x dx\n\n(cid:18)\n\n[解答]\n(1)\n\nZ\n\n(2)\n\nZ\n\nZ\n\nZ\n\nxex dx =\n\nx(ex)′ dx = xex −\n\n(x)′ex dx = xex −\n\nex dx = xex − ex + C.\n\nZ\n\nx sin(2x) dx =\n\nZ\n\n1\n2\n\n(cid:18)\n− 1\n2\n\nx\n\n(cid:19)′\n\ncos(2x)\n\ndx\n\n= − x\n2\n= − x\n2\n= − x\n2\n\ncos(2x) +\n\ncos(2x) +\n\ncos(2x) +\n\n1\n2\n\n1\n2\n\n1\n4\n\n(x)′ cos(2x) dx\n\nZ\n\nZ\n\ncos(2x) dx\n\nsin(2x) + C.\n\n(3)\n\nZ\n\nZ\n\nZ\n\nlog x dx =\n\n(x)′ log x dx = x log x −"
+  },
+  {
+    "book": "cal-17",
+    "page": 2,
+    "text": "1 dx = x log x − x + C.\n\n(コメント) (sin x, cos x, ax) × (多項式) の積分は, 定理 17-1 において f (x) = 多項式, g′(x) =\nsin x, cos x, ax とみる. (log x) × (多項式) の積分は, f (x) = log x, g′(x) = 多項式 とみる.\n\n問題 17-1 次の積分を計算せよ.\n\nZ\n\nZ\n\nZ\n\n(1)\n\nx log x dx\n\n(2)\n\nx2ex dx\n\n(3)\n\narctan x dx\n\n(cid:19)\n\n例題 17-2\n\n次の積分を計算せよ.\n\nZ\n\n1\n\nZ\n\nπ\n\n(1)\n\nlog(x + 1) dx\n\n(1)\n\n(x + 1) sin x dx\n\n(2)\n\n(cid:18)\n\n0\n\n0\n\n2\n\nZ\n\n1\n\n0\n\nx2e2x dx\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-17",
+    "page": 3,
+    "text": "[解答]\n(1)\n\n(2)\n\n(3)\n\nZ\n\n1\n\n0\n\nlog(x + 1) dx =\n\nZ\n\n1\n\n0\n\nh\n\n(x + 1)′ log(x + 1) dx\nZ\n\ni1\n\n−\n\n0\n\n0\n\n1"
+  },
+  {
+    "book": "cal-17",
+    "page": 3,
+    "text": "1 dx\n\n=\n\n(x + 1) log(x + 1)\nh\n\ni1\n\n0\n\n= 2 log 2 −\n\nx\n\n= 2 log 2 − 1.\n\nZ\n\nπ\n\n0\n\n(x + 1) sin x dx =\n\nZ\n\nπ\n\n0\n\nh\n\n(x + 1)(− cos x)′ dx\nZ\n\nπ\n\n=\n\n− (x + 1) cos x\n\nh\n\n= (π + 2) +\n\nsin x\n\n= π + 2.\n\niπ\n\n0\niπ\n\n0\n\n+\n\ncos x dx\n\n0\n\nZ\n\n1\n\n0\n\nx2e2x dx =\n\n=\n\n=\n\n=\n\n=\n\n=\n\n(cid:19)′\n\ne2x\n2\n\ndx\n\nZ\n\n1\n\n−\n\nxe2x dx\n\n(cid:19)′\n\n(cid:18)\n\n0\n\ne2x\n2\n\ndx\n\nx\n\n0\n\nh\n\nxe2x\n2\n\ni1\n\n0\n\n+\n\nZ\n\n1\n\n0\n\ne2x\n2\n\ndx\n\nZ\n\n1\n\n(cid:18)\n\nx2\n\n0\n\nh\n\nx2e2x\n2\n\ni1\n\n0\n\n1\n\nZ\n\n−\n\n−\n\ne2\n2\n\ne2\n2\nh\n\ni1\n\n0\n\ne2x\n4\n\ne2 − 1\n4\n\n.\n\n問題 17-2 次の積分を計算せよ.\n\nZ\n\ne\n\n(1)\n\n(2x + 1) log x dx\n\n(2)\n\n1\n\nZ\n\nπ\n\n0\n\nx2 sin x dx\n\n(3)\n\nZ 1\n\n2\n\n0\n\narcsin x dx\n\n3"
+  },
+  {
+    "book": "cal-17",
+    "page": 4,
+    "text": "部分積分の応用として, 漸化式を用いるタイプの定積分について考えます.\n\n(cid:19)\n\n例題 17-3\n\n整数 n ≧ 0 に対して\n\nZ π\n\n2\n\n0\n\nIn =\n\n(sin x)n dx\n\nと置く.\n\n(1) n ≧ 2 のとき, In = n−1\n\nn In−2 を示せ.\n\n(2) I4 を計算せよ.\n\n(cid:18)\n\n[解答]\n(1)\n\nIn =\n\nZ π\n\n2\n\n0\n\n′\n(sin x)n−1 (− cos x)\n\ndx\n\n(cid:16)\n\n(cid:17)\n\nh\n\n=\n\n− (sin x)n−1 cos x\n\ni π\n\n+ (n − 1)\n\n2\n\n0\n\nZ π\n\n2\n\n0\n\n(sin x)n−2 (cos x)2 dx\n\n= (n − 1)\n\nZ π\n\n2\n\n0\n\n(cid:0)\n\n(sin x)n−2"
+  },
+  {
+    "book": "cal-17",
+    "page": 4,
+    "text": "1 − (sin x)2\n\n(cid:1)\n\ndx\n\n= (n − 1)(In−2 − In).\n\nよって In = n−1\n\nn In−2.\n\n(2) (1) より\n\nI4 =\n\n3\n4\n\n· I2 =\n\n3\n4\n\n· 1\n2\n\n· I0 =\n\nZ π\n\n2\n\n0\n\n·\n\n3\n8"
+  },
+  {
+    "book": "cal-17",
+    "page": 4,
+    "text": "1 dx =\n\n3π\n16\n\n問題 17-3 整数 n ≧ 0 に対して\n\nと置く.\n\n(1) n ≧ 1 のとき, 次を示せ.\n\n(2) I3 を計算せよ.\n\nZ\n\n1\n\n0\n\nIn =\n\n1\n(x2 + 1)n dx\n\nIn+1 =\n\n1\nn2n+1 +\n\n(2n − 1)\n2n\n\nIn\n\n4"
+  },
+  {
+    "book": "cal-17",
+    "page": 5,
+    "text": "(cid:16)\n\n(cid:17)\n\n(cid:19)\n\n定理 17-2\n\n実数 a ̸= 0 に対して次が成り立つ.\nZ\n\np\n\n(1)\n\ndx = log(x +\n\nx2 + a) + C.\n\n1√\n\nx2 + a\n\nZ p\n\n(2)\n\nx2 + a dx =\n\n1\n2\n\nn\n\np\n\nx\n\nx2 + a + a log\n\n(cid:12)\n(cid:12)\n(cid:12)x +\n\np\n\nx2 + a\n\no\n\n(cid:12)\n(cid:12)\n(cid:12)\n\n+ C.\n\n※ (2) は放物線の長さを計算する際に用います (問題 17-5).\n\n(cid:18)\n\n[証明]\n(1) y = x +\n\n√\n\nx2 + a と置くと,\n\ndy\ndx\n\n= 1 +\n\nx√\n\nx2 + a\n\nx +\n√\n\n=\n\n√\n\nx2 + a\n\nx2 + a\n\n.\n\nZ\n\ndy\ny\n\ndx =\n\n= log |y| + C = log\n\n(cid:12)\n(cid:12)\n(cid:12)x +\n\np\n\n(cid:12)\n(cid:12)\n(cid:12) + C.\nx2 + a\n\nより dy\n\ny = dx√\n\nx2+a\n\n. 従って\nZ\n\n1√\n\nx2 + a\n\n(2)\n\nZ p\n\nx2 + a dx =\n\nZ\n\np\n\n(x)′\n\nx2 + a dx = x\n\nZ\n\np\n\nx2 + a −\n\n√\n\nx2\nx2 + a\n\ndx.\n\n上式の 2 項目の積分を次のように変形する.\n\nZ\n\n√\n\nx2\nx2 + a\n\ndx =\n\nZ\n\nZ\n\nx2 + a\n√\nx2 + a\n\ndx −\n\na√\n\nx2 + a\n\ndx\n\nZ p\n\n=\n\nx2 + a dx − a log\n\n(cid:12)\n(cid:12)\n(cid:12)x +\n\np\n\n(cid:12)\n(cid:12)\n(cid:12) .\nx2 + a\n\n従って\n\nZ p\n\nx2 + a dx =\n\n1\n2\n\nn\n\np\n\nx\n\nx2 + a + a log\n\n(cid:12)\n(cid:12)\n(cid:12)x +\n\np\n\n(cid:12)\n(cid:12)\n(cid:12)\nx2 + a\n\no\n\n+ C.\n\n(コメント) 定理 17-2 (1) の積分は双曲線関数で置換積分することでも計算できます (問題 17-4).\n\n5"
+  },
+  {
+    "book": "cal-17",
+    "page": 6,
+    "text": "問題 17-4 関数 sinh(x) = ex−e−x\n\n2\n\n,\n\ncosh(x) = ex+e−x\n\n2\n\nを考える.\n\n(1) (cosh(x))2 − (sinh(x))2 = 1 を示せ.\n\n(2) (sinh)\n\n′\n\n(x) = cosh(x) を示せ.\n\n(3) sinh(x) の逆関数を求めよ.\n\n(4) x = sinh(y) で置換積分することで, 次の積分を計算せよ.\n\nZ\n\n1√\n\nx2 + 1\n\ndx.\n\n問題 17-5 C 1 級関数 f (x) に対して, 曲線 C : y = f (x) (a ≦ x ≦ b) の長さ L は次で与えられる.\n\nL(C) =\n\nZ\n\nb\n\np\n\na"
+  },
+  {
+    "book": "cal-17",
+    "page": 6,
+    "text": "1 + (f ′(x))2 dx\n\nこれを踏まえて, 放物線 C : y = x2 (0 ≦ x ≦ 1) の長さ L(C) を求めよ.\n\n6"
+  },
+  {
+    "book": "cal-16",
+    "page": 1,
+    "text": "教養の微積 (16 回目)\n\n置換積分\n\n前回は, 微分積分学の基本定理を証明し, 原始関数から定積分が計算できることをみました. 今\n\n回からは具体的な積分の計算方法について紹介していきます.\n\n(cid:16)\n\n(cid:17)\n\n(cid:19)\n\n定理 16-1(置換積分)\n\n微分可能な関数 φ(t) に対して, x = φ(t) とする.\n\n∫\n\n(1)\n\nf (x) dx =\n\n∫\n\nf (φ(t))φ′(t) dt.\n\n(2) t : α → β のとき, x : a → b とする. このとき,\n\n∫\n\nb\n\na\n\nf (x) dx =\n\n∫\n\nβ\n\nα\n\nf (φ(t))φ′(t) dt.\n\n※ 形式的に dx = dx\nとができる.\n\n(cid:18)\n\ndt dt と覚えておくと, (1) は x を φ(t), dx を dx\n\ndt dt に置き換えた式と見るこ\n\n[証明]\n(1) F (x) を f (x) の原始関数とすると,\n\n′\n(F (φ(t)))\n\n= φ′(t)F ′(φ(t)) = φ′(t)f (φ(t)).\n\n従って\n\n∫\n\n∫\n\nf (φ(t))φ′(t) dt = F (φ(t)) + C = F (x) + C =\n\nf (x) dx.\n\n(2) f (φ(t))φ′(t) の原始関数は F (φ(t)) より\n\n∫\n\nβ\n\nα\n\nf (φ(t))φ′(t) dt = F (φ(β)) − F (φ(α)) = F (b) − F (a) =\n\n∫\n\nb\n\na\n\nf (x) dx.\n\n置換積分を用いて\n\n∫\n\n(2t + 1)3 dt を計算してみます. f (x) = x3, x = φ(t) = 2t + 1 と置くと,\n\nf (φ(t)) = (2t + 1)3, φ′(t) = 2.\n\n従って\n\n∫\n\n(2t + 1)3 dt =\n\n∫\n\n1\n2\n\nf (φ(t))φ′(t) dt =\n\n∫\n\n1\n2\n\nf (x) dx =\n\nx4\n8\n\n+ C.\n\ncopyright © 大学数学の授業ノート\n\n1"
+  },
+  {
+    "book": "cal-16",
+    "page": 2,
+    "text": "よって\n\n∫\n\n(2t + 1)3 dt =\n\n(2t + 1)4\n8\n\n+ C.\n\n上の計算は次のように形式的に行うこともできます. 2t + 1 = x とすると,\n\nよって\n\n定積分\n\ndt =\n\ndt\ndx\n\ndx =\n\n1\n2\n\ndx.\n\n∫\n\n∫\n\n(2t + 1)3 dt =\n\nx3\n2\n\ndx =\n\nx4\n8\n\n+ C =\n\n(2t + 1)4\n8\n\n+ C.\n\n1\n\n∫"
+  },
+  {
+    "book": "cal-16",
+    "page": 2,
+    "text": "0 (2t + 1)3 dt についても考えてみます. t : 0 → 1 のとき, x : 1 → 3 なので,\n∫\n\n∫\n\n[\n\n1\n\n(2t + 1)3 dt =\n\n0\n\n1\n\n3\n\nx3\n2\n\ndx =\n\n]3\n\nx4\n8\n\n= 10.\n\n1\n\n(cid:19)\n\n例題 16-1\n\n次の積分を計算せよ.\n\n∫\n\n(1)\n\n(cid:18)\n\nsin x (cos x)2 dx\n\n∫\n\n(2)\n\nlog x\nx dx\n\n√\n\n∫\n\n1\n0\n\n(3)"
+  },
+  {
+    "book": "cal-16",
+    "page": 2,
+    "text": "1 − x2 dx\n\n[解答]\n(1) y = cos x と置くと, dy\n\ndx = − sin x である. dy = − sin x dx より,\n\n∫\n\n∫\n\nsin x (cos x)2 dx = −\n\ny2 dy = − y3\n3\n\n+ C = − 1\n3\n\n(cos x)3 + C.\n\n(cid:16)\n\n(cid:17)\n\n(2) y = log x と置くと, dy\ndx = 1\n∫\n\nx\n\nである. dy = dx\nx\n∫\n\nlog x\nx\n\ndx =\n\ny dy =\n\nより,\n\ny2\n2\n\n+ C =\n\n1\n2\n\n(log x)2 + C.\n\n(3) x = sin y と置くと, dx\nである. cos y ≧ 0 より\n\ndy = cos y である. よって dx = cos y dy. また x : 0 → 1 のとき, y : 0 → π\n\n2\n\n√"
+  },
+  {
+    "book": "cal-16",
+    "page": 2,
+    "text": "1 − x2 =\n\n√"
+  },
+  {
+    "book": "cal-16",
+    "page": 2,
+    "text": "1 − (sin y)2 =\n\n√\n\n(cos y)2 = cos y.\n\nよって\n∫\n\n√\n\n1\n\n0"
+  },
+  {
+    "book": "cal-16",
+    "page": 2,
+    "text": "1 − x2 dx =\n\n∫ π\n\n2\n\n0\n\n(cos y)2 dy =\n\n∫ π\n\n2\n\n0\n\ncos(2y) + 1\n2\n\ndy =\n\n[\n\nsin(2y)\n4\n\n+\n\n] π\n\n2\n\n0\n\ny\n2\n\n=\n\nπ\n4\n\n.\n\n2"
+  },
+  {
+    "book": "cal-16",
+    "page": 3,
+    "text": "∫ √\n\n(コメント)\n\na2 − x2 dx (a > 0) は y = a sin x で置き換えると計算できます.\n\n問題 16-1 次の積分を求めよ.\n\n∫\n\n∫\n\n(1)\n\n(3x + 1)5 dx,\n\n(2)\n\nxe−x2\n\ndx,\n\n∫\n\n1\n\n√\n\n(4)\n\nx\n\nx + 1 dx\n\n(5)\n\n0\n\n∫\n\n√\n\n1\n\n0"
+  },
+  {
+    "book": "cal-16",
+    "page": 3,
+    "text": "2 − x2 dx\n\n∫\n\n(3 )\n\n1\nex + 1\n\ndx.\n\n(cid:19)\n\n定理 16-2\n\n(cid:18)\n\n∫\n\nf ′(x)\nf (x)\n\ndx = log |f (x)| + C.\n\n(cid:16)\n\n(cid:17)\n\n[証明]\ny = f (x) と置くと, dy\n∫\n\ndx = f ′(x) である. dy = f ′(x) dx より\n\n∫\n\nf ′(x)\nf (x)\n\ndx =\n\n1\ny\n\ndy = log |y| + C = log |f (x)| + C.\n\n定理 16-2 の使い方を確認しておきます. 例えば,\n\n∫\n\n1\ntan x\n\ndx =\n\n∫\n\ncos x\nsin x\n\ndx =\n\n∫\n\n(sin x)′\nsin x\n\ndx = log | sin x| + C\n\nと計算できます.\n\n問題 16-2 次の積分を求めよ.\n\n∫\n\n(1)\n\n2x\nx2 + 3\n\ndx,\n\n∫\n\n1\n\n0\n\nex\nex + 1\n\n(2)\n\ndx,\n\n(3)\n\n∫ π\n\n4\n\n0\n\ntan x dx.\n\n問題 16-3\n\n(1) t = tan\n\n)\n\n(\n\nθ\n2\n\nと置くとき, 次を示せ.\n\nsin θ =\n\n2t"
+  },
+  {
+    "book": "cal-16",
+    "page": 3,
+    "text": "1 + t2 ,\n\ncos θ ="
+  },
+  {
+    "book": "cal-16",
+    "page": 3,
+    "text": "1 − t2"
+  },
+  {
+    "book": "cal-16",
+    "page": 3,
+    "text": "1 + t2 ,\n\ndθ =\n\n2"
+  },
+  {
+    "book": "cal-16",
+    "page": 3,
+    "text": "1 + t2 dt\n\n(2) 次の積分を計算せよ.\n\n∫ π\n\n3\n\n0\n\n(1)\n\n1\ncos θ\n\ndθ\n\n∫ π\n\n2\n\n0\n\n(2)\n\n1"
+  },
+  {
+    "book": "cal-16",
+    "page": 3,
+    "text": "1 + sin θ\n\ndθ\n\n3"
+  },
+  {
+    "book": "cal-1",
+    "page": 1,
+    "text": "微分積分 (1 回目)\n\n1. 数列の極限\n\n今回は数列の極限に関する基本事項についてみます.\n\n(cid:19)\n\n定義 1-1 (数列の極限 1)\n\n数列 {an} に対して, n が大きくなるにつれて an が一定の値 α に近づくとき, 数列 {an} は\n\nα に 収束するといい,\n\nlim\nn→∞\n\nan = α, または an → α (n → ∞)\n\nで表す. このとき, α を 数列 {an} の極限値という. 数列 {an} が収束しないとき, {an} は発散\nするという.\n\n(cid:18)\n\n(cid:16)\n\n(cid:17)\n\n例えば, 数列\n\nは n が大きくなるにつれて 0 に近づくので\n\n1,\n\n1\n2\n\n,\n\n1\n3\n\n, ... ,\n\n1\nn\n\n, ....\n\nと表せます. 一方, 数列\n\nlim\nn→∞\n\n1\nn\n\n= 0\n\n1, −1, 1, ..., (−1)n−1, ....\n\nは 1 と −1 を繰り返し, どの値にも近づかないので, 数列 {(−1)n−1} は発散します.\n\n問題 1-1 次の数列の極限値を求めよ.\n\n(1) 1, 1\n\n(2)\n\n1"
+  },
+  {
+    "book": "cal-1",
+    "page": 1,
+    "text": "2 , 2\n\n1\n2n , ...."
+  },
+  {
+    "book": "cal-1",
+    "page": 1,
+    "text": "2 , 1"
+  },
+  {
+    "book": "cal-1",
+    "page": 1,
+    "text": "4 , ....,"
+  },
+  {
+    "book": "cal-1",
+    "page": 1,
+    "text": "3 , ...., n−1\n\nn , ....\n\ncopyright © 大学数学の授業ノート\n\n1"
+  },
+  {
+    "book": "cal-1",
+    "page": 2,
+    "text": "(cid:19)\n\n定義 1-2 (数列の極限 2)\n\n数列 {an} に対して, n を限りなく大きくするとき, an も限りなく大きくなるなら, 数列 {an}\n\nは正の無限大に発散するといい,\n\nlim\nn→∞\n\nan = ∞, または an → ∞ (n → ∞)\n\nで表す. また, −an が正の無限大に発散するとき, 数列 {an} は負の無限大に発散するといい,\n\nlim\nn→∞\n\nan = −∞, または an → −∞ (n → ∞)\n\nで表す.\n\n(cid:18)\n\n数列 {2n} は n が限りなく大きくなると, n 項目の値 2n も限りなく大きくなるので, 正の無\n\n限大に発散します. よって\n\nlim\nn→∞\n\n2n = ∞.\n\n次に数列の極限値の性質について述べておきます.\n\n(cid:19)\n\n定理 1-1\nlim\nn→∞\n\nan = α,\n\nlim\nn→∞\n\nbn = β とするとき, 次が成立する.\n\n(1)\n\nlim\nn→∞\n\n(2)\n\nlim\nn→∞\n\n(an + bn) = α + β.\n\n(an − bn) = α − β.\n\n(3)\n\nlim\nn→∞\n\n(anbn) = αβ.\n\n(4) bn ̸= 0, β ̸= 0 のとき,\n\n(cid:18)\n\n定理 1-1 の使い方を確認しておきます.\n\n(cid:19)\n\n例題 1-1\n\n次の数列の極限値を求めよ.\n\nlim\nn→∞\n\nan\nbn\n\n=\n\nα\nβ\n\n.\n\n(3) lim\nn→∞"
+  },
+  {
+    "book": "cal-1",
+    "page": 2,
+    "text": "2 +\n\n(cid:18)\n\n(1) lim\nn→∞\n\n(cid:18)\n\n(cid:18)\n\n(cid:19)\n\n,\n\n1\nn\n\n+\n\n1\n2n\n\n(2) lim\nn→∞\n\nn + 2\nn + 1\n\n,\n\n(cid:19) (cid:18)\n\n(cid:19)\n\n,\n\n1\n2n"
+  },
+  {
+    "book": "cal-1",
+    "page": 2,
+    "text": "1 +\n\n1\n3n\n\n(cid:8)√\n\nn + 1 −\n\n√\n\n(cid:9)\n\nn\n\n.\n\n(4) lim\nn→∞\n\n2\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-1",
+    "page": 3,
+    "text": "[解答]\n(1) について.\n\n(2) について.\n\n(3) について.\n\n(cid:19)\n\n(cid:18)\n\n1\nn\n\n+\n\n1\n2n\n\nlim\nn→∞\n\n= lim\nn→∞\n\n1\nn\n\n+ lim\nn→∞\n\n1\n2n = 0 + 0 = 0.\n\nlim\nn→∞\n\nn + 2\nn + 1\n\n= lim\nn→∞"
+  },
+  {
+    "book": "cal-1",
+    "page": 3,
+    "text": "1 + 2\nn"
+  },
+  {
+    "book": "cal-1",
+    "page": 3,
+    "text": "1 + 1\nn\n\n=\n\nlim\nn→∞\nlim\nn→∞"
+  },
+  {
+    "book": "cal-1",
+    "page": 3,
+    "text": "1 + 2\nn"
+  },
+  {
+    "book": "cal-1",
+    "page": 3,
+    "text": "1 + 1\nn\n\n=\n\n1\n1\n\n= 1.\n\n(cid:18)\n\nlim\nn→∞"
+  },
+  {
+    "book": "cal-1",
+    "page": 3,
+    "text": "2 +\n\n(cid:19) (cid:18)\n\n1\n3n"
+  },
+  {
+    "book": "cal-1",
+    "page": 3,
+    "text": "1 +\n\n1\n2n\n\n(cid:19)\n\n(cid:18)\n\n= lim\nn→∞"
+  },
+  {
+    "book": "cal-1",
+    "page": 3,
+    "text": "2 +\n\n(cid:19)\n\n1\n3n\n\n(cid:18)\n\n× lim\nn→∞"
+  },
+  {
+    "book": "cal-1",
+    "page": 3,
+    "text": "1 +\n\n(cid:19)\n\n1\n2n\n\n= 2 × 1 = 2.\n\n(4) について.\n\n(cid:8)√\n\nn + 1 −\n\n√\n\n(cid:9)\n\nn\n\nlim\nn→∞\n\n= lim\nn→∞\n\n√\n\n(\n\nn + 1 −\n√\n\n√\n\n√\n\nn)(\nn + 1 +\n\nn + 1 +\n√\nn\n\n√\n\nn)\n\n= lim\nn→∞\n\n√\n\n1\nn + 1 +\n\n√\n\nn\n\n= 0.\n\n問題 1-2 次の極限値を求めよ.\n\n(1) lim\nn→∞\n\nn2 + n + 1\nn2 + 1\n\n,\n\n(2) lim\nn→∞\n\n3n + 2n\n3n − 2n ,\n\nnp\n\no\n\nn2 + 1 − n\n\n.\n\n(3) lim\nn→∞\n\n(cid:19)\n\n定理 1-2 (はさみうちの原理)\n\n数列 {an}, {bn}, {cn} があり,\n\nan ≦ bn ≦ cn かつ lim\nn→∞\n\nan = lim\nn→∞\n\ncn = α\n\nが成り立つならば,\n\nlim\nn→∞\n\nbn = α\n\nが成立する. このような数列の極限値の性質をはさみうちの原理という.\n\n(cid:18)\n\nはさみうちの原理を使って,\n\nsin(θn)\nn\nを証明してみます. −1 ≦ sin(nθ) ≦ 1 より,\n\nlim\nn→∞\n\n= 0\n\n(0 ≦ θ ≦ 2π)\n\n−1\nn\n\n≦ sin(θn)\nn\n\n≦ 1\nn\n\n.\n\n3\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-1",
+    "page": 4,
+    "text": "ここで,\n\nより, はさみうちの原理から,\n\nlim\nn→∞\n\n−1\nn\n\n= lim\nn→∞\n\n1\nn\n\n= 0\n\nlim\nn→∞\n\nsin(θn)\nn\n\n= 0.\n\nこのように直接的には極限値が求めにくい場合でも, 上下から極限値が分かりやすい数列で挟むこ\nとで極限値を求められます.\n\n(cid:19)\n\n例題 1-2\n\n次の数列の極限値を求めよ.\n\n(cid:18)\n\n[証明]"
+  },
+  {
+    "book": "cal-1",
+    "page": 4,
+    "text": "2 項定理から\n\nlim\nn→∞\n\nn\n2n .\n\n2n = (1 + 1)n = 1 + nC1 + nC2 + · · · + nCn\n\n(cid:16)\n\n(cid:17)\n\nn(n − 1)\n2\n\n= 1 + n +\n≧ n(n − 1)\n\n.\n\n2\n\n+ · · ·\n\nこれより, 次の不等式を得る.\n\nここで,\n\nより, はさみうちの原理から"
+  },
+  {
+    "book": "cal-1",
+    "page": 4,
+    "text": "0 ≦ n\n2n\n\n≦ n\n\nn(n−1)\n2\n\n=\n\n2\nn − 1\n\n.\n\nlim\nn→∞\n\n2\nn − 1\n\n= 0\n\nlim\nn→∞\n\nn\n2n = 0.\n\n問題 1-3 次の極限値を求めよ.\n\n(1)\n\nlim\nn→∞\n\n2n\nn!\n\n.\n\n√\nn\n\n2n + 3n.\n\n(2)\n\nlim\nn→∞\n\n4"
+  },
+  {
+    "book": "cal-1",
+    "page": 5,
+    "text": "(cid:19)\n\n定義 1-3\n\n数列 {an} を考える.\n\n(1) an ≦ an+1 (n = 1, 2, ...) のとき, {an} は単調増加すると言う. また, an ≧ an+1 (n =\n\n1, 2, ...) のとき, {an} は単調減少すると言う.\n\n(2) ある定数 K > 0 があって,\n\n|an| ≦ K (n = 1, 2, ...)\n\n(cid:18)\n\n数列\n\nのとき, {an} は有界であると言う.\n\n1,\n\n1\n2\n\n,\n\n1\n3\n\n, ...,\n\n1\nn\n\n, ....\n\nは常に減少しているので単調減少数列です. また K = 2 とすれば,\n\n(cid:12)\n(cid:12)\n(cid:12)\n(cid:12) ≦ K (n = 1, 2, ....)\n\n(∗)\n\n(cid:12)\n(cid:12)\n(cid:12)\n(cid:12)\n\n1\nn\n\nを満たすので有界な数列にもなります. 定数 K の取り方は (*) を満たせば良いので, 例えば K = 1\nや K = 10 としても構いません.\n\n単調数列の収束性に関して次が知られています.\n\n(cid:19)\n\n定理 1-3\n\n有界な数列 {an} が単調増加 (または 単調減少) するとき, {an} は収束する.\n\n(cid:18)\n\n例題で定理 1-3 の使い方を確認しておきます.\n\n(cid:19)\n\n例題 1-3\n\n数列 {an} が次の漸化式を満たすとする.\n\na1 = 3, an+1 =\n\n1\n2\n\nan + 1 (n = 1, 2, ...).\n\n(1) 2 ≦ an ≦ 3 (n = 1, 2, ...) を示せ.\n\n(2) {an} が単調減少することをを示せ.\n\n(3)\n\n(cid:18)\n\nlim\nn→∞\n\nan を求めよ.\n\n5\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-1",
+    "page": 6,
+    "text": "[解答]\n(1) n = 1 のときは正しい. n = k のとき正しいとすると, 2 ≦ ak ≦ 3 より,"
+  },
+  {
+    "book": "cal-1",
+    "page": 6,
+    "text": "2 ≦ 1\n2\n\nak + 1 ≦ 5\n2\n\n.\n\nよって 2 ≦ ak+1 ≦ 3. 従って n = k + 1 のときも正しい. 以上より (1) が示せた.\n\n(2) an ≧ 2 より,\n\nan − an+1 = an −\n\n(cid:19)\n\nan + 1\n\n=\n\n(cid:18)\n\n1\n2\n\n1\n2\n\nan − 1 ≧ 0.\n\nよって {an} は単調減少数列である.\n\n(3) (1), (2) より, {an} は有界な単調減少数列である. 従って, 定理 1-3 から {an} は収束する. そ\nの極限値を α とすると,\n\nα = lim\nn→∞\n\nan+1 = lim\nn→∞\n\n(cid:19)\n\nan + 1\n\n=\n\n(cid:18)\n\n1\n2\n\n1\n2\n\nα + 1.\n\n従って\n\nlim\nn→∞\n\nan = α = 2.\n\n問題 1-4 数列 {an} が次の漸化式を満たすとする.\n\na1 = 1, an+1 =\n\n√\n\nan + 2 (n = 1, 2, ...)\n\n(1) 0 ≦ an ≦ 2 (n = 1, 2, ...) を示せ.\n\n(2) {an} が単調増加数列であることを示せ.\n\n(3)\n\nlim\nn→∞\n\nan を求めよ.\n\n6"
+  },
+  {
+    "book": "cal-5",
+    "page": 1,
+    "text": "教養の微積 (5 回目)\n\n5. 導関数の性質\n\nまずは導関数の定義を復習しておきます. 関数 f (x) が区間 I 上で微分可能なとき, 区間 I 上の関数を\n\nf ′(x) = lim\nh→0\n\nf (x + h) − f (x)\nh\n\nで定め, これを f (x) の導関数と呼びました. 例えば, f (x) = xn (n : 整数) の導関数は f ′(x) = nxn−1 で与\nえられました. 今回は導関数の基本的な性質について紹介します.\n\n(cid:19)\n\n定理 5-1 (導関数の公式 1)\n\n微分可能な関数 f (x), g(x) と実数 c に対して次が成立する.\n\n(1) (c)′ = 0 .\n(2) (f (x) + g(x))′ = f ′(x) + g′(x).\n(3) (cf (x))′ = cf ′(x).\n\n(cid:18)\n\n[証明]\n\nここでは, (2) のみ証明します. (1), (3) は各自で考えてみてください.\n\n(f + g)(x + h) − (f + g)(x)\nh\n\nlim\nh→0\n\n= lim\nh→0\n\n{\n\nf (x + h) − f (x)\nh\n\n+\n\ng(x + h) − g(x)\nh\n\n}\n\n= f ′(x) + g′(x).\n\nよって (f (x) + g(x))′ = f ′(x) + g′(x).\n\n(cid:19)\n\n例題 5-1\n\n次の関数の導関数を求めよ.\n\n(cid:18)\n\n(1) f (x) = x3 + 2x + 1\n\n(2) f (x) =\n\nx2 + 1\nx\n\ncopyright © 大学数学の授業ノート\n\n1\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-5",
+    "page": 2,
+    "text": "[解答]\n\n(1) について.\n\n(2) について.\n\nf ′(x) = (x3)′ + 2(x)′ + (1)′ = 3x2 + 2.\n\n(\n\nf ′(x) =\n\nx +\n\n)′\n\n1\nx\n\n= (x)′ + (x−1)′ = 1 − x−2 = 1 − 1\nx2 .\n\n問題 5-1 次の関数の導関数を求めよ.\n\n(1) f (x) = x5 + 3x3\n\n(2) f (x) ="
+  },
+  {
+    "book": "cal-5",
+    "page": 2,
+    "text": "1 + 2x2\nx2\n\n(cid:19)\n\n定理 5-2 (導関数の公式 2)\n\n区間 I 上で微分可能な関数 f (x), g(x) に対して次が成立する.\n\n(1) (f (x)g(x))′ = f ′(x)g(x) + f (x)g′(x).\n\n(2) g(x) ̸= 0 (x ∈ I) のとき,\n\n)′\n\n(\n\nf (x)\ng(x)\n\n=\n\nf ′(x)g(x) − f (x)g′(x)\ng(x)2\n\n.\n\n(cid:18)\n\n[証明]\n\n(1) について.\n\nf (x + h)g(x + h) − f (x)g(x)\nh\n\nlim\nh→0\n\n= lim\nh→0\n\n{\n\n(f (x + h) − f (x))\nh\n\n· g(x + h) + f (x) · (g(x + h) − g(x))\n\nh\n\n}\n\n= f ′(x)g(x) + f (x)g′(x).\n\n(cid:16)\n\n(cid:17)\n\n(2) について.\n\nlim\nh→0\n\nよって\n\n− 1\n\ng(x)\n\n1\ng(x+h)\nh\n\n{\n\n= lim\nh→0\n\n− g(x + h) − g(x)\nh\n\n·\n\n1\ng(x + h)g(x)\n\n}\n\n= −g′(x) ·\n\n1\ng(x)2 .\n\n)′\n\n(\n\n1\ng(x)\n\n= − g′(x)\ng(x)2 .\n\n2"
+  },
+  {
+    "book": "cal-5",
+    "page": 3,
+    "text": "これと (1) より,\n\n)′\n\n(\n\nf (x)\ng(x)\n\n= f ′(x) ·\n\n1\ng(x)\n\n+ f (x) ·\n\n)′\n\n(\n\n1\ng(x)\n\n= f ′(x) ·\n\n1\ng(x)\n\n− f (x) · g′(x)\ng(x)2\n\n=\n\nf ′(x)g(x) − f (x)g′(x)\ng(x)2\n\n.\n\n(cid:19)\n\n例題 5-2\n\n次の関数の導関数を求めよ.\n\n(1) f (x) = (x2 + 1)(3x + 1)\n\n(2) f (x) =\n\nx\nx2 + 1\n\n(cid:18)\n\n[解答]\n\n(1) について.\n\nf ′(x) = (x2 + 1)′ · (3x + 1) + (x2 + 1) · (3x + 1)′ = 2x · (3x + 1) + (x2 + 1) · 3 = 9x2 + 2x + 3.\n\n(2) について.\n\nf ′(x) =\n\n(x)′ · (x2 + 1) − x · (x2 + 1)′\n(x2 + 1)2\n\n="
+  },
+  {
+    "book": "cal-5",
+    "page": 3,
+    "text": "1 · (x2 + 1) − x · 2x\n(x2 + 1)2\n\n=\n\n−x2 + 1\n(x2 + 1)2 .\n\n問題 5-2 次の関数の導関数を求めよ.\n\n(1) f (x) = (x + 1)\n\n√\n\nx\n\n(2) f (x) =\n\n1\nx3 + 2x\n\n(cid:19)\n\n定義 5-1 (合成関数)\n\n関数 f (x), g(x) に対して,\n\n(g ◦ f )(x) = g(f (x))\n\nで定まる関数を f (x) と g(x) の合成関数という.\n\n(cid:18)\n\n例えば, f (x) = 2x + 1, g(x) = x2 + 2x とすると\n\n(g ◦ f )(x) = g(f (x)) = (2x + 1)2 + 2(2x + 1) = 4x2 + 8x + 3\n\n3\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-5",
+    "page": 4,
+    "text": "となります.\n\n(cid:19)\n\n定理 5-3 (導関数の公式 3)\n\n微分可能な関数 f (x), g(x) に対して次が成立する.\n\n(g ◦ f )′(x) = f ′(x)g′(f (x)).\n\n(cid:18)\n\n[証明]\n\n(cid:16)\n\n(cid:17)\n\n証明のアイデアを分かり易くするため\n\nf (x + h) − f (x) ̸= 0\n\n(h ̸= 0 が十分小さいとき)\n\n(eq1)\n\nという条件下で証明します. 十分小さい h ̸= 0 に対して,\n\ng(f (x + h)) − g(f (x))\nh\n\n=\n\ng(f (x + h)) − g(f (x))\nf (x + h) − f (x)\n\n· f (x + h) − f (x)\nh\n\nと変形する ((eq1) の仮定を使っていることに注意). k = f (x + h) − f (x) とおく. f (x) は微分可能より連続\nなので\n\nk = f (x + h) − f (x) → 0 (h → 0).\n\n従って,\n\nまた\n\n以上より\n\ng(f (x + h)) − g(f (x))\nf (x + h) − f (x)\n\nlim\nh→0\n\n= lim\nk→0\n\ng(f (x) + k) − g(f (x))\nk\n\n= g′(f (x)).\n\nf (x + h) − f (x)\nh\n\nlim\nh→0\n\n= f ′(x).\n\n(g ◦ f )′(x) = lim\nh→0\n\ng(f (x + h)) − g(f (x))\nh\n\n= g′(f (x))f ′(x).\n\n例えば, f (x) = (x2 + 1)3 を考えます. g(x) = x3, h(x) = x2 + 1 と置くと, f (x) = g(h(x)) であり,\n\ng′(x) = 3x2,\n\nh′(x) = 2x.\n\nf ′(x) = g′(h(x))h′(x) = 3(x2 + 1)2 · 2x = 6x(x2 + 1)2\n\n定理 5-3 より\n\nと計算できます.\n\n4"
+  },
+  {
+    "book": "cal-5",
+    "page": 5,
+    "text": "(cid:16)\n\n(cid:17)\n\n(cid:19)\n\n例題 5-3\n\n次の関数の導関数を求めよ.\n\n(1) f (x) = (2x + 1)10\n\n(2) f (x) =\n\nx2 + 1\n\n√\n\n(cid:18)\n\n[解答]\n\n(1) について.\n\n(2) について.\n\nf ′(x) = 10(2x + 1)9 · (2x + 1)′ = 20(2x + 1)9.\n\nf ′(x) =\n\n√\n\n1\nx2 + 1\n\n2\n\n· (x2 + 1)′ =\n\nx√\n\nx2 + 1\n\n.\n\n問題 5-3 次の関数の導関数を求めよ.\n\n(1) f (x) = (x2 + 1)5\n\n(2) f (x) =\n\n)3\n\n(\n\nx\nx + 1\n\n問題 5-4 次の極限値を a2, f (a2), f ′(a2) を用いて表せ.\n\naf (x2) − xf (a2)\nx − a\n\n.\n\nlim\nx→a\n\n5"
+  },
+  {
+    "book": "cal-2",
+    "page": 1,
+    "text": "(cid:16)\n\n(cid:17)\n\n教養の微積 (2 回目)\n\n2. 級数の極限\n\n今回は級数の基本事項について解説し, さらに様々な級数の収束性や値について調べます.\n\n(cid:19)\n\n定義 2-1 (級数)\n\n数列 fang に対して, 形式的な和\n\na1 + a2 + a3 + (cid:1) (cid:1) (cid:1)\n\nを級数といい,\n\n1∑\n\nn=1\n\nan で表す. 自然数 n に対して,\n\nSn = a1 + a2 + (cid:1) (cid:1) (cid:1) + an\n\nと置く. 数列 fSng が S に収束するとき, 級数\n\nいう. このとき,\n\n1∑\n\nn=1\n\nan は S に収束するといい, S を級数の和と\n\n1∑\n\nn=1\n\nan = S\n\nで表す. 数列 fSng が発散するときは, 級数\n\n(cid:18)\n\n例えば,\n\n1∑\n\nn=1\n\nan は発散するという.\n\n1∑\n\nn=1\n\n1\n2n =\n\n(\n\n1\n2\n\n)\n\n(\n\n+\n\n)2\n\n1\n2\n\n+ (cid:1) (cid:1) (cid:1)\n\nについて考えます. 第 n 項までの和を Sn とすると, 等比数列の和の公式より,\n)2\n\n)n(cid:0)1\n\n)n\n\n(\n\n)\n\n(\n\n(\n\n(\n\nSn =\n\n+\n\n1\n2\n\n1\n2\n\n1\n2\n\n+ (cid:1) (cid:1) (cid:1) +\n\n= 1 (cid:0)\n\n:\n\n1\n2\n\n従って, 数列 fSng は 1 に収束するので,\n\ncopyright c⃝ 大学数学の授業ノート\n\n1∑\n\nn=1\n\n1\n2n = 1:\n\n1"
+  },
+  {
+    "book": "cal-2",
+    "page": 2,
+    "text": "(cid:19)\n\n例題 2-1\n\n次の級数の和を求めよ.\n\n(1)\n\n(\n\n1∑\n\nn=1\n\n)n\n\n2\n3\n\n(2)\n\n1∑\n\nn=1\n\n1\nn(n + 1)\n\n(cid:18)\n\n(cid:16)\n\n(cid:17)\n\n[解答]\n(1) 第 n 項までの和を Sn とおくと,\n(\n\n(\n\n)\n\nSn =\n\n従って\n\n(2) 第 n 項までの和を Sn とおく.\n\nと変形できるので,\n\nn∑\n\nk=1\nn∑\n\nSn =\n\n=\n\n2\n3\n\n+\n\n)2\n\n+ (cid:1) (cid:1) (cid:1) +\n\n)n(cid:0)1\n\n(\n\n2\n3\n\n{\n\n(\n\n= 2 (cid:2)"
+  },
+  {
+    "book": "cal-2",
+    "page": 2,
+    "text": "1 (cid:0)\n\n)n}\n\n:\n\n2\n3\n\n2\n3\n\n(\n\n1∑\n\nn=1\n\n)n\n\n2\n3\n\n= lim\nn!1\n\nSn = 2:\n\n1\nk(k + 1)\n\n=\n\n1\nk\n\n(cid:0) 1\n\nk + 1\n\n1\nk(k + 1)\n(\n\n1\nk\n\n(cid:0) 1\n\nk + 1\n(\n\n)\n\n=\n\n(cid:0)\n\nk=1\n(\n1\n(cid:3)(cid:3)1\n(cid:3)\n1\n2\n= 1 (cid:0) 1\n\nn + 1\n\n+\n\n:\n\n)\n\n)\n\n(\n\n(cid:1) (cid:1) (cid:1) +\n\n(cid:0)\n\n(cid:3)(cid:3)1\n(cid:3)\n3\n\n(cid:3)(cid:3)1\n(cid:3)\nn\n\n(cid:0) 1\n\nn + 1\n\n)\n\n(cid:3)(cid:3)1\n(cid:3)\n2\n\n従って\n\n1∑\n\nn=1\n\n1\nn(n + 1)\n\n= lim\nn!1\n\nSn = 1:\n\n問題 2-1 次の級数の和を求めよ.\n\n(1)\n\n1∑\n\nn=1\n\n3n + 2n\n4n\n\n(2)\n\n1∑\n\nn=1\n\n8\n(2n + 1)(2n (cid:0) 1)\n\n(3)\n\n1∑\n\nn=1\n\nn\n(n + 1)!\n\n2"
+  },
+  {
+    "book": "cal-2",
+    "page": 3,
+    "text": "次は級数が発散する場合を考えます.\n\n(cid:19)\n\n例題 2-2\n\n次の級数は発散することを示せ.\n\n1∑\n\nn=1\n\n((cid:0)1)n(cid:0)1 = 1 + ((cid:0)1) + 1 + ((cid:0)1) + (cid:1) (cid:1) (cid:1)\n\n(eq1)\n\n(cid:18)\n\n[解答]\n\n第 n 項までの和を Sn とおく. このとき,\n\nS1 = 1; S2 = 0; S3 = 1; (cid:1) (cid:1) (cid:1)\n\nとなり, fSng は 1 と 0 を繰り返して収束しない. よって級数\n\n1∑\n\nn=1\n\n((cid:0)1)n(cid:0)1 は発散する.\n\n[補足] (eq1) は数列\n\nan = ((cid:0)1)n(cid:0)1\n\n(n = 1; 2; 3; :::)\n\nに対する級数の和を表しています. 一方, (eq1) に次のように括弧をつけます.\n\nf1 + ((cid:0)1)g + f1 + ((cid:0)1)g + (cid:1) (cid:1) (cid:1)\n\n(eq2)\n\n(eq2) は数列\n\nbn = 1 + ((cid:0)1) = 0 (n = 1; 2; :::)\n\nに対する級数の和を表しており, 第 n 項までの和は\n\nよって級数の和は\n\nTn = b1 + b2 + (cid:1) (cid:1) (cid:1) + bn = 0:\n\n1∑\n\nn=1\n\nbn = lim\nn!1\n\nTn = 0\n\nと計算できます. このように級数は括弧のつけ方で意味が変わるので注意が必要です.\n\n(cid:19)\n\n例題 2-3\n\n次の級数が収束することを示せ.\n\n(cid:18)\n\n1∑\n\nn=1\n\n((cid:0)1)n+1\nn\n\n(eq3)\n\n3\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-2",
+    "page": 4,
+    "text": "[解答]\n\n第 n 項までの和を Sn とし, Tn = S2n と置く. まずは Tn が収束することを示す.\n\nTn = Tn(cid:0)1 +\n\n(\n\n1\n2n (cid:0) 1\n\n(cid:0) 1\n2n\n\n)\n\n≧ Tn(cid:0)1\n\nより fTng は単調増加であり,\n\nTn = 1 (cid:0)\n\n(\n\n1\n2\n\n(cid:0) 1\n3\n\n)\n\n(\n\n(cid:0) (cid:1) (cid:1) (cid:1) (cid:0)\n\n1\n2n (cid:0) 2\n\n(cid:0) 1\n\n2n (cid:0) 1\n\n)\n\n(cid:0) 1\n2n\n\n≦ 1;\n\nTn =\n\n("
+  },
+  {
+    "book": "cal-2",
+    "page": 4,
+    "text": "1 (cid:0) 1\n2\n\n)\n\n(\n\n+ (cid:1) (cid:1) (cid:1) +\n\n1\n2n (cid:0) 1\n\n(cid:0) 1\n2n\n\n)\n\n≧ 0:\n\n従って fTng は有界でもある. 定理 1-3 から fTng は収束し, その極限値を T とする. 次に\n\n8\n><\n\n>:\n\n1\nn\n\n0\n\nRn =\n\nn が奇数のとき;\n\nn が偶数のとき\n\nと置く. このとき,\n\nが成り立つ. ただし, [ n"
+  },
+  {
+    "book": "cal-2",
+    "page": 4,
+    "text": "2 ] は n\n\n2\n\nlim\nn!1\n\nRn = 0;\n\nSn = T[ n"
+  },
+  {
+    "book": "cal-2",
+    "page": 4,
+    "text": "2 ] + Rn\n\nを超えない最大の整数を表す. 以上より,\n\n1∑\n\nn=1\n\n((cid:0)1)n+1\nn\n\n= lim\nn!1\n\nSn = lim\nn!1\n\nT[ n"
+  },
+  {
+    "book": "cal-2",
+    "page": 4,
+    "text": "2 ] + lim\nn!1\n\nRn = T\n\nとなり, 級数 (eq3) は T に収束する.\n\n[コメント] 上の証明では級数 (eq3) が収束することは分かっても極限値までは分かりません. こ\nの極限値の計算方法については, テイラーの定理の応用として後の授業ノートで紹介する予定です.\n\n問題 2-2 次の級数が収束することを示せ.\n\n1∑\n\nn=0\n\n2n\nn!\n\n問題 2-3 級数\n\n1∑\n\nn=1\n\nan が収束すれば,\n\nlim\nn!1\n\nan = 0 が成り立つことを示せ.\n\n4"
+  },
+  {
+    "book": "cal-9",
+    "page": 1,
+    "text": "教養の微積 (第 9 回)\n\n9. 平均値の定理とロピタルの定理\n\nまずは平均値の定理の主張と使い方をみていきます.\n\n(cid:19)\n\n定理 9-1 (平均値の定理)\n\n関数 f (x) が閉区間 [a, b] 上で微分可能であるとき,\n\nを満たす c が存在する.\n\nf (b) − f (a)\nb − a\n\n= f ′(c),\n\na < c < b\n\nf (b)\n\nf (a)\n\ny\n\nA\n\na\n\nB\n\nC\n\nc\n\nx\n\nb\n\n※ 上図で直線 AB の傾きは\n\nf (b) − f (a)\nb − a\n\nで与えられる. よって平均値の定理は直線 AB と平行な接線が引ける点 C (c, f (c)) が弧 AB 上にあるこ\n\nとを意味する.\n\n(cid:18)\n\n[証明] 文献 [1] の定理 5-2 を参照.\n\n平均値の定理の使い方を例題で確認しておきます.\n\ncopyright © 大学数学の授業ノート\n\n1\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-9",
+    "page": 2,
+    "text": "(cid:19)\n\n例題 9-1\n\na < b に対して次を示せ.\n\n(cid:18)\n\nea <\n\neb − ea\nb − a\n\n< eb.\n\n[証明]\nf (x) = ex とすると, f ′(x) = ex. 平均値の定理より\n\neb − ea\nb − a\n\n= f ′(c) = ec,\n\na < c < b\n\nを満たす c がある. ex は単調増加関数より ea < ec < eb. 従って\n\nea <\n\neb − ea\nb − a\n\n< eb.\n\n問題 9-1 a > 0 とする. 平均値の定理を用いて次の等式を示せ.\n\nlog(1 + a) <\n\n1\na\n\n+ log(a).\n\n(cid:19)\n\n定理 9-2\n\n関数 f (x) は閉区間 [a, b] 上で微分可能とする. f ′(x) = 0 のとき, f (x) は定数関数である.\n\n(cid:18)\n\n[証明]\nc = f (a) とし, a < x ≦ b とする. 平均値の定理から\n\nf (x) − f (a)\nx − a\n\n= f ′(d),\n\na < d < x\n\nとなる d がある . 仮定から f ′(d) = 0 であるので, f (x) = f (a) = c. よって f (x) は定数関数である.\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n問題 9-2 関数 f (x) は閉区間 [a, b] 上で微分可能とする. f ′(x) = f (x) のとき, f (x) = cex\n\n(c:定数) と\n\n表せることを示せ.\n\n平均値の定理は次のように一般化できます.\n\n2"
+  },
+  {
+    "book": "cal-9",
+    "page": 3,
+    "text": "(cid:19)\n\n定理 9-3 (コーシーの平均値定理)\n\n関数 f (x), g(x) は閉区間 [a, b] 上で微分可能とする. また [a, b] 上で g′(x) ̸= 0 のとき,\n\nf (b) − f (a)\ng(b) − g(a)\n\n=\n\nf ′(c)\ng′(c)\n\n,\n\na < c < b\n\nを満たす c が存在する.\n\n※ g(x) = x のとき平均値の定理と一致する.\n\n(cid:18)\n\n[証明]\n\n関数 F (x) を次で定める.\n\nF (x) = (g(b) − g(a))f (x) − (f (b) − f (a))g(x)\n\nこのとき, F (b) − F (a) = 0 であり, また\n\nF ′(x) = (g(b) − g(a))f ′(x) − (f (b) − f (a))g′(x).\n\n(eq1)\n\n平均値の定理から\n\nF ′(c) = 0,\n\na < c < b\n\nとなる c がとれる. これと式 (eq1) から"
+  },
+  {
+    "book": "cal-9",
+    "page": 3,
+    "text": "0 = (g(b) − g(a))f ′(c) − (f (b) − f (a))g′(c).\n\n従って定理が成り立つ.\n\nコーシーの平均値定理から次のロピタルの定理が導かれます.\n\n(cid:19)\n\n定理 9-4 (ロピタルの定理)\n\nf (x), g(x) は微分可能な関数で f (a) = g(a) = 0 とする. このとき,\n\nが存在すれば,\n\nf ′(x)\ng′(x)\n\nlim\nx→a\n\nlim\nx→a\n\nf (x)\ng(x)\n\n= lim\nx→a\n\nf ′(x)\ng′(x)\n\n.\n\n※ 上で挙げたのはロピタルの定理の一例です. ロピタルの定理には様々なバージョンがあるので詳しく\n\nは文献 [1] をみてください.\n\n(cid:18)\n\n3\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-9",
+    "page": 4,
+    "text": "(cid:16)\n\n(cid:17)\n\n[証明]\n\na と異なる実数 x をとる. コーシーの平均値定理から\n\nとなる実数 cx が a と x の間にある. x → a のとき, cx → a. よって\n\nf ′(cx)\ng′(cx)\n\n=\n\nf (x) − f (a)\ng(x) − g(a)\n\n=\n\nf (x)\ng(x)\n\nf ′(x)\ng′(x)\n\nlim\nx→a\n\n= lim\nx→a\n\nf ′(cx)\ng′(cx)\n\n= lim\nx→a\n\nf (x)\ng(x)\n\n.\n\nロピタルの定理を使うと極限の計算が簡単になる場合があります.\n\n(cid:19)\n\n例題 9-2\n\n次の極限値を求めよ.\n\n(cid:18)\n\n(1)\n\nlim\nx→0\n\nex − e−x\nx\n\n(2)\n\nlim\nx→0\n\ncos x − 1\nx2\n\n[解答]\n(1) f (x) = ex − e−x, g(x) = x とすると f (0) = g(0) = 0. ロピタルの定理より\n\nex − e−x\nx\n\nlim\nx→0\n\n= lim\nx→0\n\nf (x)\ng(x)\n\n= lim\nx→0\n\nf ′(x)\ng′(x)\n\n= lim\nx→0\n\nex + e−x\n1\n\n= 2.\n\n(2) f (x) = cos x − 1, g(x) = x2 とすると f (0) = g(0) = 0. ロピタルの定理より\n\ncos x − 1\nx2\n\nlim\nx→0\n\n= lim\nx→0\n\nf (x)\ng(x)\n\n= lim\nx→0\n\nf ′(x)\ng′(x)\n\n= lim\nx→0\n\n−1\n2\n\n· sin x\nx\n\n= − 1\n2\n\n.\n\n問題 9-3 次の極限を求めよ.\n\n(1)\n\nlim\nx→1\n\nlog x\nx − 1\n\n(2)\n\nlim\nx→0\n\nx"
+  },
+  {
+    "book": "cal-9",
+    "page": 4,
+    "text": "1 − sin x\n\n問題 9-4 自然数 n に対して,\n\nと置くとき, 次を示せ.\n\nfn(x) =\n\nn−1∑\n\nk=0\n\nxk\nk!\n\nex − fn(x)\nxn\n\n=\n\n1\nn!\n\n.\n\nlim\nx→0\n\n4"
+  },
+  {
+    "book": "cal-9",
+    "page": 5,
+    "text": "参考文献\n\n[1] 山形大学数理科学科編, 「微分積分入門」, 裳華房.\n\n5"
+  },
+  {
+    "book": "cal-19",
+    "page": 1,
+    "text": "教養の微積 (19 回目)"
+  },
+  {
+    "book": "cal-19",
+    "page": 1,
+    "text": "19 広義積分の収束判定\n\n広義積分\n\nR\n\n1\n0\n\n1\nxα dx を計算すると,\n\nZ\n\n1\n\n0\n\n1\nxα dx =\n\n8\n>><\n\n>>:\n\n1\n1−α\n\n(0 < α < 1 のとき),\n\n発散\n\n(α ≧ 1 のとき)\n\nとなり, α の値によって収束 · 発散が変化します (問題 18-3 を参照). このように広義積分はいつで\nも収束するわけではなく, 発散する場合もあります. 今回は, 広義積分が収束する条件についてみ\nます. また応用として, ガンマ関数の収束性について調べます.\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n(cid:19)\n\n定理 19-1\n\n区間 (a, b] (または [a, b) ) 上の連続関数 f (x) に対して, 極限値\n\n(cid:16)\n\n(cid:17)\n\n(x − a)λf (x)\n\nlim\nx ↓ a\n\nまたは lim\nx ↑ b\n\n(b − x)λf (x)\n\nが存在するような 0 < λ < 1 が取れるとき, 広義積分\n\nR\n\nb\na f (x) dx は収束する.\n\n(cid:18)\n\n[証明]\n\n文献 [1] 定理 10-2 を参照のこと.\n\n(cid:19)\n\n例題 19-1\n\nR\n\n1\n0\n\n(cid:18)\n\ncos x√\n\nx dx は収束することを示せ.\n\n⋆ 関数 f (x) = cos x√\nx\n\nは x = 0 で発散する. そこで, 定理 19-1 を用いて収束性を調べる.\n\n[証明]\n\nf (x) = cos x√\nx\n\nとし, λ = 1\n2\n\nと置く. このとき,\n\nlim\nx ↓ 0\n\nxλf (x) = lim\nx ↓ 0\n\ncos x = 1.\n\ncopyright © 大学数学の授業ノート\n\n1"
+  },
+  {
+    "book": "cal-19",
+    "page": 2,
+    "text": "従って, 定理 19-1 から\n\nR\n\n1\n0\n\ncos x√\n\nx dx は収束する.\n\n[コメント] 上の証明では λ = 1\n2\n\nとして考えましたが, lim\nx ↓ 0\n\nxλf (x) が収束すれば良いので, 1\n2\n\n≦ λ < 1\n\nの範囲ならばどんな λ をとっても証明できます.\n\n問題 19-1 次の積分が収束することを示せ.\n\nZ\n\n(1)\n\n1\n\n1√\n\n0\n\nsin x\n\ndx\n\n(2)\n\nZ\n\n3\n\n1\n\np\n\n1\n(x − 1)(3 − x)\n\ndx\n\nR\n\n問題 19-2\n\n1\n0\n\nex\nx dx は発散することを示せ.\n\n(cid:19)\n\n定理 19-2\n\n区間 [a, ∞) (または (−∞, a] ) 上の連続関数 f (x) に対して, 極限値\n\n(cid:16)\n\n(cid:17)\n\nlim\nx → ∞\n\nxλf (x)\n\nまたは lim\n\nxλf (x)\n\nが存在するような λ > 1 が取れるとき, 広義積分\nする.\n\nx → −∞\nR ∞\na f (x) dx\n\n(cid:16)\n\nR\n\nまたは\n\na\n−∞ f (x) dx\n\n(cid:17)\n\nは収束\n\n(cid:18)\n\n[証明]\n\n文献 [1] 定理 10-2 を参照のこと.\n\n(cid:19)\n\n例題 19-2\n広義積分\n\n(cid:18)\n\n[証明]\n\nR ∞"
+  },
+  {
+    "book": "cal-19",
+    "page": 2,
+    "text": "0 e−x2\n\ndx は収束することを示せ.\n\nf (x) = e−x2 とし, λ = 2 と置く. ロピタルの定理より\n\n従って, 定理 19-2 から\n\ndx は収束する.\n\nlim\nx→∞\n\nxλf (x) = lim\nx→∞\nR ∞"
+  },
+  {
+    "book": "cal-19",
+    "page": 2,
+    "text": "0 e−x2\n\nx2\nex2 = lim\n\nx→∞\n\n2x\n2xex2 = lim\n\nx→∞\n\n1\nex2 = 0.\n\n問題 19-3 次の積分が収束することを示せ.\n\nZ\n\n0\n\n(1)\n\n−∞\n\n1\nx3 − 1\n\ndx\n\n2\n\nZ ∞\n\n(2)\n\n0\n\nsin x\nex dx\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-19",
+    "page": 3,
+    "text": "(cid:16)\n\n(cid:17)\n\n(cid:19)\n\n定理 19-3\n\ns > 0 に対して, 次の広義積分は収束する.\nZ ∞\n\nΓ(s) =\n\nxs−1e−x dx.\n\n0\n\n上の積分で定義される関数 Γ(s) をガンマ関数という.\n\n※ 自然数 n での値を考えると,\n\nΓ(n) = (n − 1)!\n\nとなる (問題 19-4). このことから, Γ(s) は階乗を正の実数に拡張した関数と思える.\n\n(cid:18)\n\n[証明]\n\nまず, 積分区間を次のように二つに分ける.\n\nΓ(s) =\n\nZ\n\n1\n\n0\n\n|\n\nxs−1e−x dx\n}\n\n{z\nA\n\nZ ∞\n\n+\n\n1\n\n|\n\n.\n\nxs−1e−x dx\n}\n\n{z\nB\n\nはじめに A の積分の収束性をみる. f (x) = xs−1e−x と置く. s ≧ 1 のとき, f (x) は x = 0 で値を\n持つので A の積分は収束する. 0 < s < 1 のとき, λ = 1 − s と置くと, 0 < λ < 1 であり,\n\nlim\nx ↓ 0\n\nxλf (x) = lim\nx ↓ 0\n\ne−x = 1.\n\n定理 19-1 より A の積分は収束する.\n\n次に B の積分を考える. λ = 2 とし, s + 1 より大きい自然数 M を一つ取る. このとき,"
+  },
+  {
+    "book": "cal-19",
+    "page": 3,
+    "text": "0 ≦ xλf (x) = xs+1e−x ≦ xM e−x.\n\nここで,\n\nlim\nx→∞\n\nxM e−x について考える. ロピタルの定理を繰り返し使うと,\n\nxM\nex = lim\n\nx→∞\n\nM xM −1\nex\n\nlim\nx→∞\n\n= · · · = lim\nx→∞\n\nM !\nex = 0.\n\nよって lim\nx→∞\n\nxλf (x) = 0. 定理 19-2 から B の積分も収束性する.\n\n問題 19-4\n\n(1) Γ(1) を求めよ.\n\n(2) sΓ(s) = Γ(s + 1) (s > 0) を示せ.\n\n(3) 自然数 n に対して, Γ(n) = (n − 1)! を示せ.\n\n問題 19-5 ガンマ関数を利用して,\n\n1\n\nR"
+  },
+  {
+    "book": "cal-19",
+    "page": 3,
+    "text": "0 (log x)n dx (n : 自然数) を計算せよ.\n\n3"
+  },
+  {
+    "book": "cal-19",
+    "page": 4,
+    "text": "参考文献\n\n[1] 微分積分入門 1 変数 (山形大学 数理科学科編), 裳華房.\n\n4"
+  },
+  {
+    "book": "cal-6",
+    "page": 1,
+    "text": "教養の微積 (６回目)"
+  },
+  {
+    "book": "cal-6",
+    "page": 1,
+    "text": "6 逆関数とその微分\n\n今回は逆関数の定義と性質について説明します. また逆関数の微分について触れます.\n\n(cid:19)\n\n定義 6-1(単調関数)\n\n関数 f (x) が\n\nx1 < x2 ) f (x1) < f (x2)\n\nを満たすとき, f (x) を単調増加関数と言い, また\n\nx1 < x2 ) f (x1) > f (x2)\n\nを満たすとき, f (x) を単調減少関数という.\n\n(cid:18)\n\n(cid:16)\n\n(cid:17)\n\n左下図のように常に増加している関数が単調増加関数で, 右下図のように常に減少している関数が\n\n単調減少関数です.\n\ny\n\ny\n\nx\n\nx\n\n例えば, 関数 f (x) = x2 は区間 ((cid:0)1; 0] で単調減少関数で, 区間 [0; 1) で単調増加関数になります.\n\ncopyright c⃝ 大学数学の授業ノート\n\n1"
+  },
+  {
+    "book": "cal-6",
+    "page": 2,
+    "text": "(cid:19)\n\n定義 6-2 (逆関数)\n\n区間 [a; b] 上の単調増加関数 f (x) を考える. このとき, 区間 [f (a); f (b)] 上の実数 q に対して\n\nf (p) = q;\n\na ≦ p ≦ b\n\n(eq1)\n\nを満たす実数 p を対応させる関数を f (x) の [a; b] 上の逆関数と呼び, f (cid:0)1(x) で表す. 単調減少関数の場\n合も同様に定義する.\n\ny\n\nf (b)\n\nq\n\nf (a)\n\na\n\np\n\nb\n\nx\n\n(注意)\n\n(cid:15) 中間値の定理より (eq1) を満たす実数 p が存在し, また f (x) は単調増加関数より, そのような p\n\nはただ 1 つしかない.\n\n(cid:15) 区間 [a; b] 上の単調増加関数 f (x) に対して, その逆関数 f (cid:0)1(x) の定義域は [f (a); f (b)] となる (単\n\n調減少関数のときは [f (b); f (a)]).\n\n(cid:15) 逆関数の定義より, f (p) = q () f (cid:0)1(q) = p:\n(cid:15) f (x) が連続関数のとき, f (cid:0)1(x) も連続関数になる.\n\n(cid:18)\n\n単調増加 (減少) 関数 f (x) (a ≦ x ≦ b) に対して, y = f (x) を x について解いて x = g(y) で表\nします. このとき, g(x) が f (x) の逆関数で, その定義域は [f (a); f (b)] となります (単調減少のときは\n\n[f (b); f (a)] ). 例えば,\n\nを考えると,\n\nf (x) = 3x + 5 (0 ≦ x ≦ 1)\n\ny = 3x + 5 () x =\n\ny (cid:0) 5\n3\n\nなので f (cid:0)1(x) = x(cid:0)5\n3\n\nとなり, 定義域は 5 ≦ x ≦ 8 となります.\n\n(cid:16)\n\n(cid:17)\n\n2"
+  },
+  {
+    "book": "cal-6",
+    "page": 3,
+    "text": "(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n(cid:19)\n\n例題 6-1\n\n次の関数の逆関数とその定義域を求めよ.\n\n(1) f (x) = 2x + 1 (1 ≦ x ≦ 2)\n\n(2) f (x) = x2 + 1\n\n((cid:0)2 ≦ x ≦ 0)\n\n(cid:18)\n\n[解答]\n\n(1) について.\n\ny = 2x + 1 () x =\n\ny (cid:0) 1\n2\n\nなので, f (cid:0)1(x) = x(cid:0)1\n2\n\nであり, その定義域は 3 ≦ x ≦ 5 である.\n\n(2) x ≦ 0 に注意すると,\n\ny = x2 + 1 () x = (cid:0)\n\n√\n\ny (cid:0) 1:\n\nよって f (cid:0)1(x) = (cid:0)\n\np\n\nx (cid:0) 1 であり, その定義域は 1 ≦ x ≦ 5 である.\n\n問題 6-1 次の関数の逆関数とその定義域を求めよ.\n\n(1) f (x) =\n\n1\nx + 3\n\n(0 ≦ x ≦ 1)\n\n(2) f (x) = x2 + 2x (0 ≦ x ≦ 1)\n\n(cid:19)\n\n定理 6-1 (逆関数の微分)\n\n区間 I 上の微分可能な単調増加 (減少) 関数 f (x) を考える. f ′(x) ̸= 0 (x 2 I) が成り立てば,\n\n(cid:18)\n\n(f (cid:0)1)′(x) =\n\n1\nf ′(f (cid:0)1(x))\n\n:\n\n[証明]\nk = f (cid:0)1(x + h) (cid:0) f (cid:0)1(x) とおくと, f (cid:0)1(x) は連続関数より\n\nk = f (cid:0)1(x + h) (cid:0) f (cid:0)1(x) ! 0 (h ! 0):\n\ny = f (cid:0)1(x) とすると, f (y) = x かつ y + k = f (cid:0)1(x + h). 従って\n\nf (y + k) = x + h = f (y) + h:\n\nよって\n\nf (cid:0)1(x + h) (cid:0) f (cid:0)1(x)\nh\n\nlim\nh!0\n\n= lim\nk!0\n\nk\nf (y + k) (cid:0) f (y)\n\n= lim\nk!0\n\n1\nf (y+k)(cid:0)f (y)\nk\n\n=\n\n1\nf ′(y)\n\n:\n\n3"
+  },
+  {
+    "book": "cal-6",
+    "page": 4,
+    "text": "従って\n\n(cid:19)\n\n例題 6-2\n\n自然数 n に対して,\n\n(cid:18)\n\n[証明]\nf (x) = xn とおくと,\n\n(f (cid:0)1)′(x) =\n\n1\nf ′(f (cid:0)1(x))\n\n:\n\n:\n\n(cid:16)\n\n(cid:17)\n\n)′\n\n(\n\n1\nn\n\nx\n\n=\n\n(cid:0)1\n\nn\n\nx 1\nn\n\n(cid:0)1\n\nn\n\nx 1\nn\n\n:\n\nより f (cid:0)1(x) = x 1\n\nn となる. f ′(x) = nxn(cid:0)1 より,\n\ny = xn () y\n\n1\nn = x\n\n(f (cid:0)1)′(x) =\n\n1\nf ′(f (cid:0)1(x))\n\n=\n\n1\nn(x 1\nn )n(cid:0)1\n\n=\n\n問題 6-2 f (x) = 2x2 + 1 ((cid:0)1 < x < 0) を考える.\n\n(1) f (x) の逆関数とその定義域を求めよ.\n\n(2) (f (cid:0)1)′(x) を求めよ.\n\n問題 6-3 有理数 (cid:11) に対して次を示せ.\n\n′\n(x(cid:11))\n\n= (cid:11)x(cid:11)(cid:0)1:\n\n問題 6-4 微分可能な単調増加関数 f (x) を考える. f (x)f ′(x) = 1 が成り立つとき, f (cid:0)1(x) の微分を求めよ.\n\n4"
+  },
+  {
+    "book": "cal-7",
+    "page": 1,
+    "text": "(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n教養の微積 (7 回目)\n\n7. 三角関数と逆三角関数の微分\n\n今回は三角関数と逆三角関数 (=三角関数の逆関数) の微分について考えます.\n\n(cid:19)\n\n定理 7-1\n\n(cid:18)\n\nlim\nθ→0\n\nsin θ\nθ\n\n= 1.\n\n[証明] 参考文献 [1] の定理 3-3 を参照のこと.\n\n例題で定理 7-1 の使い方を確認しておきます.\n\n(cid:19)\n\n例題 7-1\n\n次の極限値を求めよ.\n\n(cid:18)\n\n(1) lim\nx→0\n\nsin(2x)\nx\n\n(2) lim\nx→0"
+  },
+  {
+    "book": "cal-7",
+    "page": 1,
+    "text": "1 − cos x\nx2\n\n.\n\n[解答]\n(1) y = 2x とおくと, y → 0 (x → 0). 定理 7-1 から\n\n(2) について.\n\nlim\nx→0\n\nsin(2x)\nx\n\n= lim\ny→0"
+  },
+  {
+    "book": "cal-7",
+    "page": 1,
+    "text": "2 · sin y\ny\n\n= 2."
+  },
+  {
+    "book": "cal-7",
+    "page": 1,
+    "text": "1 − cos x\nx2\n\nlim\nx→0\n\n= lim\nx→0\n\n(1 − cos x)(1 + cos x)\nx2(1 + cos x)\n\n= lim\nx→0"
+  },
+  {
+    "book": "cal-7",
+    "page": 1,
+    "text": "1 − cos2 x\nx2\n\n·\n\n1"
+  },
+  {
+    "book": "cal-7",
+    "page": 1,
+    "text": "1 + cos x\n\n)2\n\n(\n\nsin x\nx\n\n·\n\n1"
+  },
+  {
+    "book": "cal-7",
+    "page": 1,
+    "text": "1 + cos x\n\n= lim\nx→0\n\n=\n\n1\n2\n\n.\n\ncopyright © 大学数学の授業ノート\n\n1"
+  },
+  {
+    "book": "cal-7",
+    "page": 2,
+    "text": "問題 7-1 次の極限値を求めよ.\n\n(1) lim\nx→0\n\nsin(3x) sin(2x)\nx2\n\n(2) lim\nx→0\n\ntan x\nx\n\n.\n\n(cid:19)\n\n定理 7-2 (三角関数の微分)\n\n(1) (sin x)′ = cos x.\n\n(2) (cos x)′ = − sin x.\n\n(3) (tan x)′ = 1\n\n(cos x)2 .\n\n(cid:18)\n\n[解答]\n\n(1) 三角関数の和積の公式を思い出しておく.\n(\n\nsin A − sin B = 2 cos\n\nA + B\n2\n\n)\n\n(\n\nsin\n\n)\n\nA − B\n2\n\n.\n\n(A, B は実数)\n\nこれより,\n\n(cid:16)\n\n(cid:17)\n\nsin(x + h) − sin(x)\nh\n\n=\n\n2\nh\n\n(\n\ncos\n\n(\n\n= cos\n\nx +\n\n2x + h\n2\n)\n\nh\n2\n\n·\n\n)\n\n(\n\nsin\n\n)\n\nh\n2\n\nsin\n\n)\n\nh\n2\n\n.\n\n(\n\nh\n2\n\n従って, 定理 7-1 より\n\n(2) について.\n\n(sin x)′ = lim\nh→0\n\nsin(x + h) − sin(x)\nh\n\n= cos x.\n\n(cos x)′ =\n\n(\n\n(\n\nsin\n\nx +\n\nπ\n2\n\n))′\n\n(\n\n=\n\nx +\n\n)′\n\n(\n\ncos\n\nx +\n\nπ\n2\n\n)\n\nπ\n2\n\n(\n\n= cos\n\nx +\n\n)\n\nπ\n2\n\n= − sin x.\n\n(3) tan x = sin x\ncos x\n\nより\n\n(tan x)′ =\n\n(sin x)′ cos x − sin x(cos x)′\n(cos x)2\n\n=\n\n(cos x)2 + (sin x)2\n(cos x)2\n\n=\n\n1\n(cos x)2 .\n\n問題 7-2 次の関数の導関数を求めよ.\n\n(1) (cos x)3\n\n(2) x sin x\n\n(3)\n\n1\ntan x\n\n2"
+  },
+  {
+    "book": "cal-7",
+    "page": 3,
+    "text": "次に三角関数の逆関数について考えます.\n\n(cid:19)\n\n定義 7-1 (逆三角関数)\n\n≦ x ≦ π\n(1) sin x (− π\n2\n≦ y ≦ π\n− π"
+  },
+  {
+    "book": "cal-7",
+    "page": 3,
+    "text": "2 .\n2"
+  },
+  {
+    "book": "cal-7",
+    "page": 3,
+    "text": "2 ) の逆関数を arcsin x と表す. y = arcsin x の定義域は −1 ≦ x ≦ 1, 値域は\n\n(2) cos x (0 ≦ x ≦ π) の逆関数を arccos x と表す. y = arccos x の定義域は −1 ≦ x ≦ 1, 値域は"
+  },
+  {
+    "book": "cal-7",
+    "page": 3,
+    "text": "0 ≦ y ≦ π.\n\n(3) tan x (− π\n値域は − π"
+  },
+  {
+    "book": "cal-7",
+    "page": 3,
+    "text": "2 ) の逆関数を y = arctan x と表す. y = arctan x の定義域は −∞ < x < ∞,"
+  },
+  {
+    "book": "cal-7",
+    "page": 3,
+    "text": "2 < x < π"
+  },
+  {
+    "book": "cal-7",
+    "page": 3,
+    "text": "2 < y < π"
+  },
+  {
+    "book": "cal-7",
+    "page": 3,
+    "text": "2 .\n\n(cid:18)\n\n逆三角関数はそれぞれ下図のようになります.\n\ny\n\nπ\n2\n\n−1\n\nx\n\n1\n\n− π\n2\n\ny\n\nπ\n\nπ\n2\n\n−1\n\nx\n\n1\n\ny\n\nπ\n2\n\n− π\n2\n\nx\n\ny = arcsin x\n\ny = arccos x\n\ny = arctan x\n\n(cid:16)\n\n(cid:17)\n\nA = arcsin( 1"
+  },
+  {
+    "book": "cal-7",
+    "page": 3,
+    "text": "2 ) の値を求めてみます. arcsin x の値域に注意すると, − π\n(\n\n)\n\n2\n\n≦ A ≦ π"
+  },
+  {
+    "book": "cal-7",
+    "page": 3,
+    "text": "2 . よって\n\n1\n2\n\n⇐⇒ A =\n\nπ\n6\n\n.\n\n1\n2\n\nA = arcsin\n\n問題 7-3\n\n(1) arccos\n\n(\n\n)\n\n−1\n2\n\n, arctan(−1) を求めよ.\n\n(2) arctan(2) + arctan(3) を求めよ.\n\n⇐⇒ sin A =\n\n3"
+  },
+  {
+    "book": "cal-7",
+    "page": 4,
+    "text": "(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n(cid:19)\n\n定理 7-3 (逆三角関数の微分)\n\n(1) (arcsin x)′ = 1√\n\n1−x2 .\n(2) (arccos x)′ = − 1√\n\n1−x2 .\n\n(3) (arctan x)′ = 1\n\n1+x2 .\n\n(cid:18)\n\n[証明]\n(1) f (x) = sin x (− π\n2\n\n≦ x ≦ π"
+  },
+  {
+    "book": "cal-7",
+    "page": 4,
+    "text": "2 ) とおく. このとき,\n\nより cos x =\n\n√"
+  },
+  {
+    "book": "cal-7",
+    "page": 4,
+    "text": "1 − (sin x)2. よって\n\n(sin x)2 + (cos x)2 = 1,\n\ncos x ≧ 0\n\nf ′(x) = cos x =\n\n√"
+  },
+  {
+    "book": "cal-7",
+    "page": 4,
+    "text": "1 − (sin x)2 =\n\n√"
+  },
+  {
+    "book": "cal-7",
+    "page": 4,
+    "text": "1 − f (x)2.\n\n逆関数の微分法より,\n\n(f −1(x))′ =\n\n1\nf ′(f −1(x))\n\n√\n\n=\n\n1"
+  },
+  {
+    "book": "cal-7",
+    "page": 4,
+    "text": "1 − f (f −1(x))2\n\n=\n\n1√"
+  },
+  {
+    "book": "cal-7",
+    "page": 4,
+    "text": "1 − x2\n\n.\n\n(2) は (1) と同様. また (3) は問題とする.\n\n問題 7-4 定理 7-3 (3) を示せ.\n\n(cid:19)\n\n例題 7-3\n\n次の関数の導関数を求めよ.\n\n(cid:18)\n\n[解答]\n\n(1) について.\n\n(2) について.\n\n(1) arcsin(x2)\n\n(2)\n\narctan(x)\nx\n\n(\n\n)′\n\narcsin(x2)\n\n= 2x ·\n\n1√"
+  },
+  {
+    "book": "cal-7",
+    "page": 4,
+    "text": "1 − x4\n\n=\n\n2x√"
+  },
+  {
+    "book": "cal-7",
+    "page": 4,
+    "text": "1 − x4\n\n.\n\n)′\n\n(\n\narctan(x)\nx\n\n=\n\nx\n\n1+x2 − arctan x\nx2\n\n=\n\n1\nx(1 + x2)\n\n− arctan x\nx2\n\n.\n\n4"
+  },
+  {
+    "book": "cal-7",
+    "page": 5,
+    "text": "問題 7-5 次の関数の導関数を求めよ.\n\n(1) arccos(2x)\n\n(2) sin(2 arcsin(x))\n\n参考文献\n\n[1] 山形大学数理科学科編, 「微分積分入門」, 裳華房.\n\n5"
+  },
+  {
+    "book": "cal-10",
+    "page": 1,
+    "text": "教養の微積 (10 回目)\n\n10. 関数の増減と高次導関数\n\nまずは導関数を用いて関数の増減について調べます.\n\n(cid:19)\n\n定理 10-1\n\n関数 f (x) が区間 (a; b) で微分可能とする.\n\n(1) (a; b) で f ′(x) > 0 のとき, f (x) は (a; b) で単調増加する.\n(2) (a; b) で f ′(x) < 0 のとき, f (x) は (a; b) で単調減少する.\n\n(cid:18)\n\n[証明]\n\n(1) a < x1 < x2 < b とする. 平均値の定理より\n\nf (x2) (cid:0) f (x1)\nx2 (cid:0) x1\n\n= f ′(c);\n\nx1 < c < x2\n\nを満たす c がある. x2 (cid:0) x1 > 0 かつ f ′(c) > 0 なので f (x1) < f (x2). よって f (x) は (a; b) で単調増加.\n\n(2) も同様.\n\n(cid:19)\n\n例題 10-1\n\n関数 f (x) = ex (cid:0) x (cid:0) 1 (x > 0) は単調増加関数であることを示せ.\n\n(cid:18)\n\n[証明]\n\nx > 0 より\n\n定理 10-1 より f (x) は単調増加関数である.\n\nf ′(x) = ex (cid:0) 1 > 0:\n\n問題 10-1"
+  },
+  {
+    "book": "cal-10",
+    "page": 1,
+    "text": "0 < x < (cid:25)\n2\n\nのとき, f (x) = tan x (cid:0) x は単調増加することを示せ.\n\ncopyright c⃝ 大学数学の授業ノート\n\n1\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-10",
+    "page": 2,
+    "text": "(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n(cid:19)\n\n例題 10-2\n\n関数 f (x) = x\n\n1+x2 ((cid:0)2 ≦ x ≦ 2) の最大値, 最小値を求めよ.\n\n(cid:18)\n\n[証明]\n\nf (x) を微分すると,\n\nf ′(x) ="
+  },
+  {
+    "book": "cal-10",
+    "page": 2,
+    "text": "1 (cid:0) x2\n(1 + x2)2 =\n\n(1 (cid:0) x)(1 + x)\n(1 + x2)2\n\n:\n\nよって, f (x) の増減表は次のようになる.\n\nx\n\n(cid:0)2\nf ′(x) (cid:0) (cid:0)\nf (x) (cid:0) 2\n5\n\n(cid:1) (cid:1) (cid:1) (cid:0)1\n0\n↘ (cid:0) 1\n2\n\nよって x = (cid:0)1 のとき最小値 (cid:0) 1"
+  },
+  {
+    "book": "cal-10",
+    "page": 2,
+    "text": "2 , x = 1 のとき最大値 1\n\n2\n\n(cid:1) (cid:1) (cid:1)\n1\n+\n0\n↗ 1\n2\n\n(cid:1) (cid:1) (cid:1)\n2\n(cid:0) (cid:0)\n↘ 2\n5\n\nをとる.\n\n問題 10-2 次の関数の最大値と最小値を求めよ.\n\n(1) f (x) = x3 (cid:0) 3x (0 ≦ x ≦ 3)\n(2) f (x) = 2 sin(x) (cid:0) sin(2x) (0 ≦ x ≦ (cid:25))\n\n(cid:19)\n\n定義 10-1 (極大値と極小値)\n\nf (x) をある区間上で定義された連続関数とする.\n\n(1) f (x) が x = a を境に増加から減少に転じるとき, f (x) は x = a で極大になるという. そのときの\n\nf (a) を極大値という.\n\n(2) f (x) が x = a を境に減少から増加に転じるとき, f (x) は x = a で極小になるという. そのときの\n\nf (a) を極小値という.\n\n極大値と極小値を合わせて極値という.\n\n(cid:18)\n\n2"
+  },
+  {
+    "book": "cal-10",
+    "page": 3,
+    "text": "下図において, f (x) は x = a を境に増加から減少に転じるので極大となり, x = b を境に減少から増加に転\n\nじるので極小となります. また極値において f ′(x)(=接線の傾き) は 0 になります.\n\ny\n\n極大\n\na\n\ny = f (x)\n\n極小\n\nb\n\nx\n\n(cid:19)\n\n例題 10-3\n\n関数 f (x) = x4 (cid:0) 4x3 の極値を求めよ.\n\n(cid:18)\n\n[解答]\n\nf (x) を微分すると,\n\nf ′(x) = 4x3 (cid:0) 12x2 = 4x2(x (cid:0) 3):\n\nよって f ′(x) = 0 となるのは x = 0; 3 のとき. f (x) の増減表は次のようになる.\n\n(cid:16)\n\n(cid:17)\n\n0\n\nx\n\n(cid:1) (cid:1) (cid:1)\n(cid:1) (cid:1) (cid:1)\n(cid:1) (cid:1) (cid:1)\nf ′(x) (cid:0) 0 (cid:0)\n+\nf (x) ↘ 0 ↘ (cid:0)27 ↗\n\n3\n0\n\nf (x) は x = 3 を境に減少から増加に転じるので, x = 3 で極小値 (cid:0)27 をとる.\n\n[注意] 例題 10-3 で f ′(0) = 0 だが, f (x) は x = 0 で極値になっていない. 一般的に f ′(a) = 0 であっても\nf (a) が極値になるとは限らない.\n\n3"
+  },
+  {
+    "book": "cal-10",
+    "page": 4,
+    "text": "(cid:19)\n\n定義 10-2 (高次導関数)\n\n(1) f (x) の導関数 f ′(x) が微分可能とする. このとき, f ′(x) の導関数を f (x) の 2 次導関数といい,\n\nf ′′(x) で表す.\n\n(2) f (x) が n 回微分可能とする. このとき, f (x) を n 回微分した関数を f (x) の n 次導関数といい,\n\nf (n)(x) で表す. さらに f (n)(x) が連続関数のとき, f (x) を C n 級関数という.\n\n(3) f (x) が何回でも微分可能のとき, f (x) を C1 級関数という.\n\n(cid:18)\n\nf (x) = x3 + x のとき,\n\nf (1)(x) = f ′(x) = 3x2 + 1;\n\nf (2)(x) = f ′′(x) = 6x;\n\nf (3)(x) = 6:\n\n問題 10-3\n\n(1) f (x) = e2x と置くとき, f (n)(x) (n = 1; 2; 3) を求めよ.\n(2) f (x) = x sin x と置くとき, f (n)(x) (n = 1; 2; 3) を求めよ."
+  },
+  {
+    "book": "cal-10",
+    "page": 4,
+    "text": "2 次導関数は極値の判定に用いることができます.\n\n(cid:19)\n\n定理 10-2\n\nf (x) を C 2 級関数とする.\n\n(1) f ′(a) = 0; f ′′(a) > 0 のとき, f (x) は x = a で極小となる.\n(2) f ′(a) = 0; f ′′(a) < 0 のとき, f (x) は x = a で極大となる.\n\n(cid:18)\n\n[証明]\n\n証明は次回に回します.\n\n(cid:19)\n\n例題 10-4\n\nf (x) = x log x (x > 0) の極値を求めよ.\n\n(cid:18)\n\n[証明]\n\nまず,\n\nよって極値の候補は\n\nf ′(x) = log x + 1;\n\nf ′′(x) =\n\n1\nx\n\n:\n\nf ′(x) = 0 () x =\n\n1\ne\n\n:\n\n4\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-10",
+    "page": 5,
+    "text": "(\n\n)\n\n1\ne\n\nf ′′\n\n= e > 0 より, f (x) は x = 1\ne\n\nで極小値 (cid:0) 1\ne\n\nをとる.\n\n問題 10-4\n\nf (x) = x cos x (cid:0) sin x + x2 の極値を求めよ.\n\n5"
+  },
+  {
+    "book": "cal-15",
+    "page": 1,
+    "text": "教養の微分 (15 回目)\n\n15. 微分積分学の基本定理\n\n∫\n\n前回はリーマン和を用いて定積分を定義しました. 特に閉区間 [a, b] 上の連続関数 f (x) につい\nb\na f (x) dx が定まることをみました. 今回は定積分を用いて, 連続関数に原始関数が存\n\nて, 定積分\n在することを証明します. 次を示すことが目標です.\n\n(cid:19)\n\n定理 15-1 (微分積分学の基本定理)\n\n連続関数 f (x) と実数 a に対して, 関数 F (x) を\n\n∫\n\nx\n\nF (x) =\n\nf (t) dt\n\na\n\nで定めると, F (x) は f (x) の原始関数となる.\n\n(cid:18)\n\n定理 15-1 の証明には次が必要になります.\n\n(cid:19)\n\n定理 15-2 (積分の平均値定理)\n\n連続関数 f (x) と実数 a, b (a ̸= b) に対して,\n\n∫\n\nb\n\na\n\nf (x) dx = (b − a)f (c)\n\nを満たす実数 c が a, b の間に取れる.\n\n(cid:18)\n\n[証明]\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n簡単のため, a < b で, f (x) は定数関数でない場合を考える. f (x) の最大値を M , 最小値を m と\n\nする. f (x) は定数関数でないので, m < M となる. また\n\nを満たす α, β を閉区間 [a, b] から取る. m ≦ f (x) ≦ M (a ≦ x ≦ b) に注意すると,\n\nf (α) = M,\n\nf (β) = m\n\nf (α)(b − a) = m(b − a) =\n\n∫\n\nb\n\na\n\nよって\n\n∫\n\nb\n\nm dx <\n\nf (x) dx <\n\n∫\n\nb\n\na\n\nM dx = M (b − a) = f (β)(b − a).\n\na\n\n1\nb − a\n\n∫\n\nb\n\na\n\nf (α) <\n\nf (x) dx < f (β).\n\n中間値の定理より,\n\nf (c) =\n\n1\nb − a\n\n∫\n\nb\n\na\n\nf (x) dx\n\n(1)\n\ncopyright © 大学数学の授業ノート\n\n1"
+  },
+  {
+    "book": "cal-15",
+    "page": 2,
+    "text": "を満たす c が α, β の間に取れる. c は a, b の間の点にもなっているので, (1) より定理 15-2 が導か\nれる.\n\n微分積分学の基本定理を証明します.\n\n定理 15-1 の証明\n\n次を証明すればよい.\n\nF (x + h) − F (x)\nh\n\nlim\nh→0\n\n= f (x).\n\nまず, 分子を次のように変形する.\n\nF (x + h) − F (x) =\n\n∫\n\nx+h\n\na\n\nf (t) dt −\n\n∫\n\nx\n\na\n\n∫\n\nx+h\n\nf (t) dt =\n\nf (t) dt.\n\nx\n\n右辺の式に定理 15-2 を適用すると,\n\n∫\n\nx+h\n\nx\n\nf (t) dt = ((x + h) − x)f (cx,h) = hf (cx,h)\n\nを満たす cx,h が x と x + h の間に取れる. h → 0 のとき, x + h は x に近づくので,\n\n以上より\n\nlim\nh→0\n\ncx,h = x.\n\nF (x + h) − F (x)\nh\n\nlim\nh→0\n\n= lim\nh→0\n\nf (cx,h) = f (x).\n\n2"
+  },
+  {
+    "book": "cal-15",
+    "page": 3,
+    "text": "(cid:19)\n\n定理 15-3\n\n連続関数 f (x) とその原始関数 P (x) を考える. 実数 a, b に対して,\n\n∫\n\nb\n\na\n\nf (x) dx = P (b) − P (a).\n\n※ 右辺の P (b) − P (a) を [P (x)]b\n\na で表す.\n\n(cid:18)\n\n(cid:16)\n\n(cid:17)\n\n[証明]\n∫\nx\na f (t) dt と P (x) は共に f (x) の原始関数であるので, 定理 13-1 から\n\nx\n\nf (t) dt = P (x) + C (C : 定数)\n\nと表せる. 上の式で x = a のときを考えると,\n\na\n\nf (t) dt − P (a) = −P (a).\n\n∫\n\na\n\n∫\n\nC =\n\na\n\nよって\n\n∫\n\nb\n\na\n\nf (t) dt = P (b) + C = P (b) − P (a).\n\n定理 15-3 を用いて\n\n理 15-3 より\n\nと計算できます.\n\n2\n\n∫"
+  },
+  {
+    "book": "cal-15",
+    "page": 3,
+    "text": "1 x2 dx を計算してみます. P (x) = 1"
+  },
+  {
+    "book": "cal-15",
+    "page": 3,
+    "text": "3 x3 は x2 の原始関数の一つなので, 定\n\n∫\n\n2\n\n1\n\nx2dx =\n\n[\n\n]2\n\n1\n\n1\n3\n\nx3\n\n=\n\n8\n3\n\n− 1\n3\n\n=\n\n7\n3\n\n問題 15-1 次を計算せよ.\n\n∫\n\n2\n\n1\n\n(1)\n\nx2 + x dx\n\n(2)\n\n∫\n\n0\n\n1\n\nex dx\n\n(cid:19)\n\n例題 15-1\n\n∫\n\n(1)\n\n1"
+  },
+  {
+    "book": "cal-15",
+    "page": 3,
+    "text": "0 x5 dx を求めよ.\n\n(2) 次の極限値を計算せよ.\n\n(cid:18)\n\nlim\nn→∞"
+  },
+  {
+    "book": "cal-15",
+    "page": 3,
+    "text": "15 + 25 + · · · + n5\nn6\n\n.\n\n3\n\n(cid:16)\n\n(cid:17)"
+  },
+  {
+    "book": "cal-15",
+    "page": 4,
+    "text": "[解答]\n(1) f (x) = x5 と置くと, x6\n6\n\nは f (x) の原始関数より\n\n∫\n\n1\n\n0\n\nf (x) dx =\n\n[\n\n]1\n\n0\n\nx6\n6\n\n=\n\n1\n6\n\n− 0 =\n\n1\n6\n\n.\n\n(2) 閉区間 [0, 1] の n 分割 ∆n と点列 αi = i\n\nn (i = 1, 2, ..., n) に対して,\n\nR(f, ∆n, {αi}) =\n\nn∑\n\ni=1\n\nf (αi) × 1\nn\n\n="
+  },
+  {
+    "book": "cal-15",
+    "page": 4,
+    "text": "15 + 25 + · · · + n5\nn6\n\n.\n\n定積分の定義から\n\nよって\n\nlim\nn→∞\n\nR(f, ∆n, {αi}) =\n\n∫\n\n1\n\n0\n\nf (x) dx =\n\n1\n6\n\n.\n\nlim\nn→∞"
+  },
+  {
+    "book": "cal-15",
+    "page": 4,
+    "text": "15 + 25 + · · · + n5\nn6\n\n=\n\n1\n6\n\n.\n\n問題 15-2\n\n∫\n\n(1)\n\nπ"
+  },
+  {
+    "book": "cal-15",
+    "page": 4,
+    "text": "0 sin x dx を求めよ.\n\n(2) 次の極限値を計算せよ.\n\n1\nn\n\nn∑\n\nk=1\n\nsin\n\n)\n\n(\n\nkπ\nn\n\nlim\nn→∞\n\n問題 15-3 微分積分学の基本定理を用いて, 次の関数の原始関数を一つ求めよ.\n\n\n\n\n\n\nx\n\n−x\n\nf (x) =\n\n(x ≧ 0 のとき),\n\n(x < 0 のとき).\n\n4"
+  },
+  {
+    "book": "cal-3",
+    "page": 1,
+    "text": "教養の微積 (３回目)\n\n３. 関数の極限と連続関数\n\n今回は関数の極限と連続性について解説します. また連続関数の重要な性質である中間値の定理\n\nについて紹介します.\n\n(cid:19)\n\n定義 3-1 (関数の極限)\n\n関数 f (x) において, x が::::::::::::::::::::::::::\n\na とは異なる値をとりながら a に近づくとき, f (x) が一定の値 A\n\nに近づくとする. このとき,\n\nf (x) = A または f (x) → A (x → a)\n\nlim\nx→a\n\nで表し, この値 A を x → a のときの f (x) の極限値という.\n\n(cid:18)\n\n関数\n\n8\n<\n\n:\n\nf (x) =\n\nx x ̸= 0 のとき,"
+  },
+  {
+    "book": "cal-3",
+    "page": 1,
+    "text": "1 x = 0 のとき\n\n(cid:16)\n\n(cid:17)\n\nを考えます. x ̸= 0 で f (x) = x より, x が 0 に近づくと, f (x) は 0 に近づきます. よって\n\nこの例から, 必ずしも lim\nx→a\n\nf (x) = f (a) は成立しないことが分かります. 次に関数\n\nlim\nx→0\n\nf (x) = 0.\n\n8\n<\n\n:\n\nf (x) ="
+  },
+  {
+    "book": "cal-3",
+    "page": 1,
+    "text": "2 x > 0 のとき,"
+  },
+  {
+    "book": "cal-3",
+    "page": 1,
+    "text": "1 x ≦ 0 のとき\n\nを考えます. x > 0 において x を 0 に近づけると, f (x) は 2 に近づき, 一方, x < 0 において x を 0\nに近づけると, f (x) は 1 に近づきます. よって, x = 0 への近づけ方で f (x) の近づく値が変わるの\nで, f (x) は x = 0 で極限値を持ちません.\n\ny\n\n1\n\nO\n\nx\n\ny\n\n2\n\n1\n\nx\n\nO\n\ncopyright © 大学数学の授業ノート\n\n1"
+  },
+  {
+    "book": "cal-3",
+    "page": 2,
+    "text": "(cid:19)\n\n定理 3-1\nlim\nx→a\n\nf (x) = A,\n\nlim\nx→a\n\ng(x) = B のとき,\n\n(1) lim\nx→a\n\n(2) lim\nx→a\n\n{f (x) + g(x)} = A + B.\n\n{f (x) − g(x)} = A − B.\n\n(3) lim\nx→a\n\nf (x)g(x) = AB.\n\n(4) x = a の近くで f (x) ̸= 0 であり, A ̸= 0 ならば,\n\nlim\nx→a\n\ng(x)\nf (x)\n\n=\n\nB\nA\n\n.\n\n(cid:18)\n\n定理の使い方を例題で確認します.\n\n(cid:19)\n\n例題 3-1\n\n次の極限値を求めよ.\n\n(1) lim\nx→1\n\n{(x + 2)(x + 1)}\n\n(2) lim\nx→1\n\nx\nx2 + x\n\n(3) lim\nx→0\n\nx√\n\nx + 1 − 1\n\n(cid:18)\n\n[解答]\n(1) について.\n\n(2) について.\n\nlim\nx→1\n\n{(x + 2)(x + 1)} = lim\nx→1\n\n(x + 2) × lim\nx→1\n\n(x + 1) = 3 × 2 = 6.\n\n(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\nlim\nx→1\n\nx\nx2 + x\n\n=\n\nx\n\nlim\nx→1\n(x2 + x)\n\nlim\nx→1\n\n(3) 次のように変形する.\n\nx√\n\nx + 1 − 1\n\n=\n\n√\n\n(\n\n従って,\n\n√\n\nx(\n\nx + 1 + 1)\n√\n\nx + 1 − 1)(\n\nx + 1 + 1)\n\n=\n\n1\n2\n\n.\n\n√\n\n=\n\nx + 1 + 1.\n\nlim\nx→0\n\nx√\n\nx + 1 − 1\n\n= lim\nx→0\n\n√\n{\n\nx + 1 + 1} = 2.\n\n2"
+  },
+  {
+    "book": "cal-3",
+    "page": 3,
+    "text": "問題 3-1 次の極限値を求めよ.\n\n(1) lim\nx→1\n\nx2 + x + 1\nx + 1\n\n(2) lim\nx→1\n\n√\n\nx − 1\nx + 3 − 2\n\n(3) lim\nx→0\n\nsin(2x)\nsin(x)\n\n(cid:19)\n\n定義 3-2 (関数の極限 2)\n\n(1) x を x > a (x < a) から点 a に近づけるとき, 関数 f (x) が一定の値 A に近づくなら,\n\nlim\nx ↓ a\n\nf (x) = A ( lim\nx ↑ a\n\nf (x) = A)\n\nで表し, この値を f (x) の x = a における右極限 ( 左極限) という.\n\n(2) x → ∞ (x → −∞) のとき, f (x) が一定の値 A に近づくなら,\n\nlim\nx→∞\n\nf (x) = A ( lim\n\nx→−∞\n\nf (x) = A)\n\nで表す.\n\n(cid:18)\n\n関数\n\n8\n>><\n\n>>:\n\nf (x) =\n\nx(x + 1)\n|x|\n\nx ̸= 0 のとき,\n\n0\n\nx = 0 のとき\n\n(cid:16)\n\n(cid:17)\n\nを考えます. x > 0 のとき, f (x) = x + 1 より lim\nx ↓ 0\n\nより lim\nx ↑ 0\n\nf (x) = −1 となる.\n\nf (x) = 1. 一方, x < 0 のとき, f (x) = −x − 1\n\n1\n\ny\n\n−1\n\nx\n\n[補足]\n\nlim\nx→a\n\nf (x) = A であることは, lim\nx ↓ a\n\nf (x) と lim\nx ↑ a\n\nf (x) がともに存在して A になることと同\n\n値である.\n\n3"
+  },
+  {
+    "book": "cal-3",
+    "page": 4,
+    "text": "(cid:19)\n\n定義 3-2 (連続関数)\n\n関数 f (x) が x = a で極限値を持ち, さらに\n\nlim\nx→a\n\nf (x) = f (a)\n\nが成り立つとき, f (x) は x = a で 連続という. また区間 I 上のすべての点で連続のとき, f (x)\nは I で 連続という.\n\n(cid:18)\n\n(cid:16)\n\n(cid:17)\n\n左下の関数はすべての点 a で lim\nx→a\n\nf (x) = f (a) を満たすので区間 (−∞, ∞) で連続です. 真\nん中の関数は x = 0 で極限値が存在しないので, x = 0 で連続ではありません. 右下の関数は x = 0\nで極限値は存在しますが,\n\nなので, x = 0 で連続ではありません.\n\nf (x) = 1 ̸= 0 = f (0)\n\nlim\nx→0\n\ny\n\nO\n\nx\n\ny\n\n1\n\nO\n\nx\n\ny\n\n1\n\nO\n\nx\n\n代表的な連続関数の例を挙げておきます.\n\n(1) x2 + 1 のような多項式で表せる関数は (−∞, ∞) 上で連続.\n\n(2) 指数関数 ax と三角関数 sin x, cos x は (−∞, ∞) 上で連続.\n\n(3) 対数関数 loga x は (0, ∞) 上で連続.\n\n(cid:19)\n\n定理 3-2\n\n関数 f (x), g(x) が区間 I で連続のとき,\n\n(1) f (x) ± g(x), f (x)g(x) は I で連続.\n\n(2) I 上で g(x) ̸= 0 のとき, f (x)\ng(x)\n\nは I で連続.\n\n(cid:18)\n\n(cid:16)\n\n(cid:17)\n\n例えば, x と sin x は両方とも, (−∞, ∞) 上で連続なので, 関数 x sin x も (−∞, ∞) 上連続で\n\nす. 関数 f (x) = x2 − 1 は (1, ∞) 上で連続かつ f (x) ̸= 0 なので,\n\n1\nf (x)\n\n=\n\n1\nx2 − 1\n\n4"
+  },
+  {
+    "book": "cal-3",
+    "page": 5,
+    "text": "も (1, ∞) 上で連続となります.\n\n(cid:19)\n\n例題 3-2\n関数\n\n8\n><\n\nx sin\n\n(cid:0)\n\n(cid:1)\n\n1\nx\n\n>:\n0\n\nf (x) =\n\nx ̸= 0 のとき,\n\nx = 0 のとき,\n\nは x = 0 で連続であることを示せ.\n\n(cid:18)\n\n[解答]\nx ̸= 0 のとき,\n\n(cid:0)\n\n(cid:12)\n(cid:12)sin\n\n1\nx\n\n(cid:1)(cid:12)\n(cid:12) ≦ 1 だから\n\n−|x| ≦ f (x) ≦ |x|\n\n(x ̸= 0).\n\nlim\nx→0\n\nf (x) = 0 = f (0).\n\n|x| = 0 より,\n\nlim\nx→0\n\n従って f (x) は x = 0 で連続.\n\n問題 3-2 関数\n\n(cid:16)\n\n(cid:17)\n\n8\n><\n\n2− 1\n\nx\n\nf (x) =\n\n>:\n0\n\nは x = 0 で連続であることを示せ.\n\nx > 0 のとき,\n\nx ≦ 0 のとき,\n\n5"
+  },
+  {
+    "book": "cal-3",
+    "page": 6,
+    "text": "(cid:16)\n\n(cid:17)\n\n(cid:16)\n\n(cid:17)\n\n(cid:19)\n\n定理 3-3 (中間値の定理)\n\n関数 f (x) が区間 [a, b] 上で連続とする. このとき, f (a) と f (b) の間にある点 k に対して,\n\nf (c) = k,\n\na ≦ c ≦ b\n\nを満たす c が存在する.\n\ny\n\nf (b)\n\nk\n\nf (a)\n\na\n\nc\n\nb\n\nx\n\n(cid:18)\n\n中間値の定理の使い方をみてみましょう.\n\n(cid:19)\n\n例題 3-2\n\n方程式 x3 − 2x + 5 = 0 が区間 [−3, 0] の間に実数解を持つことを示せ.\n\n(cid:18)\n\n[解答]\nf (x) = x3 − 2x + 5 とする. このとき,\n\nf (−3) = −16,\n\nf (0) = 5.\n\nk = 0 とすると, f (−3) < k < f (0) を満たすので, 中間値の定理より,\n\nf (c) = k = 0, −3 ≦ c ≦ 0\n\nを満たす c が存在する. この c が例題の条件を満たす実数解となる.\n\n問題 3-3 区間 [0, π"
+  },
+  {
+    "book": "cal-3",
+    "page": 6,
+    "text": "2 ] の間に cos α = α を満たす実数 α があることを示せ.\n\n6"
+  }
+]

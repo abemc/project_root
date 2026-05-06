@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  streamlit-ui:
+    image: project_root_streamlit-ui:latest
+    build: .
+    network_mode: host
+    volumes:
+      - .:/app
+    environment:
+      - OLLAMA_BASE_URL=http://127.0.0.1:11434
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: ["streamlit", "run", "app.py", "--server.port=8501", "--server.headless=true"]
+    working_dir: /app
+    restart: always
