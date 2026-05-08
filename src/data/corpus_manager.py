@@ -1,0 +1,1 @@
+データ管理コードを分離し、`src/data/corpus_manager.py` に移動しました。

@@ -1,0 +1,14 @@
+{
+  "files.watcherExclude": {
+    "/mnt/**": true
+  },
+  "search.exclude": {
+    "/mnt/**": true
+  },
+  "files.exclude": {
+    "/mnt/**": true
+  },
+  "python.linting.enabled": true,
+  "python.terminal.executeInFileDir": true,
+  "python.envFile": "${workspaceFolder}/.env"
+}

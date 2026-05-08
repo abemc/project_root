@@ -1,0 +1,14 @@
+[
+  {
+    "query": "RAGとは何ですか？",
+    "expected_answer": "検索拡張生成"
+  },
+  {
+    "query": "RAGのメリットを教えてください",
+    "expected_answer": "根拠付き回答"
+  },
+  {
+    "query": "LLMとRAGの違いは？",
+    "expected_answer": "外部知識検索"
+  }
+]

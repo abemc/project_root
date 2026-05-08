@@ -1,0 +1,50 @@
+[
+  {
+    "timestamp": "2026-05-08T10:07:31.524886",
+    "level": "INFO",
+    "component": "OptimizationTest",
+    "message": "ロギング永続化テスト開始",
+    "context": {},
+    "duration_ms": null
+  },
+  {
+    "timestamp": "2026-05-08T10:07:31.524962",
+    "level": "INFO",
+    "component": "OptimizationTest",
+    "message": "テストログエントリ 1",
+    "context": {},
+    "duration_ms": null
+  },
+  {
+    "timestamp": "2026-05-08T10:07:31.525082",
+    "level": "INFO",
+    "component": "OptimizationTest",
+    "message": "テストログエントリ 2",
+    "context": {},
+    "duration_ms": null
+  },
+  {
+    "timestamp": "2026-05-08T10:07:31.525148",
+    "level": "INFO",
+    "component": "OptimizationTest",
+    "message": "テストログエントリ 3",
+    "context": {},
+    "duration_ms": null
+  },
+  {
+    "timestamp": "2026-05-08T10:07:31.525227",
+    "level": "INFO",
+    "component": "OptimizationTest",
+    "message": "テストログエントリ 4",
+    "context": {},
+    "duration_ms": null
+  },
+  {
+    "timestamp": "2026-05-08T10:07:31.525290",
+    "level": "INFO",
+    "component": "OptimizationTest",
+    "message": "テストログエントリ 5",
+    "context": {},
+    "duration_ms": null
+  }
+]

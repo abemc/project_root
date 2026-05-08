@@ -1,0 +1,58 @@
+# Version Control
+.git/
+
+# Python
+.venv/
+env/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+.env
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints
+
+# Node.js
+node_modules/
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Build Artifacts
+dist/
+build/
+target/
+
+# Lock Files
+*.lock
+package-lock.json
+yarn.lock
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+
+# Temporary & Secrets
+tmp/
+temp/
+*.pem
+*.key
+
+# Data Files
+*.csv
+*.json
+!package.json
+!tsconfig.json
+!jsconfig.json
+
+# OS Files
+.DS_Store
+Thumbs.db

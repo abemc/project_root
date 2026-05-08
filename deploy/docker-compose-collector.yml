@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  collector:
+    image: python:3.10-slim
+    container_name: project_analyzer_collector
+    restart: unless-stopped
+    volumes:
+      - ./logs:/data
+      - ./certs:/certs:ro
+      - ./:/app:ro
+    working_dir: /app
+    environment:
+      - COLLECTOR_SECRET=${COLLECTOR_SECRET:-change_me}
+    command: sh -c "pip install --no-cache-dir prometheus_client && python -m analyzer.collector_cli --path /data/central.log --host 0.0.0.0 --port 8443 --auth-secret ${COLLECTOR_SECRET} --certfile /certs/cert.pem --keyfile /certs/key.pem"
+    ports:
+      - "8443:8443"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import socket,sys; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1',8443)); s.close()\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+# Notes:
+# - Ensure ./certs contains cert.pem and key.pem when running in HTTPS mode.
+# - Provide COLLECTOR_SECRET via environment or .env file to secure the endpoint.

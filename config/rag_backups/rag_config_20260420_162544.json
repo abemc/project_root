@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "created": "2026-04-20T16:25:44.760980",
+  "llm_model": "GPT-4o",
+  "search_method": "ハイブリッド",
+  "top_k": 5,
+  "confidence_threshold": 0.7,
+  "document_categories": [
+    "root",
+    "reports",
+    "guides"
+  ],
+  "enable_cache": true,
+  "cache_ttl": 3600,
+  "max_tokens": 2000,
+  "temperature": 0.7,
+  "system_prompt": "あなたは優秀なドキュメント分析専門家です。ユーザーの質問に対して、参照ドキュメントから正確で有用な情報を抽出して回答してください。",
+  "enable_source_attribution": true,
+  "enable_follow_up_questions": true,
+  "language": "ja",
+  "backup_location": "/mnt/d/backups"
+}

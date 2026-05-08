@@ -1,0 +1,457 @@
+# Prometheus Alert Rules - エンタープライズセキュリティプラットフォーム
+# ファイル: /etc/prometheus/rules/security-platform-alerts.yml
+# 更新日: 2026-04-17
+
+groups:
+  # ============================================================
+  # Layer 1: 認証システムアラート
+  # ============================================================
+  - name: authentication_layer_alerts
+    interval: 30s
+    rules:
+      # 高レイテンシ警告
+      - alert: HighAuthenticationLatency
+        expr: histogram_quantile(0.99, auth_latency_seconds) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          component: authentication
+          layer: 1
+        annotations:
+          summary: "認証レイテンシ異常高 (P99: {{ $value | humanizeDuration }})"
+          description: "認証レイテンシが目標値 (200ms) を大幅に超過しています"
+          runbook: "docs/トラブルシューティングガイド.md#問題1-ログイン失敗"
+
+      # 認証失敗率上昇
+      - alert: LowAuthenticationSuccessRate
+        expr: rate(auth_failures_total[5m]) / (rate(auth_attempts_total[5m]) + 0.001) > 0.05
+        for: 10m
+        labels:
+          severity: critical
+          component: authentication
+          layer: 1
+        annotations:
+          summary: "認証成功率低下 ({{ $value | humanizePercentage }})"
+          description: "認証成功率が 95% 未満に低下しています"
+          action: "ユーザー認証の詳細をログで確認してください"
+
+      # MFA 検証時間
+      - alert: SlowMFAVerification
+        expr: histogram_quantile(0.95, mfa_verification_duration_seconds) > 0.3
+        for: 3m
+        labels:
+          severity: warning
+          component: mfa
+          layer: 1
+        annotations:
+          summary: "MFA 検証が遅い (P95: {{ $value | humanizeDuration }})"
+
+      # セッション確立数多数
+      - alert: ExcessiveSessionCreation
+        expr: rate(session_created_total[1m]) > 10000
+        for: 2m
+        labels:
+          severity: high
+          component: authentication
+          layer: 1
+        annotations:
+          summary: "セッション確立数が異常に多い ({{ $value }}/min)"
+          description: "大量のセッション確立が検出されました。DDoS 攻撃の可能性があります"
+
+      # FIDO2 登録失敗
+      - alert: FIDO2AttestationErrors
+        expr: rate(fido2_attestation_failures_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: fido2
+          layer: 1
+        annotations:
+          summary: "FIDO2 Attestation エラー率上昇 ({{ $value | humanizePercentage }})"
+
+  # ============================================================
+  # Layer 2: 暗号化システムアラート
+  # ============================================================
+  - name: encryption_layer_alerts
+    interval: 30s
+    rules:
+      # 暗号化操作エラー
+      - alert: EncryptionOperationFailure
+        expr: rate(encryption_errors_total[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          component: encryption
+          layer: 2
+        annotations:
+          summary: "暗号化操作エラー率上昇 ({{ $value | humanizePercentage }})"
+
+      # 鍵ローテーション遅延
+      - alert: KeyRotationOverdue
+        expr: (time() - key_rotation_timestamp_seconds) / 86400 > 90
+        labels:
+          severity: high
+          component: key_management
+          layer: 2
+        annotations:
+          summary: "鍵ローテーションが遅延 ({{ $value }}日前)"
+          action: "key_rotation.sh を実行してください"
+
+      # TLS ハンドシェイク失敗
+      - alert: TLSHandshakeFailures
+        expr: rate(tls_handshake_failures_total[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: high
+          component: tls
+          layer: 2
+        annotations:
+          summary: "TLS ハンドシェイク失敗が増加 ({{ $value }})"
+
+  # ============================================================
+  # Layer 3: ネットワークセキュリティアラート
+  # ============================================================
+  - name: network_security_alerts
+    interval: 30s
+    rules:
+      # Zero Trust ポリシー違反
+      - alert: ZeroTrustPolicyViolation
+        expr: rate(zerotrust_policy_violations_total[5m]) > 0
+        for: 2m
+        labels:
+          severity: high
+          component: zero_trust
+          layer: 3
+        annotations:
+          summary: "Zero Trust ポリシー違反 ({{ $value }}件/分)"
+          description: "許可されていないアクセスが検出されました"
+
+      # マイクロセグメンテーション失敗
+      - alert: MicrosegmentationFailure
+        expr: rate(microsegmentation_failures_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: microsegmentation
+          layer: 3
+        annotations:
+          summary: "マイクロセグメンテーション失敗 ({{ $value }})"
+
+      # デバイスポスチャ低下
+      - alert: DevicePostureDegraded
+        expr: count(device_posture_score < 50) > 10
+        for: 10m
+        labels:
+          severity: high
+          component: device_posture
+          layer: 3
+        annotations:
+          summary: "ポスチャが低下したデバイス: {{ $value }}台"
+
+  # ============================================================
+  # Layer 4: SOC/オペレーションアラート
+  # ============================================================
+  - name: soc_operations_alerts
+    interval: 30s
+    rules:
+      # イベント処理バックログ
+      - alert: SOCEventQueueBacklog
+        expr: soc_event_queue_length > 10000
+        for: 5m
+        labels:
+          severity: critical
+          component: soc
+          layer: 4
+        annotations:
+          summary: "SOC イベントキュー積み上がり ({{ $value }}イベント)"
+          description: "イベント処理能力がイベント生成に追いついていません"
+          action: "[タスク3:SOC監視](docs/運用開始ガイド.md#問題4soc-イベント処理遅延) 参照"
+
+      # イベント処理レイテンシ
+      - alert: SOCProcessingLatencyHigh
+        expr: histogram_quantile(0.95, soc_event_processing_duration_seconds) > 0.5
+        for: 5m
+        labels:
+          severity: high
+          component: soc
+          layer: 4
+        annotations:
+          summary: "SOC 処理レイテンシ異常高 (P95: {{ $value | humanizeDuration }})"
+
+      # 脅威検出遅延
+      - alert: ThreatDetectionLatency
+        expr: threat_detection_latency_seconds > 900
+        for: 10m
+        labels:
+          severity: critical
+          component: threat_detection
+          layer: 4
+        annotations:
+          summary: "脅威検出が遅延 ({{ $value | humanizeDuration }})"
+          description: "脅威検出レイテンシが目標 (15分) を超えています"
+
+      # 自動対応失敗
+      - alert: AutoResponseFailure
+        expr: rate(auto_response_failures_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: high
+          component: auto_response
+          layer: 4
+        annotations:
+          summary: "自動対応失敗が増加 ({{ $value }})"
+
+      # アラートマネージャー停止
+      - alert: AlertManagerDown
+        expr: up{job="alertmanager"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: alertmanager
+        annotations:
+          summary: "AlertManager が応答していません"
+
+  # ============================================================
+  # Layer 5: インテリジェンス/ML アラート
+  # ============================================================
+  - name: intelligence_ml_alerts
+    interval: 60s
+    rules:
+      # ML モデル精度低下
+      - alert: ThreatModelAccuracyDegraded
+        expr: threat_model_precision < 0.92
+        for: 30m
+        labels:
+          severity: high
+          component: ml_models
+          layer: 5
+        annotations:
+          summary: "脅威検知モデル精度低下 ({{ $value | humanizePercentage }})"
+          description: "モデル精度が目標値 (96%) 未満に低下しています"
+          action: "src/phase10/threat_detection.py --action retrain を実行"
+
+      # 誤検知率上昇
+      - alert: HighFalsePositiveRate
+        expr: threat_model_false_positive_rate > 0.1
+        for: 60m
+        labels:
+          severity: warning
+          component: ml_models
+          layer: 5
+        annotations:
+          summary: "誤検知率上昇 ({{ $value | humanizePercentage }})"
+          description: "脅威検知の誤検知率が許容値を超過しています"
+
+      # 異常検知エンジン遅延
+      - alert: AnomalyDetectionLatency
+        expr: histogram_quantile(0.95, anomaly_detection_duration_seconds) > 2
+        for: 10m
+        labels:
+          severity: warning
+          component: anomaly_detection
+          layer: 5
+        annotations:
+          summary: "異常検知エンジンが遅い ({{ $value | humanizeDuration }})"
+
+  # ============================================================
+  # Layer 6: コンプライアンスアラート
+  # ============================================================
+  - name: compliance_alerts
+    interval: 300s
+    rules:
+      # コンプライアンス違反検出
+      - alert: ComplianceViolationDetected
+        expr: compliance_violation_count > 0
+        for: 5m
+        labels:
+          severity: high
+          component: compliance
+          layer: 6
+        annotations:
+          summary: "コンプライアンス違反: {{ $value }}件"
+          description: "GDPR/CCPA/APPI 等の規制違反が検出されました"
+
+      # 監査ログ改ざん検知
+      - alert: AuditLogIntegrityFailure
+        expr: audit_log_integrity_check_failures_total > 0
+        for: 5m
+        labels:
+          severity: critical
+          component: audit_log
+          layer: 6
+        annotations:
+          summary: "監査ログ改ざん検知"
+          description: "監査ログの改ざんが検出された可能性があります"
+
+  # ============================================================
+  # Layer 7: グローバル最適化アラート
+  # ============================================================
+  - name: global_optimization_alerts
+    interval: 30s
+    rules:
+      # リージョン故障
+      - alert: RegionDown
+        expr: up{region!~""} == 0
+        for: 3m
+        labels:
+          severity: critical
+          component: global_orchestration
+          layer: 7
+        annotations:
+          summary: "リージョンが応答しない: {{ $labels.region }}"
+          description: "リージョン {{ $labels.region }} がダウンしている可能性があります"
+
+      # リージョン間レイテンシ
+      - alert: HighInterRegionLatency
+        expr: histogram_quantile(0.95, interregion_latency_seconds) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+          component: global_orchestration
+          layer: 7
+        annotations:
+          summary: "リージョン間レイテンシが高い ({{ $value | humanizeDuration }})"
+
+      # SLA 目標達成失敗
+      - alert: SLAMissed
+        expr: sla_achievement < 0.9999
+        for: 10m
+        labels:
+          severity: critical
+          component: sla_monitoring
+          layer: 7
+        annotations:
+          summary: "SLA 目標達成失敗 ({{ $value | humanizePercentage }})"
+
+      # グローバル複製遅延
+      - alert: GlobalReplicationLag
+        expr: global_replication_lag_seconds > 60
+        for: 5m
+        labels:
+          severity: high
+          component: replication
+          layer: 7
+        annotations:
+          summary: "グローバル複製遅延 ({{ $value }}秒)"
+
+  # ============================================================
+  # インフラストラクチャレイヤーアラート
+  # ============================================================
+  - name: infrastructure_alerts
+    interval: 30s
+    rules:
+      # CPU 使用率
+      - alert: HighCPUUsage
+        expr: (1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) by (instance)) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "CPU 使用率が高い ({{ $value | humanizePercentage }})"
+
+      # メモリ使用率
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.9
+        for: 10m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "メモリ使用率が高い ({{ $value | humanizePercentage }})"
+
+      # ディスク容量
+      - alert: DiskSpaceRunningOut
+        expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lowerfs"} / node_filesystem_size_bytes)) > 0.95
+        for: 10m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "ディスク容量が残り少ない ({{ $value | humanizePercentage }}使用済)"
+
+      # ディスク I/O
+      - alert: HighDiskIO
+        expr: rate(node_disk_io_time_seconds_total[5m]) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "ディスク I/O が高い"
+
+      # ネットワーク帯域
+      - alert: HighNetworkBandwidth
+        expr: (rate(node_network_transmit_bytes_total[5m]) + rate(node_network_receive_bytes_total[5m])) > 1000000000
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "ネットワーク帯域が高い ({{ $value | humanize }}B/s)"
+
+      # Kubernetes ノード状態
+      - alert: KubernetesNodeNotReady
+        expr: kube_node_status_condition{condition="Ready", status="true"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          component: kubernetes
+        annotations:
+          summary: "Kubernetes ノードが Ready ではありません: {{ $labels.node }}"
+
+      # Pod CrashLoop
+      - alert: KubernetesPodCrashLooping
+        expr: rate(kube_pod_container_status_restarts_total[15m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+          component: kubernetes
+        annotations:
+          summary: "ポッドが CrashLoop 中: {{ $labels.pod }} in {{ $labels.namespace }}"
+
+      # Pod 保留中
+      - alert: KubernetesPodPending
+        expr: sum by (namespace, pod) (kube_pod_status_phase{phase=~"Pending"}) > 0
+        for: 15m
+        labels:
+          severity: warning
+          component: kubernetes
+        annotations:
+          summary: "ポッドが Pending 状態: {{ $labels.pod }} in {{ $labels.namespace }}"
+
+  # ============================================================
+  # Prometheus インフラストラクチャアラート
+  # ============================================================
+  - name: prometheus_infrastructure_alerts
+    interval: 30s
+    rules:
+      # Prometheus ディスク容量
+      - alert: PrometheusHighDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes{mountpoint="/prometheus"} / node_filesystem_size_bytes{mountpoint="/prometheus"})) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          component: prometheus
+        annotations:
+          summary: "Prometheus ディスク使用率が高い ({{ $value | humanizePercentage }})"
+
+      # Prometheus クエリ遅延
+      - alert: PrometheusSlowQueries
+        expr: histogram_quantile(0.99, prometheus_query_duration_seconds) > 10
+        for: 5m
+        labels:
+          severity: warning
+          component: prometheus
+        annotations:
+          summary: "Prometheus クエリが遅い (P99: {{ $value }}s)"
+
+      # Prometheus スクレイプ失敗
+      - alert: PrometheusScrapeFailed
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: warning
+          component: prometheus
+        annotations:
+          summary: "Prometheus スクレイプ失敗: {{ $labels.job }}"

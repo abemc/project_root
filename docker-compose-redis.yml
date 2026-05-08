@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7.2-alpine
+    container_name: esp-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass esp_secure_password --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - esp-network
+
+volumes:
+  redis-data:
+
+networks:
+  esp-network:
+    driver: bridge

@@ -1,0 +1,179 @@
+2026-04-11 09:14:49,010 - __main__ - ERROR - ❌ Import error: No module named 'apscheduler'
+2026-04-11 09:15:18,111 - __main__ - INFO - ✅ All modules imported successfully
+2026-04-11 09:15:18,111 - __main__ - INFO - 
+======================================================================
+2026-04-11 09:15:18,111 - __main__ - INFO - 🧪 PHASE 1 INTEGRATION TEST
+2026-04-11 09:15:18,111 - __main__ - INFO - ======================================================================
+2026-04-11 09:15:18,111 - __main__ - INFO - Timestamp: 2026-04-11 09:15:18,111
+2026-04-11 09:15:18,111 - __main__ - INFO - 
+======================================================================
+2026-04-11 09:15:18,111 - __main__ - INFO - TEST 1: Feedback Trigger System
+2026-04-11 09:15:18,111 - __main__ - INFO - ======================================================================
+2026-04-11 09:15:18,159 - src.self_improvement.feedback_manager - INFO - Loaded 20 feedback records
+2026-04-11 09:15:18,159 - src.self_improvement.triggers - INFO - FeedbackTriggerSystem initialized
+2026-04-11 09:15:18,159 - src.self_improvement.triggers - INFO - Registered callback for on_analysis_needed
+2026-04-11 09:15:18,159 - src.self_improvement.triggers - INFO - Registered callback for on_training_needed
+2026-04-11 09:15:18,159 - src.self_improvement.triggers - INFO - Registered callback for on_low_rating
+2026-04-11 09:15:18,159 - __main__ - INFO - 
+[Test 1-1] Low rating trigger
+2026-04-11 09:15:18,159 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 670ec4f4 (rating: 0.4)
+2026-04-11 09:15:18,159 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 1654f447 (rating: 0.4)
+2026-04-11 09:15:18,159 - src.self_improvement.feedback_manager - INFO - Recorded feedback: fafeca7f (rating: 0.4)
+2026-04-11 09:15:18,229 - src.self_improvement.triggers - INFO - 🔔 Triggers activated: ['Feedback count reached: 23/20']
+2026-04-11 09:15:18,229 - __main__ - INFO -   >> Callback: Analysis needed
+2026-04-11 09:15:18,229 - src.self_improvement.triggers - INFO - 📊 Analysis triggered
+2026-04-11 09:15:18,229 - __main__ - INFO - 
+[Test 1-2] Analysis trigger (20+ feedbacks)
+2026-04-11 09:15:18,230 - src.self_improvement.feedback_manager - INFO - Recorded feedback: f20b3492 (rating: 0.75)
+2026-04-11 09:15:18,230 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 3f43b414 (rating: 0.75)
+2026-04-11 09:15:18,230 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 8700c625 (rating: 0.75)
+2026-04-11 09:15:18,230 - src.self_improvement.feedback_manager - INFO - Recorded feedback: ef1c979c (rating: 0.75)
+2026-04-11 09:15:18,230 - src.self_improvement.feedback_manager - INFO - Recorded feedback: d0d43242 (rating: 0.75)
+2026-04-11 09:15:18,230 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 8b74c874 (rating: 0.75)
+2026-04-11 09:15:18,230 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 8e889706 (rating: 0.75)
+2026-04-11 09:15:18,230 - src.self_improvement.feedback_manager - INFO - Recorded feedback: e42948fd (rating: 0.75)
+2026-04-11 09:15:18,231 - src.self_improvement.feedback_manager - INFO - Recorded feedback: a5a3713c (rating: 0.75)
+2026-04-11 09:15:18,231 - src.self_improvement.feedback_manager - INFO - Recorded feedback: a4b7c87e (rating: 0.75)
+2026-04-11 09:15:18,231 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 7b1d3e4b (rating: 0.75)
+2026-04-11 09:15:18,231 - src.self_improvement.feedback_manager - INFO - Recorded feedback: d48a5648 (rating: 0.75)
+2026-04-11 09:15:18,231 - src.self_improvement.feedback_manager - INFO - Recorded feedback: dd347bf8 (rating: 0.75)
+2026-04-11 09:15:18,231 - src.self_improvement.feedback_manager - INFO - Recorded feedback: b8d80ea8 (rating: 0.75)
+2026-04-11 09:15:18,231 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 4ff9c486 (rating: 0.75)
+2026-04-11 09:15:18,231 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 7c7c5ee4 (rating: 0.75)
+2026-04-11 09:15:18,231 - src.self_improvement.feedback_manager - INFO - Recorded feedback: cf1731a6 (rating: 0.75)
+2026-04-11 09:15:18,232 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 34d8d756 (rating: 0.75)
+2026-04-11 09:15:18,232 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 24a0d7e0 (rating: 0.75)
+2026-04-11 09:15:18,232 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 2f7f5a46 (rating: 0.75)
+2026-04-11 09:15:18,232 - src.self_improvement.triggers - INFO - 🔔 Triggers activated: ['Feedback count reached: 43/20']
+2026-04-11 09:15:18,232 - __main__ - INFO -   >> Callback: Analysis needed
+2026-04-11 09:15:18,232 - src.self_improvement.triggers - INFO - 📊 Analysis triggered
+2026-04-11 09:15:18,232 - __main__ - INFO - 
+[Test 1-3] Training trigger (50+ feedbacks)
+2026-04-11 09:15:18,232 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 86bb91e0 (rating: 0.8)
+2026-04-11 09:15:18,233 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 4c80f8e0 (rating: 0.8)
+2026-04-11 09:15:18,233 - src.self_improvement.feedback_manager - INFO - Recorded feedback: f9e2d2dc (rating: 0.8)
+2026-04-11 09:15:18,233 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 31548c3c (rating: 0.8)
+2026-04-11 09:15:18,233 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 87bd5513 (rating: 0.8)
+2026-04-11 09:15:18,233 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 7e5441a9 (rating: 0.8)
+2026-04-11 09:15:18,233 - src.self_improvement.feedback_manager - INFO - Recorded feedback: bd42ffdb (rating: 0.8)
+2026-04-11 09:15:18,233 - src.self_improvement.feedback_manager - INFO - Recorded feedback: dda6e716 (rating: 0.8)
+2026-04-11 09:15:18,233 - src.self_improvement.feedback_manager - INFO - Recorded feedback: b9d2a0a3 (rating: 0.8)
+2026-04-11 09:15:18,233 - src.self_improvement.feedback_manager - INFO - Recorded feedback: d6c86bec (rating: 0.8)
+2026-04-11 09:15:18,233 - src.self_improvement.feedback_manager - INFO - Recorded feedback: dd30d377 (rating: 0.8)
+2026-04-11 09:15:18,233 - src.self_improvement.feedback_manager - INFO - Recorded feedback: e56b63d3 (rating: 0.8)
+2026-04-11 09:15:18,233 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 558a35e3 (rating: 0.8)
+2026-04-11 09:15:18,233 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 57ff2b7c (rating: 0.8)
+2026-04-11 09:15:18,233 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 101684f0 (rating: 0.8)
+2026-04-11 09:15:18,234 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 2126b0d6 (rating: 0.8)
+2026-04-11 09:15:18,234 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 168ce839 (rating: 0.8)
+2026-04-11 09:15:18,234 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 9657315d (rating: 0.8)
+2026-04-11 09:15:18,234 - src.self_improvement.feedback_manager - INFO - Recorded feedback: fd5461ff (rating: 0.8)
+2026-04-11 09:15:18,234 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 052a9a07 (rating: 0.8)
+2026-04-11 09:15:18,234 - src.self_improvement.feedback_manager - INFO - Recorded feedback: d08636ea (rating: 0.8)
+2026-04-11 09:15:18,234 - src.self_improvement.feedback_manager - INFO - Recorded feedback: d159649f (rating: 0.8)
+2026-04-11 09:15:18,234 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 9f8da395 (rating: 0.8)
+2026-04-11 09:15:18,234 - src.self_improvement.feedback_manager - INFO - Recorded feedback: a36f0286 (rating: 0.8)
+2026-04-11 09:15:18,234 - src.self_improvement.feedback_manager - INFO - Recorded feedback: e4b7d5ce (rating: 0.8)
+2026-04-11 09:15:18,234 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 2a1d017a (rating: 0.8)
+2026-04-11 09:15:18,234 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 84ba88d2 (rating: 0.8)
+2026-04-11 09:15:18,235 - src.self_improvement.feedback_manager - INFO - Recorded feedback: dc83de3a (rating: 0.8)
+2026-04-11 09:15:18,235 - src.self_improvement.feedback_manager - INFO - Recorded feedback: e5c41fc4 (rating: 0.8)
+2026-04-11 09:15:18,235 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 5e771925 (rating: 0.8)
+2026-04-11 09:15:18,235 - src.self_improvement.triggers - INFO - 🔔 Triggers activated: ['Feedback count reached: 73/20', 'Training threshold reached: 73/50']
+2026-04-11 09:15:18,235 - __main__ - INFO -   >> Callback: Training needed
+2026-04-11 09:15:18,235 - src.self_improvement.triggers - INFO - 🧠 Training triggered
+2026-04-11 09:15:18,235 - __main__ - INFO -   >> Callback: Analysis needed
+2026-04-11 09:15:18,235 - src.self_improvement.triggers - INFO - 📊 Analysis triggered
+2026-04-11 09:15:18,235 - __main__ - INFO - 
+✅ Trigger Test Results:
+2026-04-11 09:15:18,235 - __main__ - INFO -    Analysis callbacks: 3
+2026-04-11 09:15:18,235 - __main__ - INFO -    Training callbacks: 1
+2026-04-11 09:15:18,235 - __main__ - INFO -    Urgent callbacks: 0
+2026-04-11 09:15:18,235 - __main__ - INFO -    Total feedbacks: 73
+2026-04-11 09:15:18,235 - __main__ - INFO -    Average rating: 76.64%
+2026-04-11 09:15:18,235 - __main__ - INFO - 
+======================================================================
+2026-04-11 09:15:18,235 - __main__ - INFO - TEST 2: Safety Gate
+2026-04-11 09:15:18,236 - __main__ - INFO - ======================================================================
+2026-04-11 09:15:18,236 - src.self_improvement.triggers - INFO - SafetyGate initialized (approval_required=True)
+2026-04-11 09:15:18,236 - __main__ - INFO - 
+[Test 2-1] Safe prompt change
+2026-04-11 09:15:18,236 - src.self_improvement.triggers - WARNING - Template length changed significantly: 11 → 26 (ratio: 2.4)
+2026-04-11 09:15:18,236 - src.self_improvement.triggers - INFO - ✅ Prompt change safety check passed
+2026-04-11 09:15:18,236 - __main__ - INFO -    Result: ✅ SAFE
+2026-04-11 09:15:18,236 - __main__ - INFO - 
+[Test 2-2] Unsafe prompt change (empty template)
+2026-04-11 09:15:18,236 - src.self_improvement.triggers - ERROR - New template is empty
+2026-04-11 09:15:18,236 - __main__ - INFO -    Result: ❌ UNSAFE
+2026-04-11 09:15:18,236 - __main__ - INFO - 
+[Test 2-3] Safe model update
+2026-04-11 09:15:18,236 - src.self_improvement.triggers - INFO - ✅ Model update safety check passed (delta: +8.00%)
+2026-04-11 09:15:18,236 - __main__ - INFO -    Result: ✅ SAFE
+2026-04-11 09:15:18,236 - __main__ - INFO - 
+[Test 2-4] Unsafe model update (low confidence)
+2026-04-11 09:15:18,236 - src.self_improvement.triggers - WARNING - Confidence score too low: 60.00% < 0.7. Requires review.
+2026-04-11 09:15:18,236 - __main__ - INFO -    Result: ❌ UNSAFE
+2026-04-11 09:15:18,236 - __main__ - INFO - 
+[Test 2-5] Approval workflow
+2026-04-11 09:15:18,236 - src.self_improvement.triggers - INFO - 📋 Approval requested: 04a0fff4 (prompt_change)
+2026-04-11 09:15:18,236 - __main__ - INFO -    Request ID: 04a0fff4
+2026-04-11 09:15:18,236 - __main__ - INFO -    Status: pending
+2026-04-11 09:15:18,236 - src.self_improvement.triggers - INFO - ✅ Approved: 04a0fff4
+2026-04-11 09:15:18,236 - __main__ - INFO -    Status: approved ✅
+2026-04-11 09:15:18,236 - __main__ - INFO - 
+======================================================================
+2026-04-11 09:15:18,236 - __main__ - INFO - TEST 3: Automation Scheduler
+2026-04-11 09:15:18,236 - __main__ - INFO - ======================================================================
+2026-04-11 09:15:18,237 - src.self_improvement.feedback_manager - INFO - Loaded 73 feedback records
+2026-04-11 09:15:18,237 - src.self_improvement.prompt_optimizer - INFO - Loaded 4 prompt templates
+2026-04-11 09:15:18,239 - src.self_improvement.metric_tracker - INFO - Loaded 109 metric snapshots
+2026-04-11 09:15:18,239 - __main__ - INFO - 
+[Test 3-1] Recording test feedbacks
+2026-04-11 09:15:18,239 - src.self_improvement.feedback_manager - INFO - Recorded feedback: c903ee50 (rating: 0.75)
+2026-04-11 09:15:18,239 - src.self_improvement.feedback_manager - INFO - Recorded feedback: c8b51fe6 (rating: 0.8)
+2026-04-11 09:15:18,239 - src.self_improvement.feedback_manager - INFO - Recorded feedback: ad590ba8 (rating: 0.85)
+2026-04-11 09:15:18,239 - src.self_improvement.feedback_manager - INFO - Recorded feedback: fc0be598 (rating: 0.75)
+2026-04-11 09:15:18,239 - src.self_improvement.feedback_manager - INFO - Recorded feedback: a0ac8a4a (rating: 0.8)
+2026-04-11 09:15:18,240 - src.self_improvement.feedback_manager - INFO - Recorded feedback: b7cac57e (rating: 0.85)
+2026-04-11 09:15:18,240 - src.self_improvement.feedback_manager - INFO - Recorded feedback: cfb09dc0 (rating: 0.75)
+2026-04-11 09:15:18,240 - src.self_improvement.feedback_manager - INFO - Recorded feedback: 6b58e153 (rating: 0.8)
+2026-04-11 09:15:18,240 - src.self_improvement.feedback_manager - INFO - Recorded feedback: c2ac0f53 (rating: 0.85)
+2026-04-11 09:15:18,240 - src.self_improvement.feedback_manager - INFO - Recorded feedback: c491af52 (rating: 0.75)
+2026-04-11 09:15:18,240 - __main__ - INFO -    Recorded 10 feedbacks
+2026-04-11 09:15:18,240 - __main__ - INFO - 
+[Test 3-2] Creating AutomationEngine
+2026-04-11 09:15:18,304 - src.self_improvement.scheduler - INFO - AutomationScheduler initialized (log_dir=logs/automation/scheduler)
+2026-04-11 09:15:18,304 - src.self_improvement.scheduler - INFO - Registered task: task_feedback_analysis
+2026-04-11 09:15:18,305 - src.self_improvement.scheduler - INFO - Registered task: task_prompt_optimization
+2026-04-11 09:15:18,305 - src.self_improvement.scheduler - INFO - Registered task: task_continuous_training
+2026-04-11 09:15:18,305 - src.self_improvement.scheduler - INFO - Registered task: task_metric_verification
+2026-04-11 09:15:18,305 - src.self_improvement.scheduler - INFO - Registered task: task_rollback_check
+2026-04-11 09:15:18,305 - src.self_improvement.scheduler - INFO - AutomationEngine initialized
+2026-04-11 09:15:18,305 - __main__ - INFO - ✅ AutomationEngine created
+2026-04-11 09:15:18,305 - __main__ - INFO - 
+[Test 3-3] Initial status
+2026-04-11 09:15:18,305 - __main__ - INFO -    Is running: False
+2026-04-11 09:15:18,305 - __main__ - INFO -    Scheduled jobs: 0
+2026-04-11 09:15:18,305 - __main__ - INFO - 
+[Test 3-4] Manual task execution
+2026-04-11 09:15:18,305 - __main__ - INFO -    Running: task_analyze_feedback
+2026-04-11 09:15:18,315 - src.self_improvement.scheduler - INFO - 📊 Feedback Analysis:
+2026-04-11 09:15:18,315 - src.self_improvement.scheduler - INFO -    Total feedback: 83
+2026-04-11 09:15:18,315 - src.self_improvement.scheduler - INFO -    Average rating: 76.99%
+2026-04-11 09:15:18,315 - src.self_improvement.scheduler - INFO -    Improvement areas: []
+2026-04-11 09:15:18,315 - __main__ - INFO -    Running: task_optimize_prompts
+2026-04-11 09:15:18,316 - src.self_improvement.scheduler - INFO - ✅ Prompt quality is acceptable
+2026-04-11 09:15:18,316 - __main__ - INFO -    Running: task_verify_metrics
+2026-04-11 09:15:18,316 - src.self_improvement.scheduler - INFO - 📈 Metrics Verification:
+2026-04-11 09:15:18,316 - src.self_improvement.scheduler - INFO -    Average rating: 78.75%
+2026-04-11 09:15:18,316 - src.self_improvement.scheduler - INFO -    Feedback count: 20
+2026-04-11 09:15:18,316 - src.self_improvement.scheduler - INFO -    Training steps: 0
+2026-04-11 09:15:18,316 - src.self_improvement.scheduler - INFO -    Improvement: 0.0%
+2026-04-11 09:15:18,316 - __main__ - INFO -    Running: task_check_rollback
+2026-04-11 09:15:18,317 - src.self_improvement.scheduler - INFO - ✅ Performance check OK (trend: stable)
+2026-04-11 09:15:18,317 - __main__ - INFO - 
+✅ All manual tasks executed
+2026-04-11 09:15:18,317 - __main__ - INFO - 
+======================================================================
+2026-04-11 09:15:18,317 - __main__ - INFO - ✅ ALL TESTS PASSED
+2026-04-11 09:15:18,317 - __main__ - INFO - ======================================================================
