@@ -1,0 +1,43 @@
+{
+  "timestamp": "2026-05-07T10:33:28.375292",
+  "config": {
+    "resource": {
+      "max_cache_size_mb": 300,
+      "max_workers": 4,
+      "max_query_queue": 100,
+      "constraint_level": "moderate"
+    },
+    "timeouts": {
+      "query_sec": 25,
+      "retrieval_sec": 20,
+      "integration_sec": 15,
+      "generation_sec": 10
+    },
+    "error_handling": {
+      "max_retries": 3,
+      "retry_delay_sec": 1,
+      "fallback_enabled": true,
+      "emergency_shutdown_enabled": true
+    },
+    "security": {
+      "input_validation": true,
+      "rate_limiting": true,
+      "rate_limit_rpm": 60,
+      "log_sensitive_data": false
+    },
+    "logging": {
+      "log_query_inputs": true,
+      "log_response_times": true,
+      "log_errors_only": false
+    }
+  },
+  "resources": {
+    "total_memory_gb": 14.460968017578125,
+    "available_memory_gb": 9.710750579833984,
+    "memory_usage_percent": "32.8%",
+    "cpu_count": 24,
+    "cpu_percent": "0.0%",
+    "disk_available_gb": 557.8440628051758,
+    "timestamp": "2026-05-07T10:33:28.475985"
+  }
+}

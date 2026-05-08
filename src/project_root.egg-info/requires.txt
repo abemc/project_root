@@ -1,0 +1,15 @@
+streamlit
+torch==2.4.1
+torchvision
+torchaudio
+faiss-cpu
+transformers
+sentence-transformers
+pandas
+openpyxl
+pytesseract
+pdf2image
+pypdf
+requests
+tiktoken
+PyMuPDF

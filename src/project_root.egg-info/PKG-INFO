@@ -1,0 +1,21 @@
+Metadata-Version: 2.4
+Name: project_root
+Version: 0.1.0
+Summary: Streamlit and PDF analysis project
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: streamlit
+Requires-Dist: torch==2.4.1
+Requires-Dist: torchvision
+Requires-Dist: torchaudio
+Requires-Dist: faiss-cpu
+Requires-Dist: transformers
+Requires-Dist: sentence-transformers
+Requires-Dist: pandas
+Requires-Dist: openpyxl
+Requires-Dist: pytesseract
+Requires-Dist: pdf2image
+Requires-Dist: pypdf
+Requires-Dist: requests
+Requires-Dist: tiktoken
+Requires-Dist: PyMuPDF

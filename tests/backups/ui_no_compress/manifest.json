@@ -1,0 +1,66 @@
+{
+  "backup_id": "ui_no_compress",
+  "timestamp": "2026-05-07T10:36:43.050640",
+  "version": "unknown",
+  "total_size": 32821,
+  "items": [
+    {
+      "source_path": ".env",
+      "relative_path": ".env",
+      "file_count": 1,
+      "total_size": 158,
+      "excluded": 0,
+      "item_type": "file"
+    },
+    {
+      "source_path": ".github",
+      "relative_path": ".github",
+      "file_count": 5,
+      "total_size": 29355,
+      "excluded": 0,
+      "item_type": "folder"
+    },
+    {
+      "source_path": "pyproject.toml",
+      "relative_path": "pyproject.toml",
+      "file_count": 1,
+      "total_size": 1145,
+      "excluded": 0,
+      "item_type": "file"
+    },
+    {
+      "source_path": "requirements.txt",
+      "relative_path": "requirements.txt",
+      "file_count": 1,
+      "total_size": 781,
+      "excluded": 0,
+      "item_type": "file"
+    },
+    {
+      "source_path": "Dockerfile",
+      "relative_path": "Dockerfile",
+      "file_count": 1,
+      "total_size": 798,
+      "excluded": 0,
+      "item_type": "file"
+    },
+    {
+      "source_path": "docker-compose.yml",
+      "relative_path": "docker-compose.yml",
+      "file_count": 1,
+      "total_size": 505,
+      "excluded": 0,
+      "item_type": "file"
+    },
+    {
+      "source_path": ".streamlit",
+      "relative_path": ".streamlit",
+      "file_count": 2,
+      "total_size": 79,
+      "excluded": 0,
+      "item_type": "folder"
+    }
+  ],
+  "config": {},
+  "notes": ""
+}

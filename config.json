@@ -1,0 +1,16 @@
+{
+"models": [
+  {
+    "model": "claude-3-5-sonnet-latest",
+    "provider": "anthropic",
+    "apiKey": "",
+    "title": "Claude 3.5 Sonnet"
+  },
+  {
+    "title": "Qwen2.5 Coder 7B Agent",
+    "provider": "openrouter",
+    "model": "Qwen2.5-Coder-7B-Instruct",
+    "role": "agent",
+    "apiKey": "..."
+  }
+]}

@@ -1,0 +1,4 @@
+
+# APIキー・トークンを含む設定ファイル
+config/onenote_token.json
+config/onenote_settings.json
