@@ -1488,6 +1488,30 @@ def _generate_assistant_response(query: str) -> None:
         })
         return
 
+    # サーバ側ショートカット: 単純な日付/時刻問い合わせはローカルで確実に日本語で応答する
+    try:
+        import re
+        q_low = (query or "").strip()
+        if re.search(r"今日.?の?日付|今日は何月何日|今日は何日|何月何日", q_low):
+            from datetime import date
+            t = date.today()
+            resp = f"今日は{t.year}年{t.month}月{t.day}日です。"
+            st.session_state.messages.append({"role": "assistant", "content": resp})
+            # clear file-context consumed for this query
+            st.session_state.attached_file_contents = []
+            return
+        if re.search(r"何時|何時ですか|何時になっています|現在の時刻|現在時刻", q_low):
+            from datetime import datetime
+            from zoneinfo import ZoneInfo
+            now = datetime.now(ZoneInfo("Asia/Tokyo")) if '東京' in q_low or 'jst' in q_low else datetime.now()
+            resp = f"現在の時刻は {now.hour:02d}時{now.minute:02d}分です。"
+            st.session_state.messages.append({"role": "assistant", "content": resp})
+            st.session_state.attached_file_contents = []
+            return
+    except Exception:
+        # ショートカットで問題が発生してもフォールバックは通常のLLM経路で対応
+        pass
+
     system_prompt = """あなたは日本語専用のAIアシスタントです。
 
 【最重要ルール - 絶対に破らないこと】

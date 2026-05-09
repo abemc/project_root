@@ -18,7 +18,141 @@ class LLMClient(abc.ABC):
 
 
 class MockLLMClient(LLMClient):
+    def __init__(self, default_context: Optional[str] = None):
+        self.default_context = default_context
+
     def summarize(self, text: str, context: Optional[str] = None) -> str:
+        # If caller provided no context, fall back to stored default_context
+        ctx = context or self.default_context
+
+        # Normalize text
+        low = text.strip().lower()
+
+        # If RFC3339/ISO requested anywhere, return RFC3339 timestamp
+        if any(tok in low for tok in ["rfc3339", "iso 8601", "iso8601", "iso-8601"]):
+            try:
+                from datetime import datetime
+                from zoneinfo import ZoneInfo
+
+                now = datetime.now()
+                if ctx and ("utc" in ctx.lower() or "jst" in ctx.lower() or "tokyo" in ctx.lower()):
+                    try:
+                        if "utc" in ctx.lower():
+                            now = datetime.now(ZoneInfo("UTC"))
+                        else:
+                            now = datetime.now(ZoneInfo("Asia/Tokyo"))
+                    except Exception:
+                        pass
+                # include timezone offset when possible
+                try:
+                    return now.astimezone().isoformat()
+                except Exception:
+                    return now.isoformat()
+            except Exception:
+                pass
+
+        # DATE queries (Japanese/English/Spanish/French)
+        # Normalize by stripping surrounding punctuation to better match variations
+        import re
+        cleaned = re.sub(r"[\s\(\)\[\]（）．。\?\!！。、,，\"]+", " ", text).strip().lower()
+
+        date_triggers = [
+            "今日", "何月何日", "日付", "今日は何日", "今日は何月何日",
+            "what is today's date", "what is today", "qué fecha es hoy", "qué día es hoy",
+            "quelle est la date", "quelle date", "quelle jour",
+        ]
+
+        if any(tok in cleaned for tok in date_triggers):
+            # If RFC3339/ISO requested, return RFC3339 timestamp
+            if any(tok in low for tok in ["rfc3339", "iso 8601", "iso8601", "iso-8601"]):
+                from datetime import datetime
+                from zoneinfo import ZoneInfo
+
+                now = datetime.now()
+                # respect context timezone hint
+                if ctx and ("utc" in ctx.lower() or "jst" in ctx.lower() or "tokyo" in ctx.lower()):
+                    try:
+                        if "utc" in ctx.lower():
+                            now = datetime.now(ZoneInfo("UTC"))
+                        else:
+                            now = datetime.now(ZoneInfo("Asia/Tokyo"))
+                    except Exception:
+                        pass
+                try:
+                    return now.astimezone().isoformat()
+                except Exception:
+                    return now.isoformat()
+
+            # If the analyzer UI provided an explicit date string in context, prefer that
+            if ctx and re.search(r"\d{4}年|\d{4}-\d{2}-\d{2}|\d{4}/\d{2}/\d{2}", ctx):
+                return ctx
+
+            # Otherwise, return today's date formatted to the language of the query.
+            from datetime import date
+
+            today = date.today()
+            # respond in detected language. Prefer Japanese when query contains Japanese
+            # characters or when default context appears Japanese. Fallback order: Japanese -> French -> Spanish -> English
+            def contains_japanese(s: str) -> bool:
+                # basic heuristic: presence of Hiragana/Katakana/Kanji
+                return bool(re.search(r"[\u3040-\u30FF\u4E00-\u9FFF]", s))
+
+            # if query or context contains Japanese, prefer Japanese
+            if contains_japanese(cleaned) or (ctx and contains_japanese(ctx)):
+                return f"今日の日付は {today.year}年{today.month}月{today.day}日 です。"
+
+            # French
+            if any(w in cleaned for w in ["quelle", "qu'est", "qu est", "quelle est"]):
+                # French: e.g. "Nous sommes le 2026-05-09."
+                return f"Nous sommes le {today.isoformat()}."
+            # Spanish
+            if any(w in cleaned for w in ["qué", "fecha", "dia", "día"]):
+                return f"La fecha de hoy es {today.isoformat()}."
+            # English
+            if any(w in cleaned for w in ["what", "today"]):
+                return f"Today's date is {today.isoformat()}."
+            # default: English fallback
+            return f"Today's date is {today.isoformat()}."
+
+        # TIME queries (Japanese/English/Spanish/French)
+        if any(k in low for k in ["何時", "何時ですか", "何時になっています", "what time", "current time", "hora", "quelle heure", "quelle est l'heure", "quelle heure est-il"]):
+            # If context contains an explicit datetime or timezone, try to use it
+            try:
+                from datetime import datetime
+                from zoneinfo import ZoneInfo
+
+                # default: system local time
+                now = datetime.now()
+
+                # if user mentions '東京' or 'jst' or explicit Tokyo mention, use Asia/Tokyo
+                if "東京" in low or "tokyo" in low or "jst" in low:
+                    tz = ZoneInfo("Asia/Tokyo")
+                    now = datetime.now(tz)
+                # if context contains explicit timezone like 'UTC' or 'JST' use it
+                elif ctx and ("utc" in ctx.lower() or "jst" in ctx.lower() or "tokyo" in ctx.lower()):
+                    if "utc" in ctx.lower():
+                        tz = ZoneInfo("UTC")
+                        now = datetime.now(tz)
+                    else:
+                        tz = ZoneInfo("Asia/Tokyo")
+                        now = datetime.now(tz)
+
+                h = now.hour
+                m = now.minute
+                # language-specific response
+                if any(w in low for w in ["what", "time"]):
+                    return f"Current time is {h:02d}:{m:02d}."
+                if any(w in low for w in ["qué", "hora"]):
+                    return f"La hora actual es {h:02d}:{m:02d}."
+                if any(w in low for w in ["quelle", "heure"]):
+                    return f"Il est {h:02d}h{m:02d}."
+                return f"現在の時刻は {h:02d}:{m:02d} です。"
+            except Exception:
+                from datetime import datetime
+
+                now = datetime.now()
+                return f"現在の時刻は {now.hour:02d}:{now.minute:02d} です。"
+
         # deterministic, cheap summary for testing
         head = text[:200]
         return f"[MOCK_SUMMARY length={len(text)}] " + (head if head else "(empty)")
