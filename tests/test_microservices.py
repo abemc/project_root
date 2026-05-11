@@ -6,12 +6,10 @@ ServiceHealth, LoadBalancer の包括的なテスト
 """
 
 import pytest
-import asyncio
 from datetime import datetime, timedelta
 
 from src.microservices.base_service import (
-    ServiceBase, ServiceConfig, ServiceStatus,
-    ServiceMetrics, ServiceLogLevel
+    ServiceBase, ServiceConfig, ServiceStatus
 )
 from src.microservices.service_registry import (
     ServiceRegistry, ServiceInstance,
@@ -19,8 +17,7 @@ from src.microservices.service_registry import (
 )
 from src.microservices.service_communication import (
     ServiceRequest, ServiceResponse,
-    CircuitBreaker, RetryPolicy,
-    HTTPRestChannel, ServiceCommunicationManager
+    CircuitBreaker, RetryPolicy
 )
 from src.microservices.service_health import (
     HealthCheckManager, HealthCheckType,
@@ -28,7 +25,6 @@ from src.microservices.service_health import (
     RecoveryStrategy
 )
 from src.microservices.load_balancer import (
-    LoadBalancingStrategy, LoadBalancerFactory,
     RoundRobinLoadBalancer, LeastConnectionsLoadBalancer
 )
 
@@ -282,7 +278,7 @@ class TestLoadBalancer:
         selected1 = balancer.select(instances)
         selected2 = balancer.select(instances)
         selected3 = balancer.select(instances)
-        selected4 = balancer.select(instances)
+        balancer.select(instances)
         
         # 異なるインスタンスが選択されることを確認
         assert selected1.instance_id != selected2.instance_id
@@ -293,7 +289,6 @@ class TestLoadBalancer:
         balancer = LeastConnectionsLoadBalancer()
         
         # インスタンスメトリクスを設定
-        from src.microservices.load_balancer import InstanceMetrics
         
         balancer.register_instance_metrics("inst-1", weight=1)
         balancer.register_instance_metrics("inst-2", weight=1)
@@ -328,8 +323,8 @@ class TestIntegration:
         balancer = RoundRobinLoadBalancer()
         
         # サービス登録
-        inst1 = registry.register("api", "localhost", 8080)
-        inst2 = registry.register("api", "localhost", 8081)
+        registry.register("api", "localhost", 8080)
+        registry.register("api", "localhost", 8081)
         
         # 発見
         instances = registry.discover("api")

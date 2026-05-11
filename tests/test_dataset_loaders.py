@@ -28,7 +28,7 @@ def test_mmlu_loader():
     print("MMLU ローダーテスト")
     print("="*80)
     
-    from src.evaluation.datasets.mmlu_loader import MMULoader, MMUQuestion
+    from src.evaluation.datasets.mmlu_loader import MMULoader
     
     loader = MMULoader(num_samples=5)
     
@@ -40,7 +40,7 @@ def test_mmlu_loader():
     
     # ローダーのテスト（オフラインモード）
     print("\n✓ MMULoader初期化成功")
-    print(f"✓ ローダーテスト通過")
+    print("✓ ローダーテスト通過")
     
 
 
@@ -89,8 +89,8 @@ def test_gsm8k_loader():
         status = "✓" if result == expected else "✗"
         print(f"  {status} '{pred}' vs '{correct}' → {result} (期待: {expected})")
     
-    print(f"\n✓ GSM8KLoader初期化成功")
-    print(f"✓ ローダーテスト通過")
+    print("\n✓ GSM8KLoader初期化成功")
+    print("✓ ローダーテスト通過")
     
 
 
@@ -101,7 +101,7 @@ def test_humaneval_loader():
     print("HumanEval ローダーテスト")
     print("="*80)
     
-    from src.evaluation.datasets.humaneval_loader import HumanEvalLoader, HumanEvalEvaluator
+    from src.evaluation.datasets.humaneval_loader import HumanEvalLoader
     
     loader = HumanEvalLoader(num_samples=3)
     
@@ -111,8 +111,8 @@ def test_humaneval_loader():
     print(f"  説明: {metadata['description']}")
     print(f"  予想問題数: {metadata['num_problems']}")
     
-    print(f"\n✓ HumanEvalLoader初期化成功")
-    print(f"✓ ローダーテスト通過")
+    print("\n✓ HumanEvalLoader初期化成功")
+    print("✓ ローダーテスト通過")
     
 
 
@@ -133,8 +133,8 @@ def test_truthfulqa_loader():
     print(f"  説明: {metadata['description']}")
     print(f"  予想問題数: {metadata['num_questions']}")
     
-    print(f"\n✓ TruthfulQALoader初期化成功")
-    print(f"✓ ローダーテスト通過")
+    print("\n✓ TruthfulQALoader初期化成功")
+    print("✓ ローダーテスト通過")
     
 
 
@@ -171,12 +171,12 @@ def test_bbq_loader():
     predictions = [0, 1, 2]
     results = BiasEvaluator.evaluate_bbq(predictions, test_questions)
     print(f"  精度: {results['accuracy']:.2%}")
-    print(f"  バイアスタイプ別:")
+    print("  バイアスタイプ別:")
     for bias, acc in results['by_bias_type'].items():
         print(f"    - {bias}: {acc:.2%}")
     
-    print(f"\n✓ BBQLoader初期化成功")
-    print(f"✓ ローダーテスト通過")
+    print("\n✓ BBQLoader初期化成功")
+    print("✓ ローダーテスト通過")
     
 
 

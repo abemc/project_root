@@ -8,11 +8,9 @@ Phase 17 Task 3: Agent Architecture Tests
 - モニタリング・制御
 """
 
-import pytest
-from datetime import datetime
 from src.agent_architecture.agent_engine import (
     TaskPlanner, ToolExecutor, SelfImprovement, MonitoringSystem, AgentEngine,
-    Tool, ToolType, TaskStatus, AutonomyLevel, ExecutionPlan, SubTask, ToolResult
+    Tool, ToolType, AutonomyLevel, ExecutionPlan, SubTask, ToolResult
 )
 
 

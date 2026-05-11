@@ -262,7 +262,7 @@ class SafetyGate:
                 f"(ratio: {length_ratio:.1f})"
             )
         
-        logger.info(f"✅ Prompt change safety check passed")
+        logger.info("✅ Prompt change safety check passed")
         return True
     
     def check_model_update(

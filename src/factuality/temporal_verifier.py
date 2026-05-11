@@ -9,7 +9,6 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timedelta
 from enum import Enum
-import json
 
 
 class FreshnessLevel(Enum):

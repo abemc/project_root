@@ -413,7 +413,7 @@ def main():
         analyzer.load_results(args.results)
     
     # ドメイン分析実行
-    report = analyzer.generate_report(output_path=args.output)
+    analyzer.generate_report(output_path=args.output)
     
     # サマリー表示
     analyzer.print_summary()

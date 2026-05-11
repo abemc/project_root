@@ -9,15 +9,6 @@ Phase 10 Step 3: ML脅威検出テスト
 - モデル訓練 (3個)
 """
 
-import pytest
-from datetime import datetime, timedelta
-from src.phase10 import (
-    AnomalyDetector,
-    BehaviorProfiler,
-    ThreatPredictor,
-    MLPipelineManager,
-    ThreatLevel
-)
 
 
 # ========== 異常検出テスト (5個) ==========
@@ -395,7 +386,7 @@ class TestMLPipeline:
         mock_ml_pipeline.metrics = metrics
         is_acceptable = mock_ml_pipeline.evaluate_model_performance()
         
-        assert is_acceptable == True or is_acceptable is not None
+        assert is_acceptable or is_acceptable is not None
     
     def test_model_deployment_validation(self, mock_ml_pipeline):
         """モデルデプロイ検証テスト"""
@@ -410,4 +401,4 @@ class TestMLPipeline:
         mock_ml_pipeline.current_model = new_model
         can_deploy = mock_ml_pipeline.validate_model_deployment()
         
-        assert can_deploy == True or can_deploy is not None
+        assert can_deploy or can_deploy is not None

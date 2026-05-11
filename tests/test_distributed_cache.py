@@ -8,11 +8,11 @@ import pytest
 import asyncio
 
 from src.microservices.distributed_cache import (
-    CacheManager, DistributedCache, CachePolicy,
+    CacheManager, CachePolicy,
     CacheStrategy, InvalidationStrategy, CacheInvalidationManager
 )
 from src.microservices.cache_cluster import (
-    CacheCluster, CacheClusterNode, CacheConsistencyManager,
+    CacheCluster, CacheConsistencyManager,
     NodeRole, ReplicationMode, ReplicationConfig
 )
 

@@ -6,7 +6,7 @@ SLA監視とアラート機能の実装
 
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Any, Callable, List
-from datetime import datetime, timedelta
+from datetime import datetime
 import asyncio
 import logging
 

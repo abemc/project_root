@@ -12,8 +12,7 @@ import time
 from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta
-import json
+from datetime import datetime
 import inspect
 import asyncio
 
@@ -266,11 +265,6 @@ class QueryOptimizer:
     async def optimize_permission_check_query(self) -> str:
         """権限チェック N+1 クエリの最適化版"""
         # ❌ Before: N+1 (1 + N クエリ)
-        before = """
-        SELECT * FROM users WHERE tenant_id = ?
-        -- ループで各 user ごとに:
-        SELECT * FROM permissions WHERE user_id = ?
-        """
         
         # ✅ After: 1 クエリ (JOIN)
         after = """
@@ -292,19 +286,6 @@ class QueryOptimizer:
     async def optimize_log_aggregation_query(self) -> str:
         """ログ集計クエリの最適化"""
         # ❌ Before: 複数ジョイン (平均 250ms)
-        before = """
-        SELECT 
-          u.user_id,
-          COUNT(*) as total,
-          MAX(al.created_at) as last_action,
-          COUNT(CASE WHEN al.severity = 'ERROR' THEN 1 END) as error_count
-        FROM users u
-        JOIN audit_logs al ON u.id = al.user_id
-        JOIN compliance_records cr ON al.record_id = cr.id
-        WHERE u.tenant_id = ? AND al.created_at > NOW() - INTERVAL '7 days'
-        GROUP BY u.user_id
-        ORDER BY error_count DESC
-        """
         
         # ✅ After: 1 テーブル (平均 35ms)
         after = """

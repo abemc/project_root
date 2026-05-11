@@ -14,8 +14,7 @@ IDEAL_LLM_RESEARCH_REPORT に基づくハイブリッド検索・再ランキン
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Set, Tuple, Optional, Any
-import json
+from typing import Dict, List, Tuple, Optional, Any
 from datetime import datetime
 from collections import defaultdict
 import math

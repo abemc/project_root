@@ -10,11 +10,9 @@ Phase 7ロードテスト・パフォーマンス検証
 - 複数ドメイン検索パフォーマンス
 """
 
-import sys
 import time
 import statistics
 from datetime import datetime
-from typing import List, Dict, Any
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -81,7 +79,7 @@ class LoadTestRunner:
             
             for query in test_queries:
                 start = time.time()
-                result = preprocessor.preprocess(query)
+                preprocessor.preprocess(query)
                 elapsed = (time.time() - start) * 1000  # ms
                 latencies.append(elapsed)
             
@@ -94,7 +92,7 @@ class LoadTestRunner:
                 "p95": sorted(latencies)[int(len(latencies) * 0.95)]
             }
             
-            print(f"\n📊 レイテンシ統計:")
+            print("\n📊 レイテンシ統計:")
             print(f"  最小: {stats['min']:.2f}ms")
             print(f"  最大: {stats['max']:.2f}ms")
             print(f"  平均: {stats['mean']:.2f}ms")
@@ -104,13 +102,13 @@ class LoadTestRunner:
             
             # 評価
             if stats['mean'] < 100:
-                print(f"\n✅ 基本レイテンシ: 優秀 (目標: < 500ms)")
+                print("\n✅ 基本レイテンシ: 優秀 (目標: < 500ms)")
                 verdict = "PASS"
             elif stats['mean'] < 500:
-                print(f"\n✅ 基本レイテンシ: 良好 (目標: < 500ms)")
+                print("\n✅ 基本レイテンシ: 良好 (目標: < 500ms)")
                 verdict = "PASS"
             else:
-                print(f"\n❌ 基本レイテンシ: 要改善 (目標: < 500ms)")
+                print("\n❌ 基本レイテンシ: 要改善 (目標: < 500ms)")
                 verdict = "FAIL"
             
             self.test_results["basic_latency"] = {
@@ -154,7 +152,7 @@ class LoadTestRunner:
             speedup = time1 / time2 if time2 > 0 else float('inf')
             hit_rate = 2 / 3 * 100  # 3回中2回ヒット
             
-            print(f"📊 キャッシュ効率統計:")
+            print("📊 キャッシュ効率統計:")
             print(f"  1回目 (キャッシュミス): {time1:.3f}ms")
             print(f"  2回目 (キャッシュヒット): {time2:.3f}ms")
             print(f"  3回目 (キャッシュヒット): {time3:.3f}ms")
@@ -163,13 +161,13 @@ class LoadTestRunner:
             
             # 評価
             if hit_rate >= 70:
-                print(f"\n✅ キャッシュ効率: 優秀 (目標: > 70%)")
+                print("\n✅ キャッシュ効率: 優秀 (目標: > 70%)")
                 verdict = "PASS"
             elif hit_rate >= 50:
-                print(f"\n✅ キャッシュ効率: 良好 (目標: > 70%)")
+                print("\n✅ キャッシュ効率: 良好 (目標: > 70%)")
                 verdict = "PASS"
             else:
-                print(f"\n⚠️  キャッシュ効率: 要改善 (目標: > 70%)")
+                print("\n⚠️  キャッシュ効率: 要改善 (目標: > 70%)")
                 verdict = "WARN"
             
             self.test_results["cache_efficiency"] = {
@@ -210,7 +208,7 @@ class LoadTestRunner:
             
             # 統合推論
             start = time.time()
-            integration_result = engine.integrate_and_reason(
+            engine.integrate_and_reason(
                 preprocessing_result=prep_result,
                 retrieved_documents=retrieved_docs
             )
@@ -218,7 +216,7 @@ class LoadTestRunner:
             
             total_time = prep_time + integration_time
             
-            print(f"📊 マルチドメイン検索時間:")
+            print("📊 マルチドメイン検索時間:")
             print(f"  クエリ前処理: {prep_time:.2f}ms")
             print(f"  知識統合: {integration_time:.2f}ms")
             print(f"  合計: {total_time:.2f}ms")
@@ -226,13 +224,13 @@ class LoadTestRunner:
             
             # 評価
             if total_time < 500:
-                print(f"\n✅ マルチドメイン検索: 高速 (< 500ms)")
+                print("\n✅ マルチドメイン検索: 高速 (< 500ms)")
                 verdict = "PASS"
             elif total_time < 1000:
-                print(f"\n✅ マルチドメイン検索: 良好 (< 1000ms)")
+                print("\n✅ マルチドメイン検索: 良好 (< 1000ms)")
                 verdict = "PASS"
             else:
-                print(f"\n⚠️  マルチドメイン検索: 要改善 (> 1000ms)")
+                print("\n⚠️  マルチドメイン検索: 要改善 (> 1000ms)")
                 verdict = "WARN"
             
             self.test_results["multidomain_perf"] = {
@@ -275,19 +273,19 @@ class LoadTestRunner:
             # スケーラビリティ評価
             degradation = (times[-1] / times[0] - 1) * 100 if times[0] > 0 else 0
             
-            print(f"\n📊 スケーラビリティ:")
+            print("\n📊 スケーラビリティ:")
             print(f"  負荷1倍時: {times[0]:.2f}ms")
             print(f"  負荷20倍時: {times[-1]:.2f}ms")
             print(f"  性能低下: {degradation:.1f}%")
             
             if degradation < 50:
-                print(f"\n✅ スケーラビリティ: 優秀 (< 50%低下)")
+                print("\n✅ スケーラビリティ: 優秀 (< 50%低下)")
                 verdict = "PASS"
             elif degradation < 100:
-                print(f"\n✅ スケーラビリティ: 良好 (< 100%低下)")
+                print("\n✅ スケーラビリティ: 良好 (< 100%低下)")
                 verdict = "PASS"
             else:
-                print(f"\n⚠️  スケーラビリティ: 要改善 (> 100%低下)")
+                print("\n⚠️  スケーラビリティ: 要改善 (> 100%低下)")
                 verdict = "WARN"
             
             self.test_results["scalability"] = {
@@ -333,7 +331,7 @@ class LoadTestRunner:
                     elapsed = (time.time() - start) * 1000
                     latencies.append(elapsed)
                     query_count += 1
-                except Exception as e:
+                except Exception:
                     errors += 1
                 
                 if query_count % 5 == 0:
@@ -351,10 +349,10 @@ class LoadTestRunner:
                 print(f"  最大レイテンシ: {max(latencies):.2f}ms")
             
             if errors / query_count < 0.01 if query_count > 0 else True:
-                print(f"\n✅ 継続負荷: 安定 (エラー率 < 1%)")
+                print("\n✅ 継続負荷: 安定 (エラー率 < 1%)")
                 verdict = "PASS"
             else:
-                print(f"\n⚠️  継続負荷: 不安定 (エラー率 > 1%)")
+                print("\n⚠️  継続負荷: 不安定 (エラー率 > 1%)")
                 verdict = "WARN"
             
             self.test_results["sustained_load"] = {
@@ -384,19 +382,19 @@ class LoadTestRunner:
         warn_count = sum(1 for result in self.test_results.values() 
                         if isinstance(result, dict) and result.get("verdict") == "WARN")
         
-        print(f"\n【テスト結果】")
+        print("\n【テスト結果】")
         print(f"  成功: {pass_count} ✅")
         print(f"  失敗: {fail_count} ❌")
         print(f"  警告: {warn_count} ⚠️")
         print(f"  実行時間: {duration:.2f}秒")
         
-        print(f"\n【パフォーマンス評価】")
+        print("\n【パフォーマンス評価】")
         if pass_count >= 4:
-            print(f"  総合評価: 優秀 - 本番環境デプロイメント準備完了 🚀")
+            print("  総合評価: 優秀 - 本番環境デプロイメント準備完了 🚀")
         elif pass_count >= 3:
-            print(f"  総合評価: 良好 - 本番環境デプロイメント可能 ✅")
+            print("  総合評価: 良好 - 本番環境デプロイメント可能 ✅")
         else:
-            print(f"  総合評価: 要改善 - 追加最適化推奨 ⚠️")
+            print("  総合評価: 要改善 - 追加最適化推奨 ⚠️")
         
         print("\n" + "="*70 + "\n")
 

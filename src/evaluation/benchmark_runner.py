@@ -9,7 +9,6 @@ import logging
 from typing import List, Dict, Any, Optional, Callable
 from dataclasses import dataclass, asdict
 from datetime import datetime
-import numpy as np
 from pathlib import Path
 from tqdm import tqdm
 
@@ -190,7 +189,7 @@ class BenchmarkRunner:
             print(f"\n{benchmark_name}:")
             print(f"  タスク種別: {benchmark_data['task_type']}")
             print(f"  サンプル数: {benchmark_data['num_samples']}")
-            print(f"  メトリクス:")
+            print("  メトリクス:")
             for metric_name, metric_value in benchmark_data["metrics"].items():
                 print(f"    {metric_name}: {metric_value:.4f}")
         
@@ -252,7 +251,7 @@ class BenchmarkComparator:
     def print_comparison(comparison: Dict[str, Any]) -> None:
         """比較結果を表示"""
         print("\n" + "="*80)
-        print(f"ベンチマーク比較")
+        print("ベンチマーク比較")
         print(f"ベースライン: {comparison['baseline_timestamp']}")
         print(f"現在:         {comparison['current_timestamp']}")
         print("="*80)

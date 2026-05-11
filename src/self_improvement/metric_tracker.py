@@ -5,9 +5,8 @@
 
 import json
 import logging
-import os
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 from .config import get_config

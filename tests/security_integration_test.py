@@ -10,7 +10,6 @@ RAGAgentにセキュリティ層を統合
 """
 
 import sys
-import json
 from datetime import datetime
 from typing import Dict, Any, Optional
 

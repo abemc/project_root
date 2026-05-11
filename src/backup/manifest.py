@@ -4,7 +4,7 @@ from dataclasses import dataclass, asdict, field
 from datetime import datetime
 from pathlib import Path
 import json
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 
 @dataclass

@@ -63,10 +63,10 @@ def test_compress_parameter():
             if result3.get("success"):
                 backup_path = result3.get("backup_path", "")
                 if ".tar.gz" in backup_path:
-                    print(f"❌ 失敗: compression=False が優先されるべき")
+                    print("❌ 失敗: compression=False が優先されるべき")
                     return False
                 else:
-                    print(f"✅ 成功: compression パラメータが正しく優先された")
+                    print("✅ 成功: compression パラメータが正しく優先された")
             else:
                 print(f"❌ 失敗: {result3}")
                 return False

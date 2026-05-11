@@ -4,8 +4,7 @@
 
 import pytest
 from src.reasoning_chain.reasoning_engine import (
-    ReasoningType, ThoughtStep, ChainOfThoughtResult, TreeNode,
-    ChainOfThoughtGenerator, TreeOfThoughtPlanner, FewShotExampleSelector,
+    ReasoningType, ThoughtStep, ChainOfThoughtGenerator, TreeOfThoughtPlanner, FewShotExampleSelector,
     SelfVerificationEngine, IterativeRefinementLoop, ReasoningTraceLogger,
     ReasoningEngine
 )
@@ -182,7 +181,8 @@ class TestSelfVerificationEngine:
     def test_register_verification_rule(self):
         """検証ルール登録テスト"""
         engine = SelfVerificationEngine()
-        rule = lambda x: len(x) > 0
+        def rule(x):
+            return len(x) > 0
         engine.register_verification_rule("non_empty", rule)
         
         assert "non_empty" in engine.verification_rules

@@ -8,14 +8,12 @@ MMU（Massive Multitask Language Understanding）は、
 参考: https://github.com/hendrycks/test
 """
 
-import os
 import json
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass
 import logging
 
-import numpy as np
 
 # Hugging Faceのdatasetsライブラリは、可用性に応じて複数の読込方法をサポート
 try:
@@ -228,7 +226,7 @@ class MMULoader:
         for subject in target_subjects:
             try:
                 # Arrow キャッシュパスを構築
-                arrow_path = self.cache_dir / f"cais___mmlu" / subject / "0.0.0"
+                arrow_path = self.cache_dir / "cais___mmlu" / subject / "0.0.0"
                 if not arrow_path.exists():
                     logger.debug(f"Arrow cache not found for {subject}")
                     continue

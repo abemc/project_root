@@ -33,7 +33,7 @@ def main():
     try:
         # インポート
         print_step(1, "モジュールインポート")
-        from src.rag.query_preprocessor import Phase7QueryPreprocessor, MultiDomainRetriever
+        from src.rag.query_preprocessor import Phase7QueryPreprocessor
         from src.rag.knowledge_integration_engine import (
             Phase7KnowledgeIntegrationEngine,
             ResponseGenerationEngine,
@@ -114,7 +114,7 @@ def main():
                 )
                 
                 # フェーズ4: 知識充実化
-                enriched_knowledge = enrichment_manager.enrich_knowledge(
+                enrichment_manager.enrich_knowledge(
                     base_knowledge=integrated_result.integrated_knowledge,
                     implicit_intents=preprocessing.implicit_intents,
                     required_domains=preprocessing.required_domains
@@ -137,7 +137,7 @@ def main():
                     'implicit_intents_count': len(preprocessing.implicit_intents)
                 })
                 
-                print(f"    ✅ PASS")
+                print("    ✅ PASS")
                 print(f"       主要ドメイン: {preprocessing.primary_domain}")
                 print(f"       応答長: {len(final_response)}文字")
                 
@@ -179,9 +179,9 @@ def main():
         print_section("統合テスト最終結果")
         if test_results['failed'] == 0:
             print("\n  🎉 すべてのテストが成功しました！")
-            print(f"\n  ✅ Phase 7 RAG統合システムは完全に動作しています")
+            print("\n  ✅ Phase 7 RAG統合システムは完全に動作しています")
             print(f"  ✅ {total}個のテストケースで{test_results['passed']}個成功")
-            print(f"\n  次ステップ: RAGパイプラインへの統合")
+            print("\n  次ステップ: RAGパイプラインへの統合")
         else:
             print(f"\n  ⚠️  {test_results['failed']}個のテストが失敗しました")
             print(f"  成功率: {test_results['passed']*100//total}%")

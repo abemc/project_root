@@ -19,7 +19,7 @@ Phase 10本番デプロイメント実行
 """
 
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, List, Any
 from dataclasses import dataclass
 from enum import Enum
@@ -199,20 +199,20 @@ class Phase10DeploymentExecutor:
         """Gradual rollout"""
         phase_enum = DeploymentPhase[phase_name.upper()]
         
-        print(f"✓ トラフィック段階的増加")
+        print("✓ トラフィック段階的増加")
         print(f"  - 現在: {target_percent - 20}% → 目標: {target_percent}%")
         print(f"  - ロールアウト対象ユーザー: ~{target_percent * 500}000")
-        print(f"  - リージョン展開数: 15")
+        print("  - リージョン展開数: 15")
         
-        print(f"✓ 継続的ヘルスチェック")
-        print(f"  - エラー率: < 0.04%")
-        print(f"  - レイテンシ P99: 50ms")
-        print(f"  - システム CPU: 65% (正常)")
+        print("✓ 継続的ヘルスチェック")
+        print("  - エラー率: < 0.04%")
+        print("  - レイテンシ P99: 50ms")
+        print("  - システム CPU: 65% (正常)")
         
-        print(f"✓ セキュリティ イベント処理")
+        print("✓ セキュリティ イベント処理")
         print(f"  - 脅威検出数: {target_percent * 10}")
-        print(f"  - 平均対応時間: 12分")
-        print(f"  - 自動対応成功率: 98%")
+        print("  - 平均対応時間: 12分")
+        print("  - 自動対応成功率: 98%")
         
         self.phase_results[phase_enum] = DeploymentMetrics(
             traffic_percentage=target_percent,

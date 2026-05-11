@@ -339,38 +339,38 @@ def display_report(report):
     print("Phase 9 完成レポート")
     print("=" * 70)
     
-    print(f"\n【実装完了日時】")
+    print("\n【実装完了日時】")
     print(f"  {report['completion_date']}")
     
-    print(f"\n【総体的ステータス】")
+    print("\n【総体的ステータス】")
     print(f"  ✅ {report['status']}")
     
-    print(f"\n【実装内容】")
+    print("\n【実装内容】")
     for i, initiative in enumerate(report['executive_summary']['implemented_initiatives'], 1):
         print(f"  {i}. {initiative}")
     
-    print(f"\n【テスト結果】")
+    print("\n【テスト結果】")
     print(f"  - 統合テスト: {report['testing_results']['integration_tests']['passed']}/{report['testing_results']['integration_tests']['total']} PASS")
     print(f"  - 成功率: {report['testing_results']['integration_tests']['success_percentage']:.1f}%")
     
-    print(f"\n【本番デプロイメント】")
+    print("\n【本番デプロイメント】")
     print(f"  - 戦略: {report['production_deployment']['strategy']}")
     print(f"  - 最終ステータス: {report['production_deployment']['final_status']}")
     print(f"  - 本番環境導入: {'✅ Go' if report['production_deployment']['go_to_production'] else '❌ No-Go'}")
     
-    print(f"\n【規制準拠】")
+    print("\n【規制準拠】")
     for framework, details in report['security_compliance']['frameworks'].items():
         print(f"  {details['status']} {framework}")
     
-    print(f"\n【ビジネスインパクト】")
+    print("\n【ビジネスインパクト】")
     for key, value in report['business_impact']['security_improvements'].items():
         print(f"  - {key}: {value}")
     
-    print(f"\n【最終判定】")
+    print("\n【最終判定】")
     for achievement in report['conclusion']['key_achievements']:
         print(f"  {achievement}")
     
-    print(f"\n【結論】")
+    print("\n【結論】")
     print(f"  {report['conclusion']['final_status']}")
     
     print("\n" + "=" * 70)

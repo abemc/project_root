@@ -10,8 +10,7 @@ import pytest
 import asyncpg
 import asyncio
 import time
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from datetime import datetime, timedelta
+from unittest.mock import Mock, AsyncMock, MagicMock
 import sys
 import os
 
@@ -25,8 +24,6 @@ from optimization.db_optimizer import (
     ConnectionPoolOptimizer,
     QueryPerformanceMonitor,
     DBOptimizationService,
-    initialize_db_optimization,
-    get_optimization_service,
 )
 
 
@@ -375,7 +372,7 @@ class TestQueryPerformanceMonitor:
                 await asyncio.sleep(0.01)
             return {"result": "slow"}
         
-        result = await perf_monitor.measure_query(
+        await perf_monitor.measure_query(
             "slow_query",
             slow_query,
             slow_threshold_ms=100

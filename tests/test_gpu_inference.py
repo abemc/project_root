@@ -10,8 +10,6 @@ import pytest
 import asyncio
 import numpy as np
 import time
-from datetime import datetime
-from unittest.mock import Mock, AsyncMock, patch
 import sys
 import os
 
@@ -21,15 +19,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 from inference.gpu_inference import (
     ModelPrecision,
     GPUInferenceRequest,
-    InferenceResult,
     TensorRTEngine,
     GPUBatchProcessor,
     GPUModelCache,
     InferenceCache,
-    GPUInferenceService,
     GPUPerformanceSimulator,
     initialize_gpu_inference,
-    get_gpu_inference_service,
 )
 
 
@@ -131,7 +126,7 @@ class TestTensorRTEngine:
         input_data = np.random.randn(64, 512).astype(np.float32)
         
         start = time.time()
-        output = await engine.infer(input_data)
+        await engine.infer(input_data)
         elapsed_ms = (time.time() - start) * 1000
         
         assert elapsed_ms < 50, f"Inference latency too high: {elapsed_ms:.1f}ms"
@@ -386,7 +381,7 @@ class TestPerformanceMetrics:
         inference_request.timeout = 2000
         start = time.time()
         result = await gpu_service.infer(inference_request)
-        elapsed_ms = (time.time() - start) * 1000
+        (time.time() - start) * 1000
         
         # Note: バッチ処理のため実際のレイテンシはより大きい可能性あり
         # ここではシミュレーション値を確認
@@ -411,7 +406,7 @@ class TestPerformanceMetrics:
         results = await gpu_service.batch_infer(requests)
         elapsed_sec = time.time() - start
         
-        throughput = len(results) / elapsed_sec if elapsed_sec > 0 else 0
+        len(results) / elapsed_sec if elapsed_sec > 0 else 0
         # シミュレーション環境では実際の値は異なるため、ここでは単に成功を確認
         assert len(results) == 10
     

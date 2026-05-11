@@ -12,8 +12,6 @@ from typing import Dict, List, Optional, Tuple
 from pathlib import Path
 from src.quality_assurance.source_credibility import (
     SourceMetadata,
-    AccuracyHistory,
-    ReputationScore,
     CredibilityAnalysisResult,
     CredibilityLevel
 )

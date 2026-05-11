@@ -18,7 +18,6 @@ import logging
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
-from pathlib import Path
 from enum import Enum
 import tempfile
 
@@ -173,7 +172,6 @@ class DeploymentPipeline:
     
     def __init__(self, config: DeploymentConfig):
         self.config = config
-        import time
         self.deployment_id = f"deploy_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}"
         self.artifacts: Dict[str, DeploymentArtifact] = {}
         self.validation_results: Dict[str, Any] = {}

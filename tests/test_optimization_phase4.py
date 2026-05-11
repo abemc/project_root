@@ -10,7 +10,7 @@ from pathlib import Path
 # パス追加
 sys.path.insert(0, '/home/abemc/project_root')
 
-from src.rag.optimized_retriever import OptimizedMultiDomainRetriever, CacheStats
+from src.rag.optimized_retriever import OptimizedMultiDomainRetriever
 from src.rag.error_handling import (
     Phase7Logger, ErrorHandler, PerformanceMonitor, LogLevel
 )
@@ -59,7 +59,7 @@ def test_caching_mechanism():
             
             # 実際の検索に代わるシミュレーション
             cache_key = retriever._get_cache_key(query, primary, related, top_k=5)
-            cached = retriever._check_cache(cache_key)
+            retriever._check_cache(cache_key)
             
             result = {
                 'query': query,
@@ -74,12 +74,12 @@ def test_caching_mechanism():
         
         # キャッシュ統計表示
         stats = retriever.get_cache_stats()
-        print(f"\n【キャッシュ統計】")
+        print("\n【キャッシュ統計】")
         print(f"  総クエリ: {stats.total_queries}")
         print(f"  ヒット: {stats.cache_hits}")
         print(f"  ミス: {stats.cache_misses}")
         print(f"  ヒット率: {stats.hit_rate:.1%}")
-        print(f"  ✅ キャッシング機構: 正常動作")
+        print("  ✅ キャッシング機構: 正常動作")
         
         logger.info(f"キャッシング機構テスト完了: {stats.get_summary()}")
         
@@ -155,10 +155,10 @@ def test_performance_optimization():
         sync_avg = sum(sync_times) / len(sync_times)
         async_avg = sum(async_times) / len(async_times)
         
-        print(f"\n【パフォーマンス統計】")
+        print("\n【パフォーマンス統計】")
         print(f"  同期版平均: {sync_avg:.2f}ms")
         print(f"  非同期版平均: {async_avg:.2f}ms")
-        print(f"  ✅ パフォーマンス最適化: 正常動作")
+        print("  ✅ パフォーマンス最適化: 正常動作")
         
         logger.info(f"パフォーマンステスト完了: 同期={sync_avg:.2f}ms, 非同期={async_avg:.2f}ms")
         
@@ -196,7 +196,7 @@ def test_error_handling():
         history = logger.get_history()
         print(f"  ✓ ログ履歴: {len(history)}件取得")
         
-        logger.info(f"エラーハンドラテスト開始")
+        logger.info("エラーハンドラテスト開始")
         
         # エラーハンドリングテスト
         try:

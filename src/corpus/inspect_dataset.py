@@ -18,7 +18,7 @@ def main():
     """
     # 1. プロジェクトルートとデータセットファイルのパスを指定
     #    このスクリプトは src/corpus/ にあるため、parents[2]でルートを取得
-    project_root = Path(__file__).resolve().parents[2]
+    Path(__file__).resolve().parents[2]
     corpus_root = get_corpus_path()
     dataset_path = str(corpus_root / "dataset.jsonl")
 

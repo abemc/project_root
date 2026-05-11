@@ -10,7 +10,7 @@ GSM8K（Grade School Math 8K）は、
 
 import json
 from pathlib import Path
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 from dataclasses import dataclass
 import logging
 import re

@@ -45,9 +45,15 @@ class MockLLMClient(LLMClient):
                         pass
                 # include timezone offset when possible
                 try:
-                    return now.astimezone().isoformat()
+                    tz_dt = now.astimezone()
                 except Exception:
-                    return now.isoformat()
+                    tz_dt = now
+                # format as RFC3339 without microseconds: YYYY-MM-DDThh:mm:ss+hh:mm
+                try:
+                    off = tz_dt.strftime('%z') or '+0000'
+                    return tz_dt.strftime('%Y-%m-%dT%H:%M:%S') + off[:3] + ':' + off[3:]
+                except Exception:
+                    return tz_dt.replace(microsecond=0).isoformat()
             except Exception:
                 pass
 
@@ -79,18 +85,26 @@ class MockLLMClient(LLMClient):
                     except Exception:
                         pass
                 try:
-                    return now.astimezone().isoformat()
+                    tz_dt = now.astimezone()
                 except Exception:
-                    return now.isoformat()
+                    tz_dt = now
+                try:
+                    off = tz_dt.strftime('%z') or '+0000'
+                    return tz_dt.strftime('%Y-%m-%dT%H:%M:%S') + off[:3] + ':' + off[3:]
+                except Exception:
+                    return tz_dt.replace(microsecond=0).isoformat()
 
             # If the analyzer UI provided an explicit date string in context, prefer that
             if ctx and re.search(r"\d{4}年|\d{4}-\d{2}-\d{2}|\d{4}/\d{2}/\d{2}", ctx):
                 return ctx
 
             # Otherwise, return today's date formatted to the language of the query.
-            from datetime import date
-
-            today = date.today()
+            from datetime import datetime
+            try:
+                from zoneinfo import ZoneInfo
+                today = datetime.now(ZoneInfo("Asia/Tokyo")).date()
+            except Exception:
+                today = datetime.now().date()
             # respond in detected language. Prefer Japanese when query contains Japanese
             # characters or when default context appears Japanese. Fallback order: Japanese -> French -> Spanish -> English
             def contains_japanese(s: str) -> bool:
@@ -99,7 +113,10 @@ class MockLLMClient(LLMClient):
 
             # if query or context contains Japanese, prefer Japanese
             if contains_japanese(cleaned) or (ctx and contains_japanese(ctx)):
-                return f"今日の日付は {today.year}年{today.month}月{today.day}日 です。"
+                # include weekday in Japanese response
+                _weekdays = ["月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日", "日曜日"]
+                weekday = _weekdays[today.weekday()]
+                return f"今日の日付は {today.year}年{today.month}月{today.day}日（{weekday}）です。"
 
             # French
             if any(w in cleaned for w in ["quelle", "qu'est", "qu est", "quelle est"]):

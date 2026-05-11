@@ -6,7 +6,7 @@ Health Check Implementation
 
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Any, Callable, List
-from datetime import datetime, timedelta
+from datetime import datetime
 import asyncio
 import logging
 
@@ -105,12 +105,12 @@ class HealthChecker:
         try:
             # チェック関数を実行
             if asyncio.iscoroutinefunction(self.check_func):
-                result = await asyncio.wait_for(
+                await asyncio.wait_for(
                     self.check_func(),
                     timeout=self.config.timeout
                 )
             else:
-                result = self.check_func()
+                self.check_func()
             
             response_time = (datetime.now() - start_time).total_seconds() * 1000
             

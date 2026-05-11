@@ -7,9 +7,8 @@ pytest conftest - 共通フィクスチャ・モック設定
 import pytest
 import asyncio
 from datetime import datetime, timedelta
-from pathlib import Path
 from src.phase10 import (
-    SecurityEvent, EventType, ThreatLevel
+    SecurityEvent, EventType
 )
 
 # ---------------------------------------------------------------------------

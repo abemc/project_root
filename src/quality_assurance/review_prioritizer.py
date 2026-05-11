@@ -6,10 +6,9 @@
 """
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
-import statistics
+from typing import Dict, List, Optional
 
 
 class PriorityLevel(Enum):
@@ -414,7 +413,7 @@ class ReviewPrioritizer:
         
         report = []
         report.append("=" * 60)
-        report.append(f"REVIEW ASSIGNMENT REPORT")
+        report.append("REVIEW ASSIGNMENT REPORT")
         report.append(f"Item: {priority_score.item_id}")
         report.append("=" * 60)
         report.append("")

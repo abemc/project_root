@@ -1,0 +1,256 @@
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x745b126dfb30>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x70eee06311c0>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7aa82f367920>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x72ba261a4080>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7cd96af57440>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x72bfe4c8e960>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7e36e1c638c0>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7140a4f5d310>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x71918d86d1c0>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7ed558e38a10>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7140ac6f2b10>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7f599040e540>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x784a51708f50>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x784a521d6c60>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7a3c61b0fb60>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7f59903dafc0>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7f59904da690>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x78d9404b6540>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x78d96c5c5f10>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x78d940691250>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x78d8f014c050>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x78d98c47afc0>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x78d986ee3d10>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7461fa831970>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7f174f344800>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7f174f3b6ff0>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7f174f333590>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7f170e1e7800>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7f174f333ce0>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- exception in search_ddg ---
+Traceback (most recent call last):
+  File "/home/abemc/project_root/src/rag/web_search.py", line 82, in search_ddg
+    ddgs_result = ddgs.text(query, region='jp-jp', max_results=max_results)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/abemc/project_root/.venv/lib/python3.12/site-packages/ddgs/ddgs.py", line 458, in text
+    return self._search_sync("text", query, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/abemc/project_root/.venv/lib/python3.12/site-packages/ddgs/ddgs.py", line 454, in _search_sync
+    raise DDGSException(err or "No results found.")
+ddgs.exceptions.DDGSException: ('error sending request for url (https://html.duckduckgo.com/html/)', 'https://html.duckduckgo.com/html/')
+
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7f174a54ae70>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x772086f6ee70>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7720fc405610>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7720fc405820>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x772086f85400>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x772086f87560>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x772043cd7a40>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x77208ae56ba0>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x772086f0a870>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x76efd3d10d40>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x76efd3cc8650>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x76ef96b85610>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x76f0495bebd0>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x76f0495be510>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x76efd2b18710>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x76efd2b30c20>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x76efd2b332f0>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x776033de4a10>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x776033de5790>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x776033de4a70>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x775fbe73b800>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x775f814fa4b0>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x775fbd572840>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x775fbd572e70>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x775fbd573860>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7ec85d93d340>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x7ec85d59e420>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x725ab00aefc0>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x725a54278170>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x725a3045a0c0>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x725a3072f0e0>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]
+--- DDGS call debug ---
+DDGS instance type: <class 'ddgs.ddgs.DDGS'>
+ddgs.text repr: <bound method DDGS.text of <ddgs.ddgs.DDGS object at 0x725a3072e480>>
+signature: (query: str, **kwargs: Any) -> list[dict[str, typing.Any]]

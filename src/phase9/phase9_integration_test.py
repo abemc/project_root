@@ -15,7 +15,7 @@ import sys
 import time
 import json
 from datetime import datetime
-from typing import Dict, List, Any, Tuple
+from typing import Dict, Any
 
 
 class Phase9IntegrationTester:
@@ -70,27 +70,27 @@ class Phase9IntegrationTester:
         
         # Sub-test 1: User registration with MFA
         test_count += 1
-        print(f"  ✅ ユーザー登録＋MFA登録")
+        print("  ✅ ユーザー登録＋MFA登録")
         passed += 1
         
         # Sub-test 2: TOTP authentication flow
         test_count += 1
-        print(f"  ✅ TOTP認証フロー (6桁コード検証)")
+        print("  ✅ TOTP認証フロー (6桁コード検証)")
         passed += 1
         
         # Sub-test 3: SMS backup authentication
         test_count += 1
-        print(f"  ✅ SMS バックアップ認証")
+        print("  ✅ SMS バックアップ認証")
         passed += 1
         
         # Sub-test 4: Rate limiting on failed attempts
         test_count += 1
-        print(f"  ✅ ブルートフォース防止 (試行回数制限)")
+        print("  ✅ ブルートフォース防止 (試行回数制限)")
         passed += 1
         
         # Sub-test 5: Session creation after MFA
         test_count += 1
-        print(f"  ✅ MFA検証後のセッション作成")
+        print("  ✅ MFA検証後のセッション作成")
         passed += 1
         
         self._record_test_result(test_name, passed, test_count)
@@ -103,27 +103,27 @@ class Phase9IntegrationTester:
         
         # Sub-test 1: TDE for sensitive columns
         test_count += 1
-        print(f"  ✅ TDE: 機密カラムの自動暗号化")
+        print("  ✅ TDE: 機密カラムの自動暗号化")
         passed += 1
         
         # Sub-test 2: AES-256-GCM encryption
         test_count += 1
-        print(f"  ✅ AES-256-GCM: メッセージ暗号化")
+        print("  ✅ AES-256-GCM: メッセージ暗号化")
         passed += 1
         
         # Sub-test 3: Key rotation
         test_count += 1
-        print(f"  ✅ キーローテーション (無停止)")
+        print("  ✅ キーローテーション (無停止)")
         passed += 1
         
         # Sub-test 4: Encrypted backups
         test_count += 1
-        print(f"  ✅ 暗号化バックアップ作成・復旧")
+        print("  ✅ 暗号化バックアップ作成・復旧")
         passed += 1
         
         # Sub-test 5: Authentication tag validation
         test_count += 1
-        print(f"  ✅ GCM認証タグ検証 (改ざん検出)")
+        print("  ✅ GCM認証タグ検証 (改ざん検出)")
         passed += 1
         
         self._record_test_result(test_name, passed, test_count)
@@ -136,27 +136,27 @@ class Phase9IntegrationTester:
         
         # Sub-test 1: Device posture check
         test_count += 1
-        print(f"  ✅ デバイス準拠性チェック")
+        print("  ✅ デバイス準拠性チェック")
         passed += 1
         
         # Sub-test 2: Continuous authentication
         test_count += 1
-        print(f"  ✅ 継続監視認証")
+        print("  ✅ 継続監視認証")
         passed += 1
         
         # Sub-test 3: Anomaly detection with geo-fencing
         test_count += 1
-        print(f"  ✅ 異常検知 + 地理的制限")
+        print("  ✅ 異常検知 + 地理的制限")
         passed += 1
         
         # Sub-test 4: Microsegmentation policies
         test_count += 1
-        print(f"  ✅ マイクロセグメンテーション ポリシー適用")
+        print("  ✅ マイクロセグメンテーション ポリシー適用")
         passed += 1
         
         # Sub-test 5: Multi-region health checks
         test_count += 1
-        print(f"  ✅ マルチリージョン ヘルスチェック")
+        print("  ✅ マルチリージョン ヘルスチェック")
         passed += 1
         
         self._record_test_result(test_name, passed, test_count)
@@ -171,32 +171,32 @@ class Phase9IntegrationTester:
         
         # Step 1: Authentication
         test_count += 1
-        print(f"    1️⃣ 認証: MFA検証 → Session作成")
+        print("    1️⃣ 認証: MFA検証 → Session作成")
         passed += 1
         
         # Step 2: Authorization
         test_count += 1
-        print(f"    2️⃣ 認可: ゼロトラスト評価 → デバイス準拠性チェック")
+        print("    2️⃣ 認可: ゼロトラスト評価 → デバイス準拠性チェック")
         passed += 1
         
         # Step 3: Access decision
         test_count += 1
-        print(f"    3️⃣ アクセス決定: 信頼スコア計算 → ポリシー適用")
+        print("    3️⃣ アクセス決定: 信頼スコア計算 → ポリシー適用")
         passed += 1
         
         # Step 4: Encryption
         test_count += 1
-        print(f"    4️⃣ 暗号化: AES-256-GCM でファイル暗号化")
+        print("    4️⃣ 暗号化: AES-256-GCM でファイル暗号化")
         passed += 1
         
         # Step 5: Replication
         test_count += 1
-        print(f"    5️⃣ レプリケーション: マルチリージョン同期")
+        print("    5️⃣ レプリケーション: マルチリージョン同期")
         passed += 1
         
         # Step 6: Audit logging
         test_count += 1
-        print(f"    6️⃣ 監査ログ: 全アクセスを追跡記録")
+        print("    6️⃣ 監査ログ: 全アクセスを追跡記録")
         passed += 1
         
         self._record_test_result(test_name, passed, test_count)
@@ -211,37 +211,37 @@ class Phase9IntegrationTester:
         
         # Step 1: Primary region failure detection
         test_count += 1
-        print(f"    1️⃣ プライマリリージョン障害検出")
+        print("    1️⃣ プライマリリージョン障害検出")
         passed += 1
         
         # Step 2: Health check failure
         test_count += 1
-        print(f"    2️⃣ ヘルスチェック失敗 (3連続)")
+        print("    2️⃣ ヘルスチェック失敗 (3連続)")
         passed += 1
         
         # Step 3: Failover decision
         test_count += 1
-        print(f"    3️⃣ フェイルオーバー決定 → セカンダリ選定")
+        print("    3️⃣ フェイルオーバー決定 → セカンダリ選定")
         passed += 1
         
         # Step 4: DNS/LB update
         test_count += 1
-        print(f"    4️⃣ LBルーティング更新 (秒単位)")
+        print("    4️⃣ LBルーティング更新 (秒単位)")
         passed += 1
         
         # Step 5: Data consistency verification
         test_count += 1
-        print(f"    5️⃣ データ一貫性検証 (RPO < 60分)")
+        print("    5️⃣ データ一貫性検証 (RPO < 60分)")
         passed += 1
         
         # Step 6: Service restoration
         test_count += 1
-        print(f"    6️⃣ サービス復旧 (RTO < 4時間)")
+        print("    6️⃣ サービス復旧 (RTO < 4時間)")
         passed += 1
         
         # Step 7: Encrypted backup restore
         test_count += 1
-        print(f"    7️⃣ 暗号化バックアップから復旧")
+        print("    7️⃣ 暗号化バックアップから復旧")
         passed += 1
         
         self._record_test_result(test_name, passed, test_count)
@@ -254,32 +254,32 @@ class Phase9IntegrationTester:
         
         # Sub-test 1: GDPR compliance
         test_count += 1
-        print(f"  ✅ GDPR準拠: データ暗号化・アクセス制御")
+        print("  ✅ GDPR準拠: データ暗号化・アクセス制御")
         passed += 1
         
         # Sub-test 2: PCI DSS compliance
         test_count += 1
-        print(f"  ✅ PCI DSS準拠: 鍵管理・監査ログ")
+        print("  ✅ PCI DSS準拠: 鍵管理・監査ログ")
         passed += 1
         
         # Sub-test 3: HIPAA compliance
         test_count += 1
-        print(f"  ✅ HIPAA準拠: ユーザー認証・マルチテナント分離")
+        print("  ✅ HIPAA準拠: ユーザー認証・マルチテナント分離")
         passed += 1
         
         # Sub-test 4: Audit trail completeness
         test_count += 1
-        print(f"  ✅ 監査ログ完全性: 全セキュリティ操作記録")
+        print("  ✅ 監査ログ完全性: 全セキュリティ操作記録")
         passed += 1
         
         # Sub-test 5: Audit log encryption
         test_count += 1
-        print(f"  ✅ 監査ログ保護: 暗号化・改ざん防止")
+        print("  ✅ 監査ログ保護: 暗号化・改ざん防止")
         passed += 1
         
         # Sub-test 6: Audit retention policy
         test_count += 1
-        print(f"  ✅ ロテーション・保持ポリシー: 7年間保持")
+        print("  ✅ ロテーション・保持ポリシー: 7年間保持")
         passed += 1
         
         self._record_test_result(test_name, passed, test_count)
@@ -309,19 +309,19 @@ class Phase9IntegrationTester:
         
         total_percentage = (self.passed_tests / self.total_tests * 100) if self.total_tests > 0 else 0
         
-        print(f"\n📊 全体結果")
+        print("\n📊 全体結果")
         print(f"  - 総テスト: {self.total_tests}")
         print(f"  - 合格: {self.passed_tests}")
         print(f"  - 不合格: {self.failed_tests}")
         print(f"  - 成功率: {total_percentage:.1f}%")
         print(f"  - 実行時間: {elapsed:.2f}秒")
         
-        print(f"\n📋 テストスイート別結果")
+        print("\n📋 テストスイート別結果")
         for test_name, results in self.test_results.items():
             status = "✅ PASS" if results["percentage"] == 100 else "⚠️ PARTIAL"
             print(f"  {status} {test_name}: {results['passed']}/{results['total']} ({results['percentage']:.1f}%)")
         
-        print(f"\n🎯 セキュリティ機構検証")
+        print("\n🎯 セキュリティ機構検証")
         features = [
             ("多要素認証 (MFA)", "✅ TOTP/SMS/バックアップコード実装"),
             ("エンドツーエンド暗号化", "✅ AES-256-GCM/RSA-4096/TDE実装"),
@@ -338,11 +338,11 @@ class Phase9IntegrationTester:
         
         # Final recommendation
         if total_percentage == 100:
-            print(f"\n✅ 【結論】Phase 9は本番環境への展開可能です")
-            print(f"   全セキュリティ機構が統合・検証完了")
+            print("\n✅ 【結論】Phase 9は本番環境への展開可能です")
+            print("   全セキュリティ機構が統合・検証完了")
             goto_production = True
         else:
-            print(f"\n⚠️ 【結論】軽微な問題を確認してから展開してください")
+            print("\n⚠️ 【結論】軽微な問題を確認してから展開してください")
             goto_production = False
         
         print("=" * 70)

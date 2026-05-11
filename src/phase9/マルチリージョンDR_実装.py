@@ -13,13 +13,11 @@ Specifications:
 - Cross-region replication with encryption
 """
 
-import os
-import json
 import hashlib
 import uuid
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Tuple, Any, Set
+from typing import Optional, Dict, List, Tuple, Any
 from enum import Enum
 import time
 from collections import defaultdict
@@ -625,7 +623,7 @@ def test_multi_region_dr_system():
     # Test 1: Multi-region initialization
     print("\n【Test 1】マルチリージョン初期化")
     init_result = system.initialize_multi_region()
-    print(f"✅ マルチリージョン初期化完了")
+    print("✅ マルチリージョン初期化完了")
     print(f"  - プライマリリージョン: {init_result['primary_region']}")
     print(f"  - セカンダリリージョン: {init_result['secondary_regions']}個")
     print(f"  - RPO: {init_result['rpo_minutes']}分")
@@ -634,7 +632,7 @@ def test_multi_region_dr_system():
     # Test 2: Regional health check
     print("\n【Test 2】全リージョンのヘルスチェック")
     health_summary = system.check_all_regions_health()
-    print(f"✅ ヘルスチェック完了")
+    print("✅ ヘルスチェック完了")
     for region, status in health_summary["regions"].items():
         health_indicator = "🟢" if status["is_healthy"] else "🔴"
         print(f"  {health_indicator} {region}")
@@ -648,14 +646,14 @@ def test_multi_region_dr_system():
     success = system.replicate_data_to_all_regions(test_data)
     print(f"✅ レプリケーション完了: {'成功' if success else '失敗'}")
     print(f"  - レプリケートデータ: {len(test_data)} bytes")
-    print(f"  - ターゲットリージョン: 2個")
+    print("  - ターゲットリージョン: 2個")
     
     # Test 4: Replication metrics
     print("\n【Test 4】レプリケーションメトリクス")
     metrics = system.replication_engine.get_replication_metrics("ap-northeast-1->ap-southeast-2")
     if metrics:
-        print(f"✅ レプリケーション監視")
-        print(f"  - 経路: Tokyo → Sydney")
+        print("✅ レプリケーション監視")
+        print("  - 経路: Tokyo → Sydney")
         print(f"  - 状態: {metrics.replication_status.value}")
         print(f"  - ラグ: {metrics.replication_lag_seconds:.3f}秒")
         print(f"  - レプリケート量: {metrics.bytes_replicated} bytes")
@@ -679,14 +677,14 @@ def test_multi_region_dr_system():
         RegionName.SYDNEY
     )
     if restored_data:
-        print(f"✅ バックアップ復旧成功")
+        print("✅ バックアップ復旧成功")
         print(f"  - 復旧先: {RegionName.SYDNEY.value}")
         print(f"  - 復旧データサイズ: {len(restored_data)} bytes")
     
     # Test 7: Failover scenario
     print("\n【Test 7】フェイルオーバーシナリオテスト")
     should_failover, target = system.failover_orchestrator.evaluate_failover()
-    print(f"✅ フェイルオーバー評価完了")
+    print("✅ フェイルオーバー評価完了")
     print(f"  - フェイルオーバー必要: {should_failover}")
     print(f"  - 現在のプライマリ: {system.failover_orchestrator.primary_region.value}")
     if should_failover:
@@ -695,9 +693,9 @@ def test_multi_region_dr_system():
     # Test 8: DR metrics
     print("\n【Test 8】災害復旧メトリクス")
     dr_metrics = system.get_disaster_recovery_metrics()
-    print(f"✅ DR メトリクス")
+    print("✅ DR メトリクス")
     print(f"  - プライマリリージョン: {dr_metrics['primary_region']}")
-    print(f"  - レプリケーション状態: 複数経路監視中")
+    print("  - レプリケーション状態: 複数経路監視中")
     for pair, status in dr_metrics['replication_status'].items():
         print(f"    - {pair}: {status['status']} (ラグ: {status['lag_seconds']}秒)")
     print(f"  - バックアップ数: {dr_metrics['backup_count']}")
@@ -708,12 +706,12 @@ def test_multi_region_dr_system():
     print("【パフォーマンスメトリクス】")
     print("=" * 70)
     
-    print(f"✅ データレプリケーション遅延 (RPO): < 60秒")
-    print(f"✅ フェイルオーバー実行時間 (RTO): < 4時間")
-    print(f"✅ ヘルスチェック間隔: 60秒")
-    print(f"✅ 可用性SLA: 99.99%")
-    print(f"✅ バックアップ冗長度: 3リージョン")
-    print(f"✅ 復旧成功率: 100%")
+    print("✅ データレプリケーション遅延 (RPO): < 60秒")
+    print("✅ フェイルオーバー実行時間 (RTO): < 4時間")
+    print("✅ ヘルスチェック間隔: 60秒")
+    print("✅ 可用性SLA: 99.99%")
+    print("✅ バックアップ冗長度: 3リージョン")
+    print("✅ 復旧成功率: 100%")
     
     print("\n" + "=" * 70)
     print("✅ Phase 9 Step 4 テスト完了 (すべてのチェック PASS)")

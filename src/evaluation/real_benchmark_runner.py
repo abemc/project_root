@@ -13,7 +13,7 @@ Week 3 Day 3-5: 実ベンチマーク実行エンジン
 
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional
 import json
 import argparse
 import logging
@@ -161,7 +161,7 @@ class RealBenchmarkRunner:
                 for q in batch:
                     try:
                         # 簡易推論: 選択肢からランダム選択（実装時は実モデルに置き換え）
-                        question_text = q.get('question', '')
+                        q.get('question', '')
                         choices = q.get('choices', ['A', 'B', 'C', 'D'])
                         answer = q.get('answer', 'A')
                         
@@ -209,7 +209,7 @@ class RealBenchmarkRunner:
                 error_messages=errors[:10]  # 最初の10個のエラーのみ記録
             )
             
-            logger.info(f"✅ MMLU benchmark complete:")
+            logger.info("✅ MMLU benchmark complete:")
             logger.info(f"   Accuracy: {result.accuracy:.4f}")
             logger.info(f"   F1 Score: {result.f1_score:.4f}")
             logger.info(f"   Throughput: {throughput:.1f} samples/sec")
@@ -286,7 +286,7 @@ class RealBenchmarkRunner:
                 
                 for problem in batch:
                     try:
-                        question = problem.get('question', '')
+                        problem.get('question', '')
                         answer = problem.get('answer', '')
                         
                         # ダミー推論 (実装時は実モデル推論に置き換え)
@@ -330,7 +330,7 @@ class RealBenchmarkRunner:
                 error_messages=errors[:10]
             )
             
-            logger.info(f"✅ GSM8K benchmark complete:")
+            logger.info("✅ GSM8K benchmark complete:")
             logger.info(f"   Accuracy: {result.accuracy:.4f}")
             logger.info(f"   F1 Score: {result.f1_score:.4f}")
             logger.info(f"   Throughput: {throughput:.1f} samples/sec")

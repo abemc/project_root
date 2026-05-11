@@ -5,9 +5,7 @@ Phase 7 Canaryデプロイメント計画
 戦略: 5% → 25% → 50% → 100% (段階的移行)
 """
 
-import json
 from datetime import datetime, timedelta
-from typing import Dict, Any, List
 from dataclasses import dataclass
 from enum import Enum
 
@@ -426,7 +424,7 @@ def run_canary_deployment_plan():
     print(dashboard)
     
     print("="*70)
-    print(f"✅ Canaryデプロイメント計画生成完了")
+    print("✅ Canaryデプロイメント計画生成完了")
     print("   実行開始時刻: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     print("="*70 + "\n")
     

@@ -5,17 +5,13 @@
 import pytest
 import tempfile
 from pathlib import Path
-from datetime import datetime, timedelta
 from src.quality_assurance.source_credibility import (
     SourceCredibilityAnalyzer,
     SourceMetadata,
-    AccuracyHistory,
-    CredibilityLevel,
-    CorrectionTrend
+    AccuracyHistory
 )
 from src.quality_assurance.source_registry import (
-    SourceRegistry,
-    SourceRecord
+    SourceRegistry
 )
 
 

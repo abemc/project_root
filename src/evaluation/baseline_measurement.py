@@ -12,7 +12,7 @@
 
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 import json
 import argparse
 import torch
@@ -26,12 +26,9 @@ sys.path.insert(0, str(project_root / "src"))
 from model import GPT, GPTConfig
 from evaluation.benchmark_runner import BenchmarkRunner
 from evaluation.metrics.metric_calculator import MetricCalculator
-from evaluation.datasets.mmlu_loader import MMULoader, MMUEvaluator
-from evaluation.datasets.gsm8k_loader import GSM8KLoader, GSM8KEvaluator
+from evaluation.datasets.mmlu_loader import MMULoader
+from evaluation.datasets.gsm8k_loader import GSM8KLoader
 from evaluation.datasets.truthfulqa_bbq_loaders import BBQLoader, BiasEvaluator
-from evaluation.model_loader import ModelCheckpointLoader, InferenceEngine
-from evaluation.tokenizer_pipeline import TokenizationPipeline
-from evaluation.model_loader import ModelCheckpointLoader, InferenceEngine
 from evaluation.tokenizer_pipeline import TokenizationPipeline
 
 # ログ設定
@@ -247,7 +244,7 @@ class BaselineMeasurementRunner:
         # メトリクス計算機
         self.calculator = MetricCalculator()
         
-        logger.info(f"Initialized BaselineMeasurementRunner")
+        logger.info("Initialized BaselineMeasurementRunner")
         logger.info(f"  Model: {model_name}")
         logger.info(f"  Device: {device}")
         logger.info(f"  Output: {self.output_dir}")
@@ -525,7 +522,7 @@ def main():
     runner.print_summary(results)
     result_file = runner.save_results(results)
     
-    logger.info(f"✓ Baseline measurement complete")
+    logger.info("✓ Baseline measurement complete")
     logger.info(f"  Results: {result_file}")
     
     return 0

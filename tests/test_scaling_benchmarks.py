@@ -68,12 +68,12 @@ def test_scaling_benchmark_mmlu():
     
     print("\n📊 Scaling Benchmark Results (MMLU):")
     if result:
-        print(f"✅ Benchmark completed successfully")
+        print("✅ Benchmark completed successfully")
         print(f"   Dataset size: {result['dataset_size']}")
         print(f"   Total time: {result['inference_statistics']['total_time']:.2f}s")
         print(f"   Throughput: {result['inference_statistics']['samples_per_second']:.2f} samples/sec")
     else:
-        print(f"⚠️  Benchmark completed with warnings")
+        print("⚠️  Benchmark completed with warnings")
     
     return runner
 
@@ -106,12 +106,12 @@ def test_scaling_benchmark_gsm8k():
     
     print("\n📊 Scaling Benchmark Results (GSM8K):")
     if result:
-        print(f"✅ Benchmark completed successfully")
+        print("✅ Benchmark completed successfully")
         print(f"   Dataset size: {result['dataset_size']}")
         print(f"   Total time: {result['inference_statistics']['total_time']:.2f}s")
         print(f"   Throughput: {result['inference_statistics']['samples_per_second']:.2f} samples/sec")
     else:
-        print(f"⚠️  Benchmark completed with warnings")
+        print("⚠️  Benchmark completed with warnings")
     
     return runner
 
@@ -150,7 +150,7 @@ def test_batch_inference_pipeline():
     
     # キャッシュ統計
     cache_stats = pipeline.get_cache_statistics()
-    print(f"\n📦 Cache Statistics:")
+    print("\n📦 Cache Statistics:")
     print(f"   Cache hits: {cache_stats['cache_hits']}")
     print(f"   Cache misses: {cache_stats['cache_misses']}")
     print(f"   Hit rate: {cache_stats['hit_rate']:.2f}%")
@@ -188,7 +188,7 @@ def test_dynamic_batch_size_optimization():
     print(f"\n✅ Suggested batch size: {suggested}")
     
     # メモリに基づいた調整
-    print(f"\nTesting memory-based adjustment:")
+    print("\nTesting memory-based adjustment:")
     initial_size = optimizer.batch_size
     
     # メモリ使用量が多い場合
@@ -242,25 +242,25 @@ def test_comparison_and_statistics():
             print(f"    Best metric: {max(metrics['metrics'].values()):.4f}")
     
     if comparison['summary']:
-        print(f"\n  Summary:")
+        print("\n  Summary:")
         print(f"    Best accuracy: {comparison['summary'].get('best_accuracy', 'N/A')}")
         print(f"    Best throughput: {comparison['summary'].get('best_throughput', 'N/A')}")
     
     # 統計情報
     stats = runner.get_scaling_statistics()
-    print(f"\n📈 Scaling Statistics:")
+    print("\n📈 Scaling Statistics:")
     print(f"  Total benchmarks: {stats.get('total_benchmarks', 0)}")
     print(f"  Total samples: {stats.get('total_samples', 0)}")
     print(f"  Total time: {stats.get('total_time', 0):.2f}s")
     
     if stats.get('benchmarks'):
-        print(f"\n  Benchmark details:")
+        print("\n  Benchmark details:")
         for bench_name, bench_stats in stats['benchmarks'].items():
             print(f"    {bench_name}: {bench_stats.get('samples', 0)} samples, {bench_stats.get('throughput', 0):.2f} samples/sec")
     
     # 結果保存
     runner.save_results('scaling_test_results.json')
-    print(f"\n✅ Results saved to results/scaling_benchmarks/")
+    print("\n✅ Results saved to results/scaling_benchmarks/")
 
 
 def main():

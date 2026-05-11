@@ -12,10 +12,8 @@ Canaryデプロイメント: 段階的本番環境展開
 Total: 33時間 (1.4日)
 """
 
-import json
-import time
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from datetime import datetime
+from typing import Dict, List
 from dataclasses import dataclass
 from enum import Enum
 import logging

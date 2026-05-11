@@ -1,0 +1,8 @@
+2026-05-10T16:58:33+09:00 | Score check
+- Query: 昨日のジャイアンツの試合は？ (resolved ISO: 2026-05-09)
+- Source: https://www.giants.jp/game/20260509_19021_1/  — found "試合終了" and score block R: 中日 4 / 巨人 2
+- Source: https://npb.jp/scores/2026/0509/d-g-07/      — page shows 試合終了 and score table (読売ジャイアンツ 2 - 中日 4)
+- Cross-check: sources agree on最終スコア: 中日 4 - 読売ジャイアンツ 2
+
+Notes:
+- giants.jp fetched via Playwright (rendered). npb.jp fetched and confirms the same final score.

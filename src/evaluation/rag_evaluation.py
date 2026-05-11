@@ -5,8 +5,7 @@ Retrieval, Generation, 統合パイプラインの評価
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, Set
-import json
+from typing import Dict, List, Optional, Set
 import math
 import logging
 from collections import defaultdict

@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-import os
 
 # プロジェクトルートとパス設定
 ROOT = Path(__file__).resolve().parents[2]

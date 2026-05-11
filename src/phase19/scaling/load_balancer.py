@@ -1,9 +1,8 @@
 """Load Balancer - distributes requests across multiple backends."""
 
 import random
-import time
 import threading
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum

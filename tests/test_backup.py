@@ -3,9 +3,7 @@
 import unittest
 import tempfile
 import shutil
-import json
 from pathlib import Path
-from datetime import datetime, timedelta
 
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -147,7 +145,7 @@ class TestBackupManager(unittest.TestCase):
             backup_name="test_size",
             compression=False
         )
-        backup_path = result.get("backup_path")
+        result.get("backup_path")
         
         size = self.manager.get_backup_size("test_size")
         self.assertIsNotNone(size)
@@ -181,7 +179,7 @@ class TestBackupManager(unittest.TestCase):
             targets=["system_config"],
             compression=False
         )
-        backup_path = result.get("backup_path")
+        result.get("backup_path")
     """バックアップアイテムテスト"""
     
     def test_create_item(self):

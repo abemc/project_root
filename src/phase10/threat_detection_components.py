@@ -14,16 +14,13 @@ Phase 10 Step 3: AI/ML 脅威検出エンジン - サブコンポーネント実
 """
 
 import numpy as np
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple, Any
-from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Dict, List, Optional, Any
 from collections import deque
 import hashlib
 import hmac
-import json
 import logging
 import pickle
-from enum import Enum
 
 logger = logging.getLogger(__name__)
 

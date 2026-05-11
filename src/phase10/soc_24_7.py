@@ -17,13 +17,12 @@ Phase 10 Step 1: 24/7 Security Operations Center (SOC) - メインエンジン
 import asyncio
 import json
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 import logging
 from collections import defaultdict, deque
 import hashlib
-import re
 
 logger = logging.getLogger(__name__)
 

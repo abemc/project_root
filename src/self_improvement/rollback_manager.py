@@ -12,7 +12,7 @@ Phase 2: ロールバック機構の強化
 import os
 import json
 import shutil
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass, field, asdict
 from typing import Dict, List, Optional, Tuple, Any

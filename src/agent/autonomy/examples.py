@@ -13,7 +13,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from src.agent.autonomy.decision_analyzer import (
     DecisionAnalyzer,
     DecisionType,
-    DecisionQuality,
 )
 
 
@@ -273,7 +272,7 @@ def example_report_generation(output_dir: Path = Path("/tmp")):
     analyzer.export_flows_to_csv(csv_flows)
     analyzer.export_steps_to_csv(csv_steps)
     
-    print(f"\n【エクスポート完了】")
+    print("\n【エクスポート完了】")
     print(f"  JSON レポート: {json_file}")
     print(f"  フロー CSV: {csv_flows}")
     print(f"  ステップ CSV: {csv_steps}")

@@ -3,9 +3,9 @@ import numpy as np
 import json
 import torch
 from transformers import AutoTokenizer, AutoModel
-from typing import Union, Optional
+from src.utils.async_helpers import run_in_executor, await_future
+from typing import Union
 
-import sentencepiece
 import os
 from pathlib import Path
 try:
@@ -28,17 +28,17 @@ class Retriever:
         print("Loading local embedding model (bge-m3, safetensors)...")
 
         # safetensors のみロード（torch.load を使わない）
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            "BAAI/bge-m3",
-            # bge-m3はカスタムコードを含むため、このオプションが必須です
-            trust_remote_code=True,
-        )
-        self.model = AutoModel.from_pretrained(
-            "BAAI/bge-m3",
-            use_safetensors=True,
-            # bge-m3はカスタムコードを含むため、このオプションが必須です
-            trust_remote_code=True,
-        ).to(self.device)
+        print("Loading local embedding model (bge-m3) in background...")
+        tok_fut = run_in_executor(AutoTokenizer.from_pretrained, "BAAI/bge-m3", trust_remote_code=True)
+        model_fut = run_in_executor(AutoModel.from_pretrained, "BAAI/bge-m3", use_safetensors=True, trust_remote_code=True)
+
+        # Await results (may take time) with sensible timeouts
+        self.tokenizer = await_future(tok_fut, timeout=60)
+        self.model = await_future(model_fut, timeout=180)
+        try:
+            self.model = self.model.to(self.device)
+        except Exception:
+            pass
         print("Local embedding model loaded successfully.")
 
         # パスを保存（strに統一）
@@ -376,9 +376,11 @@ class Retriever:
                     try:
                         img = Image.open(io.BytesIO(img_bytes))
                         # OCR実行
-                        text = pytesseract.image_to_string(img, lang='jpn+eng')
+                        # Run OCR in background to avoid blocking
+                        ocr_fut = run_in_executor(pytesseract.image_to_string, img, 'jpn+eng')
+                        text = await_future(ocr_fut, timeout=20)
                         return p_idx, text
-                    except Exception as e:
+                    except Exception:
                         return p_idx, ""
 
                 # スレッドプールで並列実行
@@ -498,7 +500,8 @@ class Retriever:
                 progress_callback(0.3, "Performing OCR on image...")
             try:
                 img = Image.open(file_obj)
-                extracted_text = pytesseract.image_to_string(img, lang='jpn+eng')
+                ocr_fut = run_in_executor(pytesseract.image_to_string, img, 'jpn+eng')
+                extracted_text = await_future(ocr_fut, timeout=20)
                 
                 if cache_available and cache_path:
                     with open(cache_path, "w", encoding="utf-8") as f:

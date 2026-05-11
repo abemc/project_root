@@ -37,7 +37,7 @@ class Phase7AdvancedTester:
     
     def __init__(self):
         """初期化"""
-        from src.rag.query_preprocessor import Phase7QueryPreprocessor, MultiDomainRetriever
+        from src.rag.query_preprocessor import Phase7QueryPreprocessor
         from src.rag.knowledge_integration_engine import (
             Phase7KnowledgeIntegrationEngine,
             ResponseGenerationEngine,
@@ -94,7 +94,7 @@ class Phase7AdvancedTester:
             try:
                 preprocessing = self.preprocessor.preprocess(query)
                 mock_docs = self._create_mock_documents(query)
-                integrated = self.knowledge_engine.integrate_and_reason(
+                self.knowledge_engine.integrate_and_reason(
                     preprocessing_result=preprocessing,
                     retrieved_documents=mock_docs
                 )
@@ -133,7 +133,7 @@ class Phase7AdvancedTester:
             try:
                 preprocessing = self.preprocessor.preprocess(query)
                 mock_docs = self._create_mock_documents(query)
-                integrated = self.knowledge_engine.integrate_and_reason(
+                self.knowledge_engine.integrate_and_reason(
                     preprocessing_result=preprocessing,
                     retrieved_documents=mock_docs
                 )
@@ -247,7 +247,7 @@ class Phase7AdvancedTester:
             try:
                 preprocessing = self.preprocessor.preprocess(query)
                 mock_docs = self._create_mock_documents(query)
-                integrated = self.knowledge_engine.integrate_and_reason(
+                self.knowledge_engine.integrate_and_reason(
                     preprocessing_result=preprocessing,
                     retrieved_documents=mock_docs
                 )
@@ -296,10 +296,10 @@ class Phase7AdvancedTester:
             print_test(i, scenario['name'])
             try:
                 scenario['test']()
-                print(f"    ✅ エラー処理: 正常に処理または失敗")
+                print("    ✅ エラー処理: 正常に処理または失敗")
                 results.append(True)
-            except TypeError as e:
-                print(f"    ✅ 予期されたエラーをキャッチ")
+            except TypeError:
+                print("    ✅ 予期されたエラーをキャッチ")
                 results.append(True)
             except Exception as e:
                 print(f"    ⚠️  エラー: {str(e)[:50]}")
@@ -359,9 +359,9 @@ class Phase7AdvancedTester:
             print_section("最終判定")
             if all_passed:
                 print("\n  🎉 すべての高度なテストが成功しました！")
-                print(f"  ✅ Phase 7 RAG統合システムは本番環境対応レベルです")
+                print("  ✅ Phase 7 RAG統合システムは本番環境対応レベルです")
             else:
-                print(f"\n  ⚠️  一部のテストに課題があります")
+                print("\n  ⚠️  一部のテストに課題があります")
             
             print(f"\n  実行完了時刻: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             

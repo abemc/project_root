@@ -8,8 +8,7 @@ import pytest
 import asyncio
 import json
 import time
-from unittest.mock import Mock, patch, AsyncMock
-from datetime import datetime
+from unittest.mock import Mock, AsyncMock
 
 import sys
 import os
@@ -19,7 +18,6 @@ from src.cache.redis_manager import (
     RedisConnectionManager,
     CacheKeyGenerator,
     CacheTier,
-    CacheConfig,
     CacheInvalidationEventSystem,
 )
 

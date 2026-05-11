@@ -11,7 +11,7 @@ Week 3 Day 4-5: ベンチマーク結果分析・比較エンジン
 
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 import json
 import logging
 from dataclasses import dataclass, asdict
@@ -152,7 +152,7 @@ class BenchmarkAnalyzer:
         else:
             analysis = {"metrics": [], "summary": {}}
         
-        logger.info(f"Performance analysis complete")
+        logger.info("Performance analysis complete")
         self.analysis['performance'] = analysis
         return analysis
     
@@ -315,7 +315,7 @@ def main():
     analyzer.load_results(args.results)
     
     # 分析実行
-    report = analyzer.generate_report(output_path=args.output)
+    analyzer.generate_report(output_path=args.output)
     
     # サマリー表示
     analyzer.print_summary()

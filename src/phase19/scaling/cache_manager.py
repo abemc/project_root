@@ -1,12 +1,10 @@
 """Cache Manager - manages multi-level caching for improved performance."""
 
 import time
-import hashlib
 import json
 import threading
-from typing import Dict, Any, Optional, List, Callable
+from typing import Dict, Any, Optional, Callable
 from dataclasses import dataclass, field
-from datetime import datetime
 from enum import Enum
 
 

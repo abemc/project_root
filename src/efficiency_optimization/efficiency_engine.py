@@ -123,7 +123,7 @@ class QuantizationEngine:
         
         sorted_vals = sorted(values)
         min_val = sorted_vals[0]
-        max_val = sorted_vals[-1]
+        sorted_vals[-1]
         
         # 外れ値除去
         percentile_idx = int(len(sorted_vals) * 0.999)
@@ -141,10 +141,8 @@ class QuantizationEngine:
         scale, zero_point = self.compute_quantization_params(tensor)
         
         if qtype == QuantizationType.INT8:
-            bits = 8
             qmax = 127
         elif qtype == QuantizationType.INT4:
-            bits = 4
             qmax = 7
         else:
             return tensor, 1.0, 0.0  # No quantization

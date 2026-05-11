@@ -7,7 +7,6 @@ INT4/INT2 量子化、精度キャリブレーションテスト
 """
 
 import pytest
-import asyncio
 import numpy as np
 import sys
 import os

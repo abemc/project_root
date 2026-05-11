@@ -6,11 +6,10 @@
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 import statistics
-from urllib.parse import urlparse
 
 
 class CredibilityLevel(Enum):
@@ -528,7 +527,7 @@ class SourceCredibilityAnalyzer:
         """分析結果のレポートを生成"""
         report = []
         report.append("=" * 60)
-        report.append(f"SOURCE CREDIBILITY ANALYSIS REPORT")
+        report.append("SOURCE CREDIBILITY ANALYSIS REPORT")
         report.append(f"Source ID: {result.source_id}")
         report.append(f"Analyzed: {result.timestamp.isoformat()}")
         report.append("=" * 60)

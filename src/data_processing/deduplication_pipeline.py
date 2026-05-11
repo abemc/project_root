@@ -11,8 +11,7 @@ from enum import Enum
 
 from src.data_processing.deduplicator import (
     ExactDeduplicator,
-    DeduplicationStrategy as ExactStrategy,
-    DeduplicationResult
+    DeduplicationStrategy as ExactStrategy
 )
 from src.data_processing.semantic_deduplicator import SemanticDeduplicator
 
@@ -426,7 +425,7 @@ Step {i}: {step.step_name}
                 else:
                     report += f"    - {metric_name}: {metric_value}\n"
         
-        report += f"""
+        report += """
 【除去されたID（最初の20件）】
 """
         for removed_id in result.all_removed_ids[:20]:

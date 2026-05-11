@@ -5,7 +5,6 @@
 """
 
 import pytest
-from datetime import datetime, timedelta
 from src.ethics.ethics_monitor import (
     EthicsMonitor,
     BiasDetector,

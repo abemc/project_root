@@ -4,16 +4,16 @@
 """
 
 import logging
-import base64
+import os
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
+from typing import Dict, List, Any
 from dataclasses import dataclass
 from datetime import datetime
-from io import BytesIO
 
-import numpy as np
 
 logger = logging.getLogger(__name__)
+
+from src.utils.async_helpers import run_in_executor, await_future
 
 
 @dataclass
@@ -49,40 +49,44 @@ class VisionAnalyzer:
     def _load_model(self):
         """ビジョンモデルをロード"""
         try:
+            # Test / CI: skip heavy model loading when USE_MOCK_VISION is set
+            if os.environ.get("USE_MOCK_VISION", "0") in ("1", "true", "True"):
+                logger.info("USE_MOCK_VISION set — skipping real model load and using lightweight mock behavior")
+                self.model = None
+                self.processor = None
+                self._mock = True
+                return
+            else:
+                self._mock = False
             if self.model_name == "clip":
                 from transformers import CLIPProcessor, CLIPModel
-                logger.info("Loading CLIP model...")
-                self.model = CLIPModel.from_pretrained(
-                    "openai/clip-vit-base-patch32",
-                    cache_dir=str(self.cache_dir)
-                )
-                self.processor = CLIPProcessor.from_pretrained(
-                    "openai/clip-vit-base-patch32",
-                    cache_dir=str(self.cache_dir)
-                )
+                logger.info("Loading CLIP model in background...")
+                model_fut = run_in_executor(CLIPModel.from_pretrained, "openai/clip-vit-base-patch32", cache_dir=str(self.cache_dir))
+                proc_fut = run_in_executor(CLIPProcessor.from_pretrained, "openai/clip-vit-base-patch32", cache_dir=str(self.cache_dir))
+                self.model = await_future(model_fut, timeout=60)
+                self.processor = await_future(proc_fut, timeout=60)
                 logger.info("✅ CLIP model loaded successfully")
             elif self.model_name == "blip":
                 from transformers import BlipProcessor, BlipForConditionalGeneration
-                logger.info("Loading BLIP model...")
-                self.model = BlipForConditionalGeneration.from_pretrained(
-                    "Salesforce/blip-image-captioning-base",
-                    cache_dir=str(self.cache_dir)
-                )
-                self.processor = BlipProcessor.from_pretrained(
-                    "Salesforce/blip-image-captioning-base",
-                    cache_dir=str(self.cache_dir)
-                )
+                logger.info("Loading BLIP model in background...")
+                model_fut = run_in_executor(BlipForConditionalGeneration.from_pretrained, "Salesforce/blip-image-captioning-base", cache_dir=str(self.cache_dir))
+                proc_fut = run_in_executor(BlipProcessor.from_pretrained, "Salesforce/blip-image-captioning-base", cache_dir=str(self.cache_dir))
+                self.model = await_future(model_fut, timeout=120)
+                self.processor = await_future(proc_fut, timeout=120)
                 logger.info("✅ BLIP model loaded successfully")
             else:
                 logger.warning(f"Model {self.model_name} not supported. Using CLIP.")
                 from transformers import CLIPProcessor, CLIPModel
-                self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
-                self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+                model_fut = run_in_executor(CLIPModel.from_pretrained, "openai/clip-vit-base-patch32")
+                proc_fut = run_in_executor(CLIPProcessor.from_pretrained, "openai/clip-vit-base-patch32")
+                self.model = await_future(model_fut, timeout=60)
+                self.processor = await_future(proc_fut, timeout=60)
         
         except ImportError:
             logger.warning("Transformers not installed. Vision module will use basic image processing.")
             self.model = None
             self.processor = None
+            self._mock = True
     
     def analyze_image(
         self,
@@ -169,7 +173,6 @@ class VisionAnalyzer:
         
         try:
             if self.model_name == "blip":
-                import torch
                 # BLIPで画像キャプション生成
                 inputs = self.processor(image, return_tensors="pt")
                 out = self.model.generate(**inputs, max_length=77)
@@ -252,7 +255,8 @@ class VisionAnalyzer:
         """
         try:
             import pytesseract
-            text = pytesseract.image_to_string(image)
+            fut = run_in_executor(pytesseract.image_to_string, image)
+            text = await_future(fut, timeout=10)
             return text.strip()
         except Exception as e:
             logger.debug(f"Text extraction not available: {e}")
@@ -271,7 +275,6 @@ class VisionAnalyzer:
         """
         try:
             import numpy as np
-            from PIL import Image
             
             # RGB変換
             if image.mode != 'RGB':
@@ -315,7 +318,6 @@ class VisionAnalyzer:
         
         # 最も値が大きい成分
         max_idx = [r, g, b].index(max(r, g, b))
-        colors = ["red", "green", "blue"]
         
         # 微調整
         if max_idx == 0:  # Red

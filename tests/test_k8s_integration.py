@@ -8,8 +8,7 @@ import pytest
 import asyncio
 
 from src.microservices.k8s_adapter import (
-    K8sDeploymentManager, K8sServiceManager, K8sResourceManager,
-    DeploymentConfig, DeploymentStrategy, PodSpec
+    K8sDeploymentManager, K8sServiceManager, DeploymentConfig, PodSpec
 )
 from src.microservices.auto_scaling import (
     AutoScaler, HPA, VerticalPodAutoscaler,
@@ -17,9 +16,8 @@ from src.microservices.auto_scaling import (
     ScalingPolicy
 )
 from src.microservices.service_mesh import (
-    ServiceMeshAdapter, ServiceMeshController, MeshMetrics,
-    DestinationRule, VirtualService, ServiceEntry,
-    ServiceMeshType, TrafficPolicy, MeshProtocol
+    ServiceMeshAdapter, MeshMetrics,
+    DestinationRule, VirtualService, ServiceMeshType, TrafficPolicy
 )
 
 

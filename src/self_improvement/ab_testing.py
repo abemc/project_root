@@ -19,11 +19,9 @@ Configuration:
   - Parallel experiment limit: 5
 """
 
-import json
 import logging
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
-from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import statistics
@@ -99,7 +97,7 @@ class CandidateGenerator:
     def generate_prompt_variations(self, count: int = 3) -> List[CandidateVariation]:
         """Generate N prompt template variations through parameter tuning."""
         variations = []
-        prompt_keys = list(self.prompt_templates.keys())
+        list(self.prompt_templates.keys())
 
         # Variation strategies
         strategies = [

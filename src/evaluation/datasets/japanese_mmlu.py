@@ -7,7 +7,7 @@
 参考: JMMLU (Japanese MMLU)
 """
 
-from typing import List, Dict, Optional
+from typing import List, Optional
 from dataclasses import dataclass
 import logging
 

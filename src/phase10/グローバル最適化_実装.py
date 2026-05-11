@@ -11,11 +11,9 @@ Features:
 - End-to-End Integration (Phase 7-10 system orchestration)
 """
 
-import json
-import time
-from datetime import datetime, timedelta
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Tuple, Any, Set
+from datetime import datetime
+from dataclasses import dataclass
+from typing import Dict, List, Any
 from enum import Enum
 import hashlib
 
@@ -776,7 +774,7 @@ def test_global_optimization_integration():
     # Test 1: System Initialization
     print("\n【Test 1】システム初期化")
     init_result = system.initialize_system()
-    print(f"✅ システム初期化完了")
+    print("✅ システム初期化完了")
     print(f"  - コンポーネント: {init_result['components']}個")
     print(f"  - 機能: {len(init_result['features'])}種類")
     
@@ -803,14 +801,14 @@ def test_global_optimization_integration():
     # Test 3: Data Residency Enforcement
     print("\n【Test 3】データレジデンシー強制")
     residency = system.multi_tenant.enforce_data_residency(tenant1.tenant_id)
-    print(f"✅ レジデンシー強制適用")
+    print("✅ レジデンシー強制適用")
     print(f"  - プライマリ保存先: {residency['primary_region']}")
     print(f"  - バックアップ保存先: {residency['backup_location']}")
     
     # Test 4: Regional Configuration
     print("\n【Test 4】リージョナル設定")
     tokyo_config = system.regional_opt.get_regional_config(Region.APAC_TOKYO)
-    print(f"✅ Tokyo リージョン設定:")
+    print("✅ Tokyo リージョン設定:")
     print(f"  - タイムゾーン: {tokyo_config['timezone']}")
     print(f"  - コンプライアンス: {', '.join(tokyo_config['compliance'])}")
     print(f"  - レイテンシSLA: {tokyo_config['latency_sla_ms']}ms")
@@ -819,14 +817,14 @@ def test_global_optimization_integration():
     # Test 5: Query Optimization
     print("\n【Test 5】クエリ最適化")
     query_setup = system.perf_tuner.setup_query_optimization()
-    print(f"✅ クエリ最適化設定完了")
-    print(f"  - インデックス戦略: composite_indexing")
+    print("✅ クエリ最適化設定完了")
+    print("  - インデックス戦略: composite_indexing")
     print(f"  - クエリタイムアウト: {query_setup['optimizations']['query_timeout_ms']}ms")
     
     # Test 6: Caching Strategy
     print("\n【Test 6】キャッシング戦略")
     cache_setup = system.perf_tuner.setup_caching_strategy()
-    print(f"✅ キャッシング設定完了")
+    print("✅ キャッシング設定完了")
     print(f"  - タイプ: {cache_setup['cache_config']['cache_type']}")
     print(f"  - キャッシュサイズ: {cache_setup['cache_config']['cache_size_gb']}GB")
     print(f"  - ヒット率: {cache_setup['expected_hit_ratio']}")
@@ -834,21 +832,21 @@ def test_global_optimization_integration():
     # Test 7: Database Indexing
     print("\n【Test 7】データベース インデックス")
     index_setup = system.perf_tuner.setup_indexing_strategy()
-    print(f"✅ インデックス設定完了")
+    print("✅ インデックス設定完了")
     print(f"  - インデックス数: {index_setup['index_count']}個")
-    print(f"  - 最適化タイプ: composite_with_covering")
+    print("  - 最適化タイプ: composite_with_covering")
     
     # Test 8: Connection Pool Tuning
     print("\n【Test 8】コネクションプール チューニング")
     pool_setup = system.perf_tuner.tune_connection_pools()
-    print(f"✅ コネクションプール最適化")
+    print("✅ コネクションプール最適化")
     print(f"  - 総接続数: {pool_setup['total_connections']}")
     print(f"  - 効率推定値: {pool_setup['efficiency_estimate']}")
     
     # Test 9: Dependency Verification
     print("\n【Test 9】依存関係 検証")
     dep_check = system.integrator.verify_dependency_chain()
-    print(f"✅ 依存関係チェック完了")
+    print("✅ 依存関係チェック完了")
     print(f"  - 全コンポーネント数: {dep_check['total_components']}")
     print(f"  - アクティブ: {dep_check['active_components']}")
     print(f"  - 依存関係充足: {'✅ はい' if dep_check['dependencies_met'] else '❌ いいえ'}")
@@ -856,31 +854,31 @@ def test_global_optimization_integration():
     # Test 10: System Health Report
     print("\n【Test 10】システムヘルス レポート")
     health = system.integrator.generate_system_health_report()
-    print(f"✅ ヘルスレポート生成")
+    print("✅ ヘルスレポート生成")
     print(f"  - 全体ステータス: {health['overall_status']}")
     print(f"  - アクティブコンポーネント: {health['components']['active']}/{health['components']['total']}")
     
     # Test 11: End-to-End Integration Scenarios
     print("\n【Test 11】エンドツーエンド統合シナリオ")
     scenario1 = system.integrator.execute_end_to_end_scenario("multi_tenant_security")
-    print(f"✅ シナリオ1 - マルチテナント セキュリティ")
+    print("✅ シナリオ1 - マルチテナント セキュリティ")
     print(f"  - ステップ数: {len(scenario1['steps'])}")
     print(f"  - 合計実行時間: {scenario1['total_duration_ms']}ms")
     
     scenario2 = system.integrator.execute_end_to_end_scenario("threat_response")
-    print(f"✅ シナリオ2 - 脅威対応フロー")
+    print("✅ シナリオ2 - 脅威対応フロー")
     print(f"  - ステップ数: {len(scenario2['steps'])}")
     print(f"  - 合計実行時間: {scenario2['total_duration_ms']}ms")
     
     scenario3 = system.integrator.execute_end_to_end_scenario("compliance_check")
-    print(f"✅ シナリオ3 - コンプライアンス チェック")
+    print("✅ シナリオ3 - コンプライアンス チェック")
     print(f"  - ステップ数: {len(scenario3['steps'])}")
     print(f"  - 合計実行時間: {scenario3['total_duration_ms']}ms")
     
     # Test 12: Complete Setup Execution
     print("\n【Test 12】完全セットアップ実行")
     setup = system.setup_all_systems()
-    print(f"✅ 全システムセットアップ完了")
+    print("✅ 全システムセットアップ完了")
     print(f"  - セットアップステップ: {len(setup['setup_steps'])}")
     setup_success_count = sum(1 for step in setup['setup_steps'] if step['status'] == 'optimized' or step['status'] == 'configured')
     print(f"  - 成功: {setup_success_count}/{len(setup['setup_steps'])}")
@@ -888,7 +886,7 @@ def test_global_optimization_integration():
     # Test 13: Performance Metrics
     print("\n【Test 13】パフォーマンス メトリクス")
     perf_metrics = system.perf_tuner.measure_performance()
-    print(f"✅ パフォーマンス測定:")
+    print("✅ パフォーマンス測定:")
     print(f"  - 平均クエリ時間: {perf_metrics['query_avg_ms']}ms")
     print(f"  - キャッシュヒット率: {perf_metrics['cache_hit_ratio']:.0%}")
     print(f"  - インデックス保守: {perf_metrics['index_maintenance_ms']}ms")
@@ -896,12 +894,12 @@ def test_global_optimization_integration():
     
     # Test 14: Phase 9 Integration Verification
     print("\n【Test 14】Phase 9統合確認")
-    print(f"✅ Phase 7-10 統合状態:")
+    print("✅ Phase 7-10 統合状態:")
     status = system.get_system_status()
     print(f"  - マルチテナント: ✅ {status['tenants']}個")
     print(f"  - リージョン設定: ✅ {status['regions_configured']}個")
-    print(f"  - 最適化: ✅ 有効")
-    print(f"  - Phase統合: ✅ アクティブ")
+    print("  - 最適化: ✅ 有効")
+    print("  - Phase統合: ✅ アクティブ")
     
     # Test 15: SLA Compliance
     print("\n【Test 15】SLA コンプライアンス確認")
@@ -918,12 +916,12 @@ def test_global_optimization_integration():
     print("【パフォーマンス サマリー】")
     print("=" * 70)
     
-    print(f"✅ クエリ最適化: < 50ms")
-    print(f"✅ キャッシュヒット率: 85%+")
-    print(f"✅ インデックス保守: < 15ms")
-    print(f"✅ エンドツーエンドシナリオ: < 200ms")
-    print(f"✅ マルチリージョン レイテンシ: < 150ms")
-    print(f"✅ SLA コンプライアンス: 99.95%+")
+    print("✅ クエリ最適化: < 50ms")
+    print("✅ キャッシュヒット率: 85%+")
+    print("✅ インデックス保守: < 15ms")
+    print("✅ エンドツーエンドシナリオ: < 200ms")
+    print("✅ マルチリージョン レイテンシ: < 150ms")
+    print("✅ SLA コンプライアンス: 99.95%+")
     
     print("\n" + "=" * 70)
     print("✅ Phase 10 Step 4 テスト完了 (すべてのチェック PASS)")

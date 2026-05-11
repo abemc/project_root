@@ -13,10 +13,9 @@ Components:
 import json
 import logging
 import statistics
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Any
 from dataclasses import dataclass, field, asdict
-from datetime import datetime, timedelta
-from pathlib import Path
+from datetime import datetime
 from enum import Enum
 import os
 
@@ -390,7 +389,7 @@ class ResourceOptimizer:
         applied_optimizations = []
         
         # 1. トークン最適化
-        token_analysis = self.token_optimizer.analyze_token_distribution(self.metrics_history)
+        self.token_optimizer.analyze_token_distribution(self.metrics_history)
         token_suggestions = self.token_optimizer.suggest_prompt_optimization(
             current_metrics.prompt_tokens
         )
@@ -402,7 +401,7 @@ class ResourceOptimizer:
         )
         
         # 2. 推論最適化
-        inference_analysis = self.inference_optimizer.analyze_inference_performance()
+        self.inference_optimizer.analyze_inference_performance()
         latency_suggestions = self.inference_optimizer.suggest_latency_optimization(
             current_metrics
         )

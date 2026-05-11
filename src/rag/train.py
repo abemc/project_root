@@ -1,7 +1,6 @@
 # src/rag/train.py
 
 import os
-import torch
 import sys
 
 try:
@@ -122,18 +121,18 @@ def train():
     try:
         model.save_pretrained_gguf(OUTPUT_DIR, tokenizer, quantization_method="q4_k_m")
         print(f"GGUF model saved to: {os.path.join(OUTPUT_DIR, gguf_path)}")
-        print(f"\n" + "="*60)
-        print(f"🎉 学習と変換が完了しました！ (Training and Conversion Complete)")
-        print(f"="*60)
-        print(f"\n[次のステップ] 生成されたモデルを Ollama で使用する手順:")
-        print(f"\n1. プロジェクトルートに 'Modelfile' という名前のファイルを作成し、以下を記述します:")
+        print("\n" + "="*60)
+        print("🎉 学習と変換が完了しました！ (Training and Conversion Complete)")
+        print("="*60)
+        print("\n[次のステップ] 生成されたモデルを Ollama で使用する手順:")
+        print("\n1. プロジェクトルートに 'Modelfile' という名前のファイルを作成し、以下を記述します:")
         print(f"   FROM {os.path.join(OUTPUT_DIR, gguf_path)}")
-        print(f"   SYSTEM \"あなたはRAGエージェントです。ユーザーの質問に対して、知識ベースに基づき正確に回答してください。\"")
-        print(f"\n2. ターミナルで以下のコマンドを実行してモデルを作成します:")
-        print(f"   ollama create my-rag-model -f Modelfile")
-        print(f"\n3. アプリ(app.py)のサイドバー設定で 'LLM Model Name' に以下を入力します:")
-        print(f"   my-rag-model")
-        print(f"="*60 + "\n")
+        print("   SYSTEM \"あなたはRAGエージェントです。ユーザーの質問に対して、知識ベースに基づき正確に回答してください。\"")
+        print("\n2. ターミナルで以下のコマンドを実行してモデルを作成します:")
+        print("   ollama create my-rag-model -f Modelfile")
+        print("\n3. アプリ(app.py)のサイドバー設定で 'LLM Model Name' に以下を入力します:")
+        print("   my-rag-model")
+        print("="*60 + "\n")
     except Exception as e:
         print(f"GGUF conversion failed: {e}")
 

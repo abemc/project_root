@@ -1,7 +1,6 @@
 """PII Detector for identifying and masking Personally Identifiable Information."""
 
 import re
-import json
 from typing import List, Dict, Tuple, Optional, Any, Set
 from enum import Enum
 from dataclasses import dataclass, field

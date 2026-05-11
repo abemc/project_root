@@ -11,14 +11,12 @@ Features:
 - Passwordless Authentication (Passkeys, Biometric-first)
 """
 
-import json
 import hashlib
 import time
-from datetime import datetime, timedelta
-from dataclasses import dataclass, field
+from datetime import datetime
+from dataclasses import dataclass
 from typing import Optional, Dict, List, Tuple, Any, Set
 from enum import Enum
-import uuid
 
 
 class AuthenticationMethod(Enum):
@@ -339,7 +337,7 @@ class BiometricAuthenticator:
         """Authenticate with biometric"""
         
         # Simulate biometric matching
-        bio_hash = hashlib.sha256(biometric_data).hexdigest()
+        hashlib.sha256(biometric_data).hexdigest()
         
         for cred_id, cred in self.credentials.items():
             if cred.user_id == user_id and cred.is_active:
@@ -606,7 +604,7 @@ def test_advanced_authentication():
     # Test 1: System Initialization
     print("\n【Test 1】システム初期化")
     init_result = system.initialize_system()
-    print(f"✅ システム初期化完了")
+    print("✅ システム初期化完了")
     print(f"  - コンポーネント: {init_result['components']}個")
     print(f"  - 対応認証方式: {len(init_result['authentication_methods'])}種類")
     
@@ -622,7 +620,7 @@ def test_advanced_authentication():
         "test_assertion_data"
     )
     if success:
-        print(f"✅ FIDO2認証成功")
+        print("✅ FIDO2認証成功")
     
     # Test 3: FIDO2 Backup Codes
     print("\n【Test 3】FID O2 バックアップコード")
@@ -657,7 +655,7 @@ def test_advanced_authentication():
         "assertion_data"
     )
     if success:
-        print(f"✅ パスキー認証成功")
+        print("✅ パスキー認証成功")
     
     # Test 6: Risk-Based Authentication
     print("\n【Test 6】リスクベース認証")
@@ -676,7 +674,7 @@ def test_advanced_authentication():
     )
     
     risk = system.risk_engine.assess_risk(context)
-    print(f"✅ リスク評価完了")
+    print("✅ リスク評価完了")
     print(f"  - リスクレベル: {risk.risk_level.name}")
     print(f"  - リスクスコア: {risk.risk_score:.1f}")
     print(f"  - 必要な認証: {risk.required_challenge.value}")
@@ -716,7 +714,7 @@ def test_advanced_authentication():
     )
     
     high_risk_auth = system.gradational_engine.initiate_authentication(high_risk_context)
-    print(f"✅ 高リスク認証フロー開始")
+    print("✅ 高リスク認証フロー開始")
     print(f"  - リスクレベル: {high_risk_auth['risk_level']}")
     print(f"  - リスク要因: {', '.join(high_risk_auth['risk_factors'][:3])}")
     print(f"  - 必要な認証: {high_risk_auth['required_methods']}")
@@ -737,7 +735,7 @@ def test_advanced_authentication():
     # Test 10: Advanced Authentication Statistics
     print("\n【Test 10】システム統計")
     stats = system.get_system_status()
-    print(f"✅ システム状態:")
+    print("✅ システム状態:")
     print(f"  - FIDO2認証器: {stats['fido2_credentials']}")
     print(f"  - バイオメトリクス: {stats['biometric_credentials']}")
     print(f"  - パスキー: {stats['passkeys']}")
@@ -746,30 +744,30 @@ def test_advanced_authentication():
     
     # Test 11: Passwordless Transition
     print("\n【Test 11】パスワードレス移行")
-    print(f"✅ パスワードレス認証対応:")
-    print(f"  - バイオメトリクス優先: ✅ 有効")
-    print(f"  - デバイスベース認証: ✅ 有効")
-    print(f"  - パスキー推奨: ✅ デフォルト")
+    print("✅ パスワードレス認証対応:")
+    print("  - バイオメトリクス優先: ✅ 有効")
+    print("  - デバイスベース認証: ✅ 有効")
+    print("  - パスキー推奨: ✅ デフォルト")
     
     # Test 12: Phase 9 Integration
     print("\n【Test 12】Phase 9との統合")
-    print(f"✅ セキュリティレイヤー統合:")
-    print(f"  - MFA (Phase 9): ✅ 統合")
-    print(f"  - 暗号化 (Phase 9): ✅ 統合")
-    print(f"  - ゼロトラスト (Phase 9): ✅ 統合")
-    print(f"  - マルチリージョン (Phase 9): ✅ 統合")
+    print("✅ セキュリティレイヤー統合:")
+    print("  - MFA (Phase 9): ✅ 統合")
+    print("  - 暗号化 (Phase 9): ✅ 統合")
+    print("  - ゼロトラスト (Phase 9): ✅ 統合")
+    print("  - マルチリージョン (Phase 9): ✅ 統合")
     
     # Performance metrics
     print("\n" + "=" * 70)
     print("【パフォーマンスメトリクス】")
     print("=" * 70)
     
-    print(f"✅ リスク評価: < 50ms")
-    print(f"✅ FIDO2認証: < 500ms")
-    print(f"✅ バイオメトリクス認証: < 300ms")
-    print(f"✅ パスキー認証: < 200ms")
-    print(f"✅ グラデーショナル認証フロー: < 100ms")
-    print(f"✅ 認証セッション処理: < 50ms")
+    print("✅ リスク評価: < 50ms")
+    print("✅ FIDO2認証: < 500ms")
+    print("✅ バイオメトリクス認証: < 300ms")
+    print("✅ パスキー認証: < 200ms")
+    print("✅ グラデーショナル認証フロー: < 100ms")
+    print("✅ 認証セッション処理: < 50ms")
     
     print("\n" + "=" * 70)
     print("✅ Phase 10 Step 2 テスト完了 (すべてのチェック PASS)")

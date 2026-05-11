@@ -17,7 +17,7 @@ Phase 19 Task 1 - Reliability & SLA Management
 import asyncio
 import logging
 from typing import Optional, Dict, Any, List
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from src.phase19.reliability.circuit_breaker import (
     CircuitBreaker,
@@ -41,7 +41,6 @@ from src.phase19.reliability.sla_monitor import (
 from src.phase19.reliability.health_check import (
     HealthCheckRegistry,
     HealthCheckConfig,
-    register_health_check,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -262,7 +261,7 @@ class ReliabilityManager:
     
     def print_status_report(self) -> None:
         """ステータスレポートを出力"""
-        status = self.get_system_status()
+        self.get_system_status()
         
         logger.info("=" * 80)
         logger.info("SYSTEM STATUS REPORT")

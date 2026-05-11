@@ -8,7 +8,7 @@ import logging
 import torch
 import torch.nn.functional as F
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Any
 from datetime import datetime
 from dataclasses import dataclass, asdict
 
@@ -172,7 +172,7 @@ class ContinuousTrainer:
             for i, batch in enumerate(training_data):
                 # デバイスに移動
                 input_ids = batch["input_ids"].to(self.device)
-                attention_mask = batch.get("attention_mask", torch.ones_like(input_ids)).to(self.device)
+                batch.get("attention_mask", torch.ones_like(input_ids)).to(self.device)
                 weights = batch.get("weights", torch.ones(1)).to(self.device)
                 
                 # 順方向パス

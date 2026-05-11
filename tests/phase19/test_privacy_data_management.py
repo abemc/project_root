@@ -3,10 +3,8 @@
 import pytest
 import json
 import os
-from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
 
-from src.phase19.privacy.encryption_manager import EncryptionManager, EncryptionAlgorithm
+from src.phase19.privacy.encryption_manager import EncryptionManager
 from src.phase19.privacy.pii_detector import PIIDetector, PIIType
 from src.phase19.privacy.audit_logger import AuditLogger, AuditEventType, AuditSeverity
 from src.phase19.privacy.gdpr_manager import GDPRManager, ConsentType, RequestStatus

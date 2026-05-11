@@ -1,7 +1,6 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-import sentencepiece
 
 
 class Reranker:

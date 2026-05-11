@@ -1,6 +1,4 @@
-import json
 import os
-from pathlib import Path
 
 class MemoryManager:
     def __init__(self, retriever):

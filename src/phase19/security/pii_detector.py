@@ -14,7 +14,7 @@ PII検出・マスキング実装
 import re
 import logging
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Tuple, Pattern
+from typing import List, Dict, Any, Optional, Pattern
 from enum import Enum
 from datetime import datetime
 

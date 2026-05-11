@@ -1,3 +1,6 @@
+"""Streamlit アプリケーション - メインモジュール"""
+
+import os
 import os
 import sys
 import tempfile
@@ -12,6 +15,8 @@ import re
 import difflib
 import pandas as pd
 import plotly.express as px
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
+from src.rag.utils import clean_markdown
 
 # OneNote 日記モジュール
 try:
@@ -29,6 +34,9 @@ except ImportError:
 
 # モデルサイズごとにキャッシュするためモデルインスタンスを辞書で保持
 _whisper_model_cache: dict = {}
+
+# Executor for audio transcription tasks
+_AUDIO_EXECUTOR = ThreadPoolExecutor(max_workers=2)
 
 def get_whisper_model(model_size: str = "tiny"):
     """Whisperモデルをサイズ別キャッシュでロード"""
@@ -202,6 +210,120 @@ def _fetch_url_text(url: str, max_chars: int = 4000) -> str:
         return result[:max_chars] + ("…（以下省略）" if len(result) > max_chars else "")
     except Exception as e:
         return f"[URLの取得に失敗しました: {e}]"
+
+
+def _parse_iso_from_query_text(q: str) -> str | None:
+    """クエリ文字列からISO日付(YYYY-MM-DD)を抽出する。見つからなければ None を返す。"""
+    try:
+        import re
+        from datetime import date, timedelta
+        m = re.search(r"(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日", q)
+        if m:
+            y, mo, d = int(m.group(1)), int(m.group(2)), int(m.group(3))
+            return f"{y:04d}-{mo:02d}-{d:02d}"
+        m2 = re.search(r"(\d{4})-(\d{2})-(\d{2})", q)
+        if m2:
+            return f"{int(m2.group(1)):04d}-{int(m2.group(2)):02d}-{int(m2.group(3)):02d}"
+        # 相対日付対応: 昨日 (Asia/Tokyo基準)
+        # 日本語テキストでは \b が期待どおりに動作しないことがあるため
+        # '昨日' または '昨日の' の出現を単純に検出する
+        if re.search(r"昨日|昨日の", q):
+            from datetime import datetime, timedelta
+            try:
+                from zoneinfo import ZoneInfo
+                today_jst = datetime.now(ZoneInfo("Asia/Tokyo")).date()
+            except Exception:
+                today_jst = datetime.now().date()
+            return (today_jst - timedelta(days=1)).isoformat()
+    except Exception:
+        pass
+    return None
+
+
+def _extract_score_from_game_page(url: str, iso_date: str | None = None) -> tuple[int, int] | None:
+    """個別試合ページまたはスケジュール一覧から、指定日(ISO)に一致する“試合終了”ブロックのスコアを抽出する。
+    戻り値は (home, away) のタプル。成功しなければ None。
+    """
+    try:
+        from bs4 import BeautifulSoup
+        import requests
+        import re
+
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/124.0.0.0 Safari/537.36"
+            ),
+            "Accept-Language": "ja,en;q=0.9",
+        }
+
+        resp = requests.get(url, headers=headers, timeout=12)
+        resp.encoding = resp.apparent_encoding or "utf-8"
+        soup = BeautifulSoup(resp.text, "html.parser")
+
+        # 1) もしページがスケジュール一覧なら個別試合リンクを優先的に辿る
+        try:
+            anchors = soup.find_all("a", href=True)
+            for a in anchors:
+                href = a["href"]
+                if "/game/" in href and iso_date:
+                    if iso_date.replace("-", "") in href or iso_date in href:
+                        linked = href if href.startswith("http") else requests.compat.urljoin(url, href)
+                        sc = _extract_score_from_game_page(linked, iso_date=None)
+                        if sc:
+                            return sc
+        except Exception:
+            pass
+
+        # 2) ページ中の time[datetime] やテキストで ISO 日付が出現するブロックを探す
+        texts = []
+        # time 要素で日付指定がある場合
+        for t in soup.find_all("time"):
+            dt = t.get("datetime", "")
+            if iso_date and dt.startswith(iso_date):
+                parent = t.find_parent()
+                if parent:
+                    texts.append(parent.get_text(separator="\n", strip=True))
+
+        # 3) テキスト検索: ISO年月日表記が本文にあるブロック
+        if iso_date:
+            ymd_jp = None
+            try:
+                y, m, d = iso_date.split("-")
+                ymd_jp = f"{int(y)}年{int(m)}月{int(d)}日"
+            except Exception:
+                ymd_jp = None
+            if ymd_jp:
+                for el in soup.find_all(text=re.compile(re.escape(ymd_jp))):
+                    parent = el.parent
+                    if parent:
+                        texts.append(parent.get_text(separator="\n", strip=True))
+
+        # Fallback: ページ全体のテキスト
+        if not texts:
+            texts = [soup.get_text(separator="\n", strip=True)]
+
+        # スコア抽出: 直近の「試合終了」表記を含むブロックを優先
+        score_re = re.compile(r"(\d{1,2})\s*[\-–—:：]\s*(\d{1,2})")
+        for block in texts:
+            if not block:
+                continue
+            if "試合終了" not in block and iso_date:
+                # ISO 日付が示されているか確認
+                if iso_date.replace("-", "") not in block and (ymd_jp and ymd_jp not in block):
+                    continue
+            m = score_re.search(block)
+            if m:
+                try:
+                    a = int(m.group(1)); b = int(m.group(2))
+                    # ページ上の記載でチーム名の前後関係が分かる場合はそのまま返す
+                    return (a, b)
+                except Exception:
+                    continue
+        return None
+    except Exception:
+        return None
 
 
 def _extract_urls(text: str) -> list[str]:
@@ -696,26 +818,65 @@ def setup_sidebar():
                             # プログレスバー
                             progress_bar = st.progress(0, text="PDFの処理を開始します...")
                             
-                            for i, uploaded_file in enumerate(uploaded_files):
+                            # 非同期化: 各ファイル処理をワーカースレッドで実行し、
+                            # UI スレッドは shared 状態をポーリングして進捗表示のみ行う。
+                            from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError
+
+                            progress_states = {i: {"page_percent": 0.0, "status": "Queued"} for i in range(len(uploaded_files))}
+
+                            def make_task(i, uploaded_file):
+                                def task():
+                                    def cb(page_percent, status_msg):
+                                        # コールバックはワーカースレッドから呼ばれるため、UI 更新は行わず状態だけ更新
+                                        progress_states[i]["page_percent"] = float(page_percent)
+                                        progress_states[i]["status"] = str(status_msg)
+
+                                    try:
+                                        if uploaded_file.name.lower().endswith(".pdf"):
+                                            return uploaded_file.name, retriever.add_pdf(uploaded_file, progress_callback=cb)
+                                        else:
+                                            return uploaded_file.name, retriever.add_image(uploaded_file, progress_callback=cb)
+                                    except Exception as e:
+                                        return uploaded_file.name, {"chunks_added": 0, "status": f"error: {e}"}
+                                return task
+
+                            with ThreadPoolExecutor(max_workers=min(4, total_files)) as ex:
+                                futures = {ex.submit(make_task(i, f)): i for i, f in enumerate(uploaded_files)}
+
                                 try:
-                                    def update_progress(page_percent, status_msg):
-                                        current_total_progress = (i + page_percent) / total_files
-                                        file_label = f"処理中 ({i+1}/{total_files}): {uploaded_file.name}"
-                                        progress_bar.progress(min(current_total_progress, 0.99), text=f"{file_label} - {status_msg}")
-                                    
-                                    if uploaded_file.name.lower().endswith(".pdf"):
-                                        result = retriever.add_pdf(uploaded_file, progress_callback=update_progress)
-                                    else:
-                                        result = retriever.add_image(uploaded_file, progress_callback=update_progress)
-                                    
-                                    if result.get("chunks_added", 0) > 0:
-                                        total_chunks_added += result["chunks_added"]
-                                        total_ocr_pages += result.get('ocr_pages', 0)
-                                    else:
-                                        failed_files.append(f"{uploaded_file.name} ({result.get('status', '不明なエラー')})")
-                                except Exception as e:
-                                    logger.error(f"ファイル処理エラー: {e}")
-                                    failed_files.append(f"{uploaded_file.name} (エラー: {str(e)[:50]})")
+                                    while futures:
+                                        # aggregate progress for display
+                                        agg = sum((progress_states[j]["page_percent"] for j in progress_states)) / float(total_files)
+                                        progress_bar.progress(min(agg, 0.99), text=f"処理中... ({int(agg*100)}%)")
+
+                                        done = []
+                                        for fut, idx in list(futures.items()):
+                                            try:
+                                                name, result = fut.result(timeout=0.1)
+                                                done.append(fut)
+                                                if result.get("chunks_added", 0) > 0:
+                                                    total_chunks_added += result["chunks_added"]
+                                                    total_ocr_pages += result.get('ocr_pages', 0)
+                                                else:
+                                                    failed_files.append(f"{name} ({result.get('status', '不明なエラー')})")
+                                            except TimeoutError:
+                                                # まだ処理中: 続けてポーリング
+                                                continue
+                                            except Exception as e:
+                                                try:
+                                                    failed_files.append(f"{uploaded_files[idx].name} (エラー: {str(e)[:50]})")
+                                                except Exception:
+                                                    failed_files.append(f"index_{idx} (エラー)")
+                                                done.append(fut)
+
+                                        for d in done:
+                                            futures.pop(d, None)
+
+                                        time.sleep(0.05)
+
+                                finally:
+                                    # 最終進捗更新
+                                    progress_bar.progress(1.0, text="完了準備中...")
                             
                             # 完了処理
                             progress_bar.progress(1.0, text="完了しました！")
@@ -1414,7 +1575,20 @@ def _render_voice_input_section() -> None:
             if audio_hash != st.session_state._voice_last_hash:
                 st.session_state._voice_last_hash = audio_hash
                 with st.spinner("🔄 音声を文字起こし中..."):
-                    transcribed = transcribe_audio_bytes(audio_value.getvalue(), whisper_size)
+                    try:
+                        fut = _AUDIO_EXECUTOR.submit(transcribe_audio_bytes, audio_value.getvalue(), whisper_size)
+                        waited = 0.0
+                        while not fut.done():
+                            time.sleep(0.05)
+                            waited += 0.05
+                            if waited > 120.0:
+                                logger.warning("Transcription timeout after %.1fs", waited)
+                                break
+                        transcribed = fut.result() if fut.done() else ''
+                    except Exception as e:
+                        logger.exception('Transcription task failed: %s', e)
+                        transcribed = ''
+
                 if transcribed:
                     st.session_state.voice_query_pending = transcribed
                     st.success(f"📝 文字起こし結果: {transcribed}")
@@ -1492,14 +1666,84 @@ def _generate_assistant_response(query: str) -> None:
     try:
         import re
         q_low = (query or "").strip()
-        if re.search(r"今日.?の?日付|今日は何月何日|今日は何日|何月何日", q_low):
-            from datetime import date
-            t = date.today()
-            resp = f"今日は{t.year}年{t.month}月{t.day}日です。"
+        if re.search(r"今日.?の?日付|今日は何月何日|今日は何日|何月何日|何曜日", q_low):
+            from datetime import datetime
+            try:
+                from zoneinfo import ZoneInfo
+                t = datetime.now(ZoneInfo("Asia/Tokyo")).date()
+            except Exception:
+                t = datetime.now().date()
+            # 曜日を日本語で表示
+            _weekdays = ["月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日", "日曜日"]
+            weekday = _weekdays[t.weekday()]
+            resp = f"今日は{t.year}年{t.month}月{t.day}日（{weekday}）です。"
             st.session_state.messages.append({"role": "assistant", "content": resp})
             # clear file-context consumed for this query
             st.session_state.attached_file_contents = []
             return
+        # サーバーショートカット: 日本ハムの試合結果を公式サイトから取得して応答
+        # 注意: クエリに相対日付（昨日など）が含まれる場合はそれを優先して解決する
+        if re.search(r"日本ハム.*試合結果|日本ハム.*試合|今日.*日本ハム.*試合|今日の日本ハム", q_low):
+            try:
+                import requests
+                from bs4 import BeautifulSoup
+                from datetime import datetime, timedelta
+                try:
+                    from zoneinfo import ZoneInfo
+                    tokyo_today = datetime.now(ZoneInfo("Asia/Tokyo")).date()
+                except Exception:
+                    tokyo_today = datetime.now().date()
+
+                # 優先: クエリからISO日付を抽出
+                iso = _parse_iso_from_query_text(query)
+                if iso:
+                    try:
+                        target_date = datetime.fromisoformat(iso).date()
+                    except Exception:
+                        target_date = tokyo_today
+                elif re.search(r"昨日|昨日の", q_low):
+                    target_date = tokyo_today - timedelta(days=1)
+                else:
+                    target_date = tokyo_today
+
+                date_str = target_date.strftime('%Y%m%d')
+                headers = {"User-Agent": "project-analyzer/1.0 (+https://example.com)"}
+                found = None
+                base = f"https://www.fighters.co.jp/gamelive/result/"
+                for i in range(1, 8):
+                    url = f"{base}{date_str}{i:02d}/"
+                    try:
+                        r = requests.get(url, timeout=6, headers=headers)
+                        if r.status_code != 200:
+                            continue
+                        soup = BeautifulSoup(r.text, 'html.parser')
+                        names = [d.get_text(strip=True) for d in soup.select('.c-game-detail__header-text')]
+                        table = soup.find(class_='c-score-board-table')
+                        if table and names:
+                            nums = re.findall(r"\d+", table.get_text())
+                            if len(nums) >= 4:
+                                r1, h1, r2, h2 = nums[-4:]
+                                r1 = int(r1); r2 = int(r2)
+                                t1 = names[0]; t2 = names[1]
+                                if '北海道' in t1 or '日本ハム' in t1:
+                                    team = t1; opp = t2; team_score = r1; opp_score = r2
+                                elif '北海道' in t2 or '日本ハム' in t2:
+                                    team = t2; opp = t1; team_score = r2; opp_score = r1
+                                else:
+                                    continue
+                                resp = f"{target_date.isoformat()} の試合結果 — {team} {team_score} - {opp_score} {opp}。 (出典: {url})"
+                                st.session_state.messages.append({"role":"assistant","content":resp})
+                                st.session_state.attached_file_contents = []
+                                found = True
+                                break
+                    except Exception:
+                        continue
+                if not found:
+                    st.session_state.messages.append({"role":"assistant","content":"申し訳ありません、試合結果を取得できませんでした。後ほど再試行してください。"})
+                    st.session_state.attached_file_contents = []
+                return
+            except Exception:
+                pass
         if re.search(r"何時|何時ですか|何時になっています|現在の時刻|現在時刻", q_low):
             from datetime import datetime
             from zoneinfo import ZoneInfo
@@ -1534,15 +1778,165 @@ def _generate_assistant_response(query: str) -> None:
 - 英語のコンテンツを参照する場合でも、回答・説明・要約はすべて日本語で行う
 - ファイル内容を引用する際は日本語の説明を必ず付ける
 
-前の会話内容を参考にしながら、常に日本語のみで一貫した回答をしてください。"""
+前の会話内容を参考にしながら、常に日本語のみで一貫した回答をしてください。
+
+追加ルール（検索ベース応答時に必ず守ること）:
+- 与えられた【Web検索結果】や【URLから取得したページ内容】のみを根拠にして答えてください。与えられたソースに記載がないことは推測しないでください。
+- 回答には必ず使用した出典のURLを明示してください（例: 出典: https://www.example.com）。
+- 複数の出典が矛盾する場合は、勝手に一方を選ばず「提供データが矛盾するため確定できません」と答え、各出典を列挙してください。
+- チーム名の曖昧さに注意してください。ユーザーが「読売ジャイアンツ」と書いた場合は日本のプロ野球チーム（読売ジャイアンツ、セ・リーグ）を指すと解釈し、MLBの "Giants"（サンフランシスコ・ジャイアンツ）とは混同しないでください。
+- スコアや勝敗などの事実は、必ず出典の本文中に明示された数値・記述をそのまま引用して示してください。
+- 出典の本文が長い場合は要点（スコア、対戦相手、開催場所）だけを抜き出し、出典URLを添えてください。
+"""
 
     try:
         with st.spinner("🤔 回答を生成中..."):
-            prompt = _build_query_with_context(query)
+            # まず、必要に応じて外部ウェブ検索を実行してコンテキストを取得
+            web_context = ""
+            # 相対日付（例: 昨日）を具体的な日付に置換して検索・プロンプトに反映する
+            effective_query = query
+            try:
+                import re
+                from datetime import datetime, timedelta
+                try:
+                    from zoneinfo import ZoneInfo
+                    tokyo_today = datetime.now(ZoneInfo("Asia/Tokyo")).date()
+                except Exception:
+                    tokyo_today = datetime.now().date()
+
+                if re.search(r"\b昨日\b|昨日の", query):
+                    y = tokyo_today - timedelta(days=1)
+                    y_jp = f"{y.year}年{y.month}月{y.day}日"
+                    # 例: "昨日のジャイアンツの試合" -> "2026年5月9日 のジャイアンツの試合"
+                    effective_query = re.sub(r"\b昨日\b", y_jp, query)
+                    effective_query = effective_query.replace("昨日の", y_jp + "の")
+            except Exception:
+                effective_query = query
+
+            try:
+                if st.session_state.get("use_web_search", False):
+                    from src.rag.web_search import search_web_tool
+                    web_hits = search_web_tool(effective_query, max_results=6)
+                    if web_hits:
+                        # Strict source-priority for スポーツ/試合確認クエリ:
+                        # - 国内の信頼できるスポーツニュース/公式サイトのみを使用する
+                        # - 見つからない場合は確定的な回答を避けユーザーへ確認を促す
+                        from urllib.parse import urlparse
+                        trusted_tokens = [
+                            "giants.jp",
+                            "baseballking.jp",
+                            "nhk.or.jp",
+                            "yahoo.co.jp",
+                            "nikkansports.com",
+                            "sponichi.co.jp",
+                            "daily.co.jp",
+                            "npb.jp",
+                            "yakyu.yahoo.co.jp",
+                        ]
+                        def is_trusted(src_url: str) -> bool:
+                            try:
+                                net = urlparse(src_url).netloc or src_url
+                                return any(t in net for t in trusted_tokens)
+                            except Exception:
+                                return False
+
+                        # 判定: スポーツ/試合関連クエリか
+                        sports_q = False
+                        try:
+                            if re.search(r"試合結果|スコア|勝敗|何点|vs|対|延長|サヨナラ|引き分け|延長戦", effective_query):
+                                sports_q = True
+                            # チーム名に「ジャイアンツ」「読売」「巨人」が含まれる場合もスポーツ扱い
+                            if re.search(r"ジャイアンツ|読売ジャイアンツ|巨人|Giants", effective_query, flags=re.I):
+                                sports_q = True
+                        except Exception:
+                            sports_q = False
+
+                        trusted_hits = [h for h in web_hits if is_trusted(h.get("meta", {}).get("source") or h.get("source") or "")]
+
+                        # スポーツクエリでは trusted_hits が必須。無ければ確定回答を避ける
+                        if sports_q and not trusted_hits:
+                            st.session_state.messages.append({
+                                "role": "assistant",
+                                "content": (
+                                    "申し訳ありません。信頼できる国内のスポーツ情報ソースが見つかりませんでした。"
+                                    "公式サイトや主要なスポーツニュースを指定してください。"
+                                )
+                            })
+                            # clear file-context consumed for this query
+                            st.session_state.attached_file_contents = []
+                            return
+
+                        chosen_hits = trusted_hits if trusted_hits else web_hits[:3]
+
+                        web_context = "\n\n【Web検索結果】\n"
+                        for h in chosen_hits[:5]:
+                            src = h.get("meta", {}).get("source") or h.get("source") or "unknown"
+                            text = h.get("text", "")
+                            # Try to fetch the page body for more concrete context
+                            try:
+                                page_body = _fetch_url_text(src, max_chars=1200)
+                                if page_body and not page_body.startswith("[URLの取得に失敗しました"):
+                                    text = (text + "\n" + page_body) if text else page_body
+                            except Exception:
+                                pass
+                            web_context += f"🔗 URL: {src}\n{text}\n---\n"
+            except Exception as e:
+                logger.warning(f"web_search failed: {e}")
+
+            # プロンプトには日付解決済みのクエリを渡す（'昨日' を具体日付に置換済み）
+            prompt = _build_query_with_context(effective_query)
+            if web_context:
+                # Web検索結果はプロンプトの先頭に付与して、最新情報が回答に反映されやすくする
+                prompt = web_context + "\n\n" + prompt
+            # 外部ウェブ検索オプションが選択されていない、または検索結果が無い場合は
+            # LLMへ検索を行っていない旨を明示して渡す（セッションフラグではなく実際の結果で判定）
+            if not web_context:
+                prompt = (
+                    "[注意] この応答では外部ウェブ検索は実行していません。最新情報が必要な場合は公式サイト等を直接ご確認ください。\n\n" + prompt
+                )
             chat_history = [
                 {"role": msg["role"], "content": msg["content"]}
                 for msg in st.session_state.messages[:-1]
             ]
+            # デバッグ: LLMへ渡すプロンプトとシステムプロンプトをログ出力（問題解析用）
+            try:
+                log_dir = Path(__file__).resolve().parent / "logs"
+                log_dir.mkdir(parents=True, exist_ok=True)
+                dbg_path = log_dir / "llm_debug.log"
+                with open(dbg_path, "a", encoding="utf-8") as dbg:
+                    # Write each block guarded so a single failure doesn't truncate other info
+                    dbg.write("---\n")
+                    try:
+                        dbg.write(f"timestamp: {datetime.utcnow().isoformat()}Z\n")
+                    except Exception:
+                        dbg.write("timestamp: [write error]\n")
+                    try:
+                        dbg.write("system_prompt:\n")
+                        dbg.write(str(system_prompt) + "\n")
+                    except Exception:
+                        dbg.write("system_prompt: [write error]\n")
+                    try:
+                        dbg.write("final_prompt:\n")
+                        dbg.write(str(prompt) + "\n")
+                    except Exception:
+                        dbg.write("final_prompt: [write error]\n")
+                    try:
+                        dbg.write("chat_history:\n")
+                        dbg.write(json.dumps(chat_history if chat_history else [], ensure_ascii=False) + "\n")
+                    except Exception:
+                        dbg.write("chat_history: [json dump failed]\n")
+                    if web_context:
+                        try:
+                            dbg.write("web_search_performed: true\n")
+                            dbg.write("web_results:\n")
+                            dbg.write(json.dumps(web_hits, ensure_ascii=False) + "\n")
+                        except Exception:
+                            dbg.write("web_results: [json dump failed]\n")
+                    dbg.flush()
+            except Exception:
+                # 最終的にログが書けなくても処理継続
+                pass
+
             response = call_llm(
                 prompt=prompt,
                 model=st.session_state.llm_model,
@@ -1553,7 +1947,86 @@ def _generate_assistant_response(query: str) -> None:
             )
 
         if isinstance(response, str) and not response.startswith("Error"):
-            st.session_state.messages.append({"role": "assistant", "content": response})
+            # スポーツ系クエリの場合は、信頼ソースから抽出したスコアと照合して不一致なら出典を示す
+            try:
+                def _extract_score_from_text(text: str) -> tuple[int,int] | None:
+                    if not text:
+                        return None
+                    # よくあるスコア表記を探索する（例: 2-4, 2 – 4, 2:4, 2–4）
+                    m = re.search(r"(\d{1,2})\s*[\-–—:：]\s*(\d{1,2})", text)
+                    if m:
+                        try:
+                            return (int(m.group(1)), int(m.group(2)))
+                        except Exception:
+                            return None
+                    # 別パターン: '2 対 4' や '2-4で敗戦' 等
+                    m = re.search(r"(\d{1,2})\s*(?:対|vs|VS)\s*(\d{1,2})", text, flags=re.I)
+                    if m:
+                        try:
+                            return (int(m.group(1)), int(m.group(2)))
+                        except Exception:
+                            return None
+                    return None
+
+                verified_msg = None
+                if 'sports_q' in locals() and sports_q and 'trusted_hits' in locals() and trusted_hits:
+                    # trusted_hits からスコアを抽出
+                    src_scores = []
+                    # クエリからISO日付を推定して個別ページ優先で抽出
+                    iso_for_query = _parse_iso_from_query_text(effective_query)
+                    for h in trusted_hits:
+                        src = h.get("meta", {}).get("source") or h.get("source") or ""
+                        sc = None
+                        try:
+                            # giants.jp や npb.jp のような公式系は個別試合ページを辿るロジックを使う
+                            if any(d in src for d in ("giants.jp", "npb.jp", "/game/")):
+                                sc = _extract_score_from_game_page(src, iso_date=iso_for_query)
+                            # フォールバック: ページ本文を再取得して正規表現で抽出
+                            if sc is None:
+                                body = _fetch_url_text(src, max_chars=2000)
+                                sc = _extract_score_from_text(body)
+                        except Exception:
+                            body = h.get("text", "")
+                            sc = _extract_score_from_text(body)
+                        if sc:
+                            src_scores.append({"src": src, "score": sc})
+
+                    # LLMが返したスコアを抽出
+                    llm_sc = _extract_score_from_text(response)
+
+                    if src_scores:
+                        # 集計: 全ソースで同一ならそのスコアを信頼して回答を置換
+                        unique_scores = {}
+                        for s in src_scores:
+                            unique_scores.setdefault(tuple(s['score']), []).append(s['src'])
+                        if len(unique_scores) == 1:
+                            # 全ソース一致
+                            score_tuple = list(unique_scores.keys())[0]
+                            if llm_sc != score_tuple:
+                                # LLMとソースが異なるので、ソースに基づく断定的な回答を返す
+                                url_list = unique_scores[score_tuple]
+                                verified_msg = (
+                                    f"提供された信頼できる出典によると、試合結果は {score_tuple[0]} - {score_tuple[1]} です。"
+                                    f" 出典: {' , '.join(url_list)}\n\n(注意: LLMの出力と異なっていたため、出典に基づく結果を優先して表示しています)"
+                                )
+                        else:
+                            # 出典間で不一致がある場合は確定を避け、出典を列挙
+                            parts = []
+                            for sc, urls in unique_scores.items():
+                                parts.append(f"{sc[0]}-{sc[1]} (出典: {' , '.join(urls)})")
+                            verified_msg = (
+                                "提供された信頼できる出典同士でスコアが一致しません。確定できません。\n"
+                                "各出典の記載は次の通りです: \n- " + "\n- ".join(parts)
+                            )
+
+                if verified_msg:
+                    st.session_state.messages.append({"role": "assistant", "content": verified_msg})
+                else:
+                    st.session_state.messages.append({"role": "assistant", "content": response})
+            except Exception:
+                # 照合処理で問題が起きても元のLLM応答を渡す
+                st.session_state.messages.append({"role": "assistant", "content": response})
+
             st.session_state.attached_file_contents = []
         else:
             st.session_state.messages.append({
@@ -1583,7 +2056,11 @@ def display_app():
         use_autonomous_rag = st.checkbox("🤖 自律RAGモード", value=st.session_state.use_autonomous_rag)
         st.session_state.use_autonomous_rag = use_autonomous_rag
     with col2:
-        use_web_search = st.checkbox("🌐 ウェブ検索", value=False)
+        use_web_search = st.checkbox(
+            "🌐 ウェブ検索",
+            value=st.session_state.get("use_web_search", False),
+            key="use_web_search",
+        )
     with col3:
         include_reasoning = st.checkbox("🧠 推論詳細", value=True)
     with col4:
@@ -1600,13 +2077,26 @@ def display_app():
     
     if st.session_state.messages:
         for message in st.session_state.messages:
+            content = message.get('content', '')
+            # 強制的に文字列化してからクリーン処理
+            try:
+                content = str(content)
+            except Exception:
+                content = ''
+
+            # LLM応答を整形してマークダウンを復元する
+            try:
+                content = clean_markdown(content)
+            except Exception:
+                pass
+
             if message["role"] == "user":
                 st.markdown(f"**🙋 あなた：**")
-                st.markdown(message['content'])
+                st.markdown(content)
             else:
                 st.markdown(f"**🤖 エージェント：**")
                 # マークダウン形式で表示（HTML利用許可）
-                st.markdown(message['content'], unsafe_allow_html=True)
+                st.markdown(content, unsafe_allow_html=True)
             st.markdown("---")
     else:
         st.info("💬 クエリを入力して、会話を開始してください")

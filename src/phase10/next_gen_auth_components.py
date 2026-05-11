@@ -7,12 +7,9 @@ Phase 10 Step 2: 次世代認証 - サブコンポーネント
 - デバイストラスト検証
 """
 
-import hashlib
-import hmac
 import json
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set, Any
-from dataclasses import dataclass, field
+from typing import Dict, List, Optional
 import base64
 import logging
 
@@ -136,7 +133,7 @@ class WebAuthnLibWrapper:
                 return False
             
             # transports 取得（オプション）
-            transports = registration_response.get('transports', ['usb'])
+            registration_response.get('transports', ['usb'])
             
             return True
         

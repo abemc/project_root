@@ -9,13 +9,12 @@ Phase 12 Task 1
 import asyncio
 import logging
 import time
-from typing import List, Dict, Any, Optional, Callable
+from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 import numpy as np
 from collections import defaultdict
-import json
 
 logger = logging.getLogger(__name__)
 

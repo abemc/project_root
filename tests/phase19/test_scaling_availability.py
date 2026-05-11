@@ -2,12 +2,11 @@
 
 import pytest
 import time
-from typing import Any, Optional
 
 from src.phase19.scaling.load_balancer import LoadBalancer, LoadBalancingStrategy, BackendStatus
 from src.phase19.scaling.auto_scaler import AutoScaler, ScalingPolicy, ScalingRule, ScalingDirection
 from src.phase19.scaling.cache_manager import CacheManager, CacheStrategy
-from src.phase19.scaling.fault_detector import FaultDetector, FaultType, FaultSeverity
+from src.phase19.scaling.fault_detector import FaultDetector, FaultType
 from src.phase19.scaling.scaling_manager import ScalingManager
 
 

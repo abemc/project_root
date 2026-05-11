@@ -9,10 +9,9 @@ TensorRT, バッチ処理, 推論最適化
 import asyncio
 import logging
 import time
-from typing import List, Dict, Any, Optional, Callable
+from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-import json
+from datetime import datetime
 import numpy as np
 from collections import OrderedDict
 from enum import Enum
@@ -202,7 +201,7 @@ class GPUBatchProcessor:
         logger.info(f"⚙️  バッチ処理開始: {batch_size_actual} リクエスト")
         
         # バッチ入力構築
-        batch_input = np.concatenate([r.input_data for r in batch], axis=0)
+        np.concatenate([r.input_data for r in batch], axis=0)
         
         # シミュレーション推論
         start = time.time()

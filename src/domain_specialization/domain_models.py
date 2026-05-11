@@ -4,12 +4,10 @@
 複数ドメイン対応、ドメイン検出、特化アダプター実装
 """
 
-from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional, Any, Callable
 import logging
-import json
 from datetime import datetime
 
 

@@ -10,7 +10,7 @@ Phase 7 Step 9: 他システム統合
 """
 
 import json
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from enum import Enum
 from dataclasses import dataclass
 

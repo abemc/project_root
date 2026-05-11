@@ -28,10 +28,10 @@ def test_external_drive():
     
     if result1.get("success"):
         backup_path1 = result1.get("backup_path")
-        print(f"✅ 成功")
+        print("✅ 成功")
         print(f"   保存先: {backup_path1}")
         if "backups" in backup_path1:
-            print(f"   ✓ デフォルト backups フォルダに保存")
+            print("   ✓ デフォルト backups フォルダに保存")
     else:
         print(f"❌ 失敗: {result1.get('error')}")
         return False
@@ -52,12 +52,12 @@ def test_external_drive():
         
         if result2.get("success"):
             backup_path2 = result2.get("backup_path")
-            print(f"✅ 成功")
+            print("✅ 成功")
             print(f"   保存先: {backup_path2}")
             if str(external_backup_root) in backup_path2:
-                print(f"   ✓ 指定した外部ドライブに保存")
+                print("   ✓ 指定した外部ドライブに保存")
             else:
-                print(f"   ✗ 指定先が異なる可能性")
+                print("   ✗ 指定先が異なる可能性")
                 return False
         else:
             print(f"❌ 失敗: {result2.get('error')}")
@@ -82,12 +82,12 @@ def test_external_drive():
             
             if result3.get("success"):
                 backup_path3 = result3.get("backup_path")
-                print(f"✅ 成功")
+                print("✅ 成功")
                 print(f"   保存先: {backup_path3}")
                 if str(env_backup_root) in backup_path3:
-                    print(f"   ✓ 環境変数で指定したパスに保存")
+                    print("   ✓ 環境変数で指定したパスに保存")
                 else:
-                    print(f"   ✗ パスが異なる可能性")
+                    print("   ✗ パスが異なる可能性")
                     return False
             else:
                 print(f"❌ 失敗: {result3.get('error')}")
@@ -115,12 +115,12 @@ def test_external_drive():
         
         if result4.get("success"):
             backup_path4 = result4.get("backup_path")
-            print(f"✅ 成功")
+            print("✅ 成功")
             print(f"   保存先: {backup_path4}")
             if str(param_backup_root) in backup_path4:
-                print(f"   ✓ 優先順序が正しく適用")
+                print("   ✓ 優先順序が正しく適用")
             else:
-                print(f"   ✗ 優先順序が異なる可能性")
+                print("   ✗ 優先順序が異なる可能性")
                 return False
         else:
             print(f"❌ 失敗: {result4.get('error')}")

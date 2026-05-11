@@ -6,7 +6,6 @@ Phase 7: 知識統合・推論レイヤー
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
-from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)

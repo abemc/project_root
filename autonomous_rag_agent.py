@@ -357,6 +357,32 @@ class AutonomousRAGAgent:
         Returns:
             応答情報を含む辞書
         """
+        # 日時に関する単純な問いはシステム時刻で応答する（LLM が利用不可のときのフォールバック）
+        q_lower = (question or "").lower()
+        date_keywords = ["今日", "何月", "何日", "何年", "現在の日付", "今日の日付", "今何日", "今の時刻", "現在の時刻", "日時"]
+        if any(kw in q_lower for kw in date_keywords):
+            now = datetime.now()
+            date_str = now.strftime("%Y年%m月%d日")
+            time_str = now.strftime("%H:%M:%S")
+            answer = f"現在の日付は {date_str}、時刻は {time_str} です。"
+            response = {
+                "question": question,
+                "answer": answer,
+                "sources": [],
+                "model": self.config.get('llm_model'),
+                "search_method": self.config.get('search_method'),
+                "timestamp": now.isoformat(),
+                "source_count": 0,
+                "confidence": 1.0,
+                "needs_human_review": False,
+                "execution_trace": [{"step": 0, "action": "date_fallback", "result": "system_time"}],
+                "ethics_audit": {"enabled": False},
+                "risk_assessment": {"risk_score": 0.0, "risk_level": "low"},
+            }
+            if save_response_log:
+                self._persist_response_log(response)
+            return response
+
         if verbose:
             print(f"\n📤 質問処理開始")
             print(f"   質問: {question}")

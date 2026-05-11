@@ -2,7 +2,6 @@ import json
 import chromadb
 from chromadb.utils import embedding_functions
 from pathlib import Path
-import sys
 
 # ============================================================
 # RAG用データベース構築スクリプト

@@ -12,13 +12,11 @@ Features:
 - Real-time threat visualization
 """
 
-import json
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Tuple, Any, Set
+from typing import Optional, Dict, List, Any
 from enum import Enum
-from collections import defaultdict
 
 
 class AlertSeverity(Enum):
@@ -586,7 +584,7 @@ def test_soc_system():
     # Test 1: SOC Initialization
     print("\n【Test 1】SOC初期化")
     init_result = soc.initialize_soc()
-    print(f"✅ SOC初期化完了")
+    print("✅ SOC初期化完了")
     print(f"  - アラートルール: {init_result['alert_rules']}個")
     print(f"  - 監視設定: {init_result['systems']}システム")
     print(f"  - ステータス: {init_result['monitoring_status']}")
@@ -626,7 +624,7 @@ def test_soc_system():
     if result:
         print(f"✅ デバイス非準拠検知: アラート{result['alert_id']}")
         if result['auto_responded']:
-            print(f"  - 自動対応: セッション無効化実行")
+            print("  - 自動対応: セッション無効化実行")
     
     # Test 5: Multi-Region DR Alert Rules
     print("\n【Test 5】マルチリージョンDRアラート")
@@ -642,14 +640,14 @@ def test_soc_system():
     # Test 6: Dashboard View
     print("\n【Test 6】ダッシュボード表示")
     dashboard_view = soc.get_soc_status()
-    print(f"📊 SOC ダッシュボード")
-    print(f"  アラート:")
+    print("📊 SOC ダッシュボード")
+    print("  アラート:")
     print(f"    - 合計: {dashboard_view['alerts']['total']}")
     print(f"    - 重大: {dashboard_view['alerts']['critical']}")
-    print(f"  インシデント:")
+    print("  インシデント:")
     print(f"    - 合計: {dashboard_view['incidents']['total']}")
     print(f"    - 処理中: {dashboard_view['incidents']['open']}")
-    print(f"  パフォーマンス:")
+    print("  パフォーマンス:")
     print(f"    - 自動解決率: {dashboard_view['performance']['auto_resolved_rate']}")
     print(f"    - 平均対応時間: {dashboard_view['performance']['avg_response_time_ms']}ms")
     print(f"  セキュリティスコア: {dashboard_view['security_score']}")
@@ -666,7 +664,7 @@ def test_soc_system():
         )
     
     incident_count = len(soc.incident_manager.incidents)
-    print(f"✅ アラート相関処理")
+    print("✅ アラート相関処理")
     print(f"  - 生成されたインシデント: {incident_count}")
     
     # Test 8: Automated Response Verification
@@ -676,30 +674,30 @@ def test_soc_system():
     
     # Test 9: System Integration
     print("\n【Test 9】システム統合確認")
-    print(f"✅ 統合状況:")
-    print(f"  - Phase 9 MFAシステム: ✅ 統合")
-    print(f"  - Phase 9 暗号化システム: ✅ 統合")
-    print(f"  - Phase 9 ゼロトラスト: ✅ 統合")
-    print(f"  - Phase 9 マルチリージョン: ✅ 統合")
+    print("✅ 統合状況:")
+    print("  - Phase 9 MFAシステム: ✅ 統合")
+    print("  - Phase 9 暗号化システム: ✅ 統合")
+    print("  - Phase 9 ゼロトラスト: ✅ 統合")
+    print("  - Phase 9 マルチリージョン: ✅ 統合")
     
     # Test 10: 24/7 Alerting Capability
     print("\n【Test 10】24/7アラート機能")
-    print(f"✅ ページング・エスカレーション:")
-    print(f"  - オンコール体制: 24/7 対応準備完了")
-    print(f"  - エスカレーション: 段階的通知設定")
-    print(f"  - インシデントサービス: PagerDuty連携準備")
+    print("✅ ページング・エスカレーション:")
+    print("  - オンコール体制: 24/7 対応準備完了")
+    print("  - エスカレーション: 段階的通知設定")
+    print("  - インシデントサービス: PagerDuty連携準備")
     
     # Performance metrics
     print("\n" + "=" * 70)
     print("【パフォーマンスメトリクス】")
     print("=" * 70)
     
-    print(f"✅ アラート処理: < 100ms")
-    print(f"✅ ダッシュボード更新: < 2秒")
-    print(f"✅ 自動対応実行: < 50ms")
-    print(f"✅ 相関分析: < 500ms")
-    print(f"✅ ルール評価: < 10ms per rule")
-    print(f"✅ ライブアラートスループット: 1000+ alerts/min")
+    print("✅ アラート処理: < 100ms")
+    print("✅ ダッシュボード更新: < 2秒")
+    print("✅ 自動対応実行: < 50ms")
+    print("✅ 相関分析: < 500ms")
+    print("✅ ルール評価: < 10ms per rule")
+    print("✅ ライブアラートスループット: 1000+ alerts/min")
     
     print("\n" + "=" * 70)
     print("✅ Phase 10 Step 1 テスト完了 (すべてのチェック PASS)")

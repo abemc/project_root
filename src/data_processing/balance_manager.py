@@ -6,7 +6,7 @@
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime
 from collections import Counter
 import numpy as np
@@ -796,7 +796,7 @@ class BalanceManager:
         Returns:
             レポート文字列
         """
-        report = f"""
+        report = """
 ═══════════════════════════════════════════
 クラスバランス調整レポート
 ═══════════════════════════════════════════
@@ -808,7 +808,7 @@ class BalanceManager:
             pct = (count / total_orig * 100) if total_orig > 0 else 0
             report += f"  {class_name}: {count} ({pct:.1f}%)\n"
         
-        report += f"""
+        report += """
 【バランス後の分布】
 """
         total_bal = sum(balanced_dist.values())

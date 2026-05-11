@@ -17,7 +17,6 @@ from datetime import datetime
 from src.phase19.security.encryption_engine import (
     CryptoEngine,
     EncryptionConfig,
-    initialize_crypto,
 )
 from src.phase19.security.pii_detector import (
     PIIDetector,
@@ -30,7 +29,6 @@ from src.phase19.security.audit_log import (
 )
 from src.phase19.security.compliance import (
     ComplianceChecker,
-    GDPRRight,
 )
 
 logger = logging.getLogger(__name__)

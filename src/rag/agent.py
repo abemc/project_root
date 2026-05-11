@@ -1,15 +1,13 @@
 # src/rag/agent.py
 
 from .llm import call_llm
-from .prompts import PLAN_PROMPT, GRADE_PROMPT, REWRITE_PROMPT, ANSWER_PROMPT, EVALUATE_ANSWER_PROMPT
+from .prompts import PLAN_PROMPT, ANSWER_PROMPT
 from .retriever import Retriever
 from .reranker import Reranker
 from .logger import save_history
 from .memory import MemoryManager
 from .query_preprocessor import Phase7QueryPreprocessor
 from .knowledge_integration_engine import Phase7KnowledgeIntegrationEngine
-from .multi_domain_retriever import MultiDomainRetriever
-from collections import OrderedDict, Counter
 from src.rag.sandbox import Sandbox
 from src.phase19.security_manager import SecurityManager
 from src.performance.cache_optimizer import get_cache_optimizer
@@ -18,7 +16,6 @@ from src.performance.index_strategy import IndexStrategy
 from src.reliability.circuit_breaker import CircuitBreaker
 from src.reliability.retry_manager import RetryManager
 from src.reliability.sla_monitor import SLAMonitor
-from src.reliability.failover_strategy import FailoverStrategy
 from .web_search import search_web_tool
 import json
 import datetime
@@ -219,7 +216,20 @@ class RAGAgent:
             rewrite_prompt = (
                 f"以下の質問を別の角度から書き換えてください。書き換え後の質問のみを返してください。\n\n質問: {self.question}"
             )
-            rewritten = call_llm(rewrite_prompt, model=self.llm_model)
+            try:
+                from .llm import call_llm_async
+                fut = call_llm_async(rewrite_prompt, model=self.llm_model)
+                # Poll with short sleeps to remain responsive and allow cancellation later
+                waited = 0.0
+                while not fut.done():
+                    time.sleep(0.05)
+                    waited += 0.05
+                    if waited > 30.0:
+                        logger.warning("LLM rewrite timeout after %.1fs", waited)
+                        break
+                rewritten = fut.result() if fut.done() else None
+            except Exception:
+                rewritten = None
             if rewritten and not rewritten.startswith("Error") and rewritten.strip() != self.question:
                 logger.info(f"Query rewritten: {rewritten.strip()[:80]}")
                 self.question = rewritten.strip()
@@ -248,7 +258,20 @@ class RAGAgent:
             question=self.question, num_docs=len(self.state["current_docs"]),
             action_history=action_history, docs_summary=docs_summary
         )
-        res = call_llm(prompt, model=self.llm_model)
+        try:
+            from .llm import call_llm_async
+            fut = call_llm_async(prompt, model=self.llm_model, chat_history=None)
+            waited = 0.0
+            while not fut.done():
+                time.sleep(0.05)
+                waited += 0.05
+                if waited > 300.0:
+                    logger.warning("LLM plan generation timeout after %.1fs", waited)
+                    break
+            res = fut.result() if fut.done() else ''
+        except Exception as e:
+            logger.exception('call_llm_async failed: %s', e)
+            res = ''
         from .utils import safe_json_loads
         return safe_json_loads(res)
 
@@ -291,7 +314,43 @@ class RAGAgent:
     def _handle_answer(self, thought):
         docs_summary = self._get_docs_summary()
         prompt = ANSWER_PROMPT.format(original_question=self.question, docs=docs_summary)
-        self.current_answer_draft = call_llm(prompt, model=self.llm_model)
+        try:
+            from .llm import call_llm_async
+            fut = call_llm_async(prompt, model=self.llm_model)
+            waited = 0.0
+            while not fut.done():
+                time.sleep(0.05)
+                waited += 0.05
+                if waited > 300.0:
+                    logger.warning("LLM answer generation timeout after %.1fs", waited)
+                    break
+            llm_res = fut.result() if fut.done() else ''
+            # フォールバック: LLMが応答できない場合は検索結果から直接組み立てる
+            if not llm_res or (isinstance(llm_res, str) and llm_res.strip().startswith("Error")):
+                docs = self.state.get("current_docs", [])
+                if docs:
+                    parts = ["外部検索で見つかった上位の情報を以下に示します:\n"]
+                    for d in docs[:5]:
+                        src = d.get("meta", {}).get("source") or d.get("source") or "(unknown)"
+                        title = d.get("text", "").split("\n", 1)[0][:200]
+                        parts.append(f"- {title}\n  URL: {src}\n")
+                    self.current_answer_draft = "\n".join(parts)
+                else:
+                    self.current_answer_draft = llm_res or ''
+            else:
+                self.current_answer_draft = llm_res
+                # 生成されたドラフトを最終回答フィールドにも格納（自動承認）
+                try:
+                    self.log_data["final_answer"] = self.current_answer_draft
+                except Exception:
+                    pass
+        except Exception as e:
+            logger.exception('call_llm_async failed: %s', e)
+            self.current_answer_draft = ''
+            try:
+                self.log_data["final_answer"] = self.current_answer_draft
+            except Exception:
+                pass
         return "Answer generated."
 
     def _handle_write_file(self, path: str, content: str) -> str:
@@ -387,4 +446,36 @@ def run_agent(question):
     agent = RAGAgent(question, retriever, reranker)
     while not agent.finished:
         agent.run_step()
-    return agent.log_data.get("final_answer")
+    # 試行後、もし最終回答が設定されていなければ、生成ドラフトや検索結果から組み立てて返す
+    final = agent.log_data.get("final_answer")
+    if final:
+        return final
+    if getattr(agent, 'current_answer_draft', None):
+        return agent.current_answer_draft
+    try:
+        docs = agent.state.get('current_docs', [])
+        if docs:
+            parts = ["外部検索で見つかった上位の情報を以下に示します:\n"]
+            for d in docs[:5]:
+                src = d.get("meta", {}).get("source") or d.get("source") or "(unknown)"
+                title = d.get("text", "").split("\n", 1)[0][:200]
+                parts.append(f"- {title}\n  URL: {src}\n")
+            return "\n".join(parts)
+    except Exception:
+        pass
+
+    # 最後の手段: 直接 web 検索を実行して要約を返す
+    try:
+        from .web_search import search_web_tool
+        res = search_web_tool(question, max_results=3)
+        if res and isinstance(res, list):
+            parts = ["外部検索結果:\n"]
+            for r in res[:3]:
+                src = r.get('meta', {}).get('source') if isinstance(r.get('meta'), dict) else r.get('meta')
+                title = r.get('text', '').split('\n', 1)[0][:200]
+                parts.append(f"- {title}\n  URL: {src}\n")
+            return "\n".join(parts)
+    except Exception:
+        pass
+
+    return None

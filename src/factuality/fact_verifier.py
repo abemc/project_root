@@ -7,14 +7,12 @@
 """
 
 import asyncio
-import json
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Set, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any
 from datetime import datetime
-from collections import Counter
 import logging
 
 logger = logging.getLogger(__name__)
@@ -462,7 +460,6 @@ class FactVerifier:
     
     def check_for_hallucinations(self, text: str, threshold: float = 0.5) -> Dict[str, Any]:
         """テキスト内のHallucinationを検出"""
-        import asyncio
         
         results = asyncio.run(self.verify_text(text))
         

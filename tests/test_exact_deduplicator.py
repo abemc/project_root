@@ -4,13 +4,10 @@
 """
 
 import pytest
-import json
-from datetime import datetime
 from src.data_processing.deduplicator import (
     ExactDeduplicator,
     DuplicateType,
-    DeduplicationStrategy,
-    DeduplicationResult
+    DeduplicationStrategy
 )
 
 

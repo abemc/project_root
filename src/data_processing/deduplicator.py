@@ -12,8 +12,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional, Set, Tuple, Any
 from datetime import datetime
-from collections import defaultdict, Counter
-import json
+from collections import Counter
 
 logger = logging.getLogger(__name__)
 

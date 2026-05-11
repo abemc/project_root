@@ -11,7 +11,6 @@ Phase 10 Step 4: グローバル統合テスト
 
 import pytest
 from datetime import datetime
-from enum import Enum
 
 
 # ========== Mock のインポート（conftest.py から）==========
@@ -78,7 +77,6 @@ def mock_compliance_engine_local():
 @pytest.fixture
 def mock_metrics_aggregator_local():
     """ローカル メトリクス集約エンジン"""
-    from datetime import datetime
     class MockMetricsAggregator:
         def collect_regional_metrics(self, metrics_dict):
             return metrics_dict
@@ -131,7 +129,7 @@ class TestRegionalDeployment:
         # リージョン登録
         registered = mock_global_orchestrator_local.register_region(region)
         
-        assert registered == True
+        assert registered
     
     def test_multi_region_deployment(self, mock_global_orchestrator_local):
         """複数リージョン展開テスト"""
@@ -161,7 +159,7 @@ class TestRegionalDeployment:
         # フェイルオーバー実行
         failover_success = mock_global_orchestrator_local.failover_to_region('us-west-2')
         
-        assert failover_success == True
+        assert failover_success
     
     def test_region_health_monitoring(self, mock_global_orchestrator_local):
         """リージョン健全性監視テスト"""
@@ -187,7 +185,7 @@ class TestRegionalDeployment:
         
         configured = mock_global_orchestrator_local.configure_replication(replication_config)
         
-        assert configured == True
+        assert configured
 
 
 # ========== ポリシー適用テスト (4個) ==========
@@ -211,7 +209,7 @@ class TestPolicyEnforcement:
         
         created = mock_global_orchestrator_local.create_global_policy(policy)
         
-        assert created == True
+        assert created
     
     def test_policy_application_to_regions(self, mock_global_orchestrator_local):
         """リージョンへのポリシー適用テスト"""
@@ -230,7 +228,7 @@ class TestPolicyEnforcement:
             regions=regions
         )
         
-        assert applied == True
+        assert applied
     
     def test_region_specific_policy_override(self, mock_global_orchestrator_local):
         """リージョン固有ポリシーオーバーライドテスト"""
@@ -250,7 +248,7 @@ class TestPolicyEnforcement:
         # リージョン固有オーバーライド
         overridden = mock_global_orchestrator_local.apply_regional_override(regional_override)
         
-        assert overridden == True
+        assert overridden
     
     def test_policy_compliance_verification(self, mock_global_orchestrator_local):
         """ポリシーコンプライアンス検証テスト"""
@@ -262,7 +260,7 @@ class TestPolicyEnforcement:
             policy_name='encryption_policy'
         )
         
-        assert is_compliant == True
+        assert is_compliant
 
 
 # ========== 規制コンプライアンステスト (5個) ==========
@@ -281,7 +279,7 @@ class TestRegulatoryCompliance:
         
         is_compliant = mock_compliance_engine_local.check_gdpr_compliance(org_context)
         
-        assert is_compliant == True
+        assert is_compliant
     
     def test_ccpa_compliance_check(self, mock_compliance_engine_local):
         """CCPA コンプライアンスチェック"""
@@ -294,7 +292,7 @@ class TestRegulatoryCompliance:
         
         is_compliant = mock_compliance_engine_local.check_ccpa_compliance(org_context)
         
-        assert is_compliant == True
+        assert is_compliant
     
     def test_appi_compliance_check(self, mock_compliance_engine_local):
         """APPI コンプライアンスチェック"""
@@ -307,7 +305,7 @@ class TestRegulatoryCompliance:
         
         is_compliant = mock_compliance_engine_local.check_appi_compliance(org_context)
         
-        assert is_compliant == True
+        assert is_compliant
     
     def test_pipl_compliance_check(self, mock_compliance_engine_local):
         """PIPL コンプライアンスチェック"""
@@ -320,7 +318,7 @@ class TestRegulatoryCompliance:
         
         is_compliant = mock_compliance_engine_local.check_pipl_compliance(org_context)
         
-        assert is_compliant == True
+        assert is_compliant
     
     def test_multi_framework_compliance(self, mock_compliance_engine_local):
         """複数フレームワークコンプライアンステスト"""

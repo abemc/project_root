@@ -12,7 +12,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from datetime import datetime
-import json
 import logging
 
 
@@ -175,9 +174,9 @@ class TaskPlanner:
         # 3-5ステップに分解
         steps = [
             f"理解: {goal}",
-            f"リソース準備",
+            "リソース準備",
             f"実行: {goal}",
-            f"検証"
+            "検証"
         ]
         
         for i, step in enumerate(steps):

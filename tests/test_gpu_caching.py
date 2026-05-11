@@ -3,7 +3,6 @@ GPU推論・キャッシング最適化 テスト
 """
 
 import pytest
-from datetime import datetime, timedelta
 from src.quality_assurance.gpu_accelerator import (
     GPUAccelerator,
     GPUDeviceType,
@@ -11,9 +10,7 @@ from src.quality_assurance.gpu_accelerator import (
 )
 from src.quality_assurance.caching_layer import (
     CachingLayer,
-    CachePolicy,
-    CacheLevel,
-    CacheInvalidationStrategy
+    CachePolicy
 )
 
 

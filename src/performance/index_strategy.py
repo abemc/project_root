@@ -2,7 +2,6 @@ import os
 import logging
 import time
 from typing import Any
-import faiss
 import numpy as np
 
 logger = logging.getLogger(__name__)

@@ -5,7 +5,6 @@ MultiDomainRetriever テスト
 
 import sys
 import os
-from pathlib import Path
 
 # プロジェクトルートをsys.pathに追加
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,10 +21,7 @@ def test_multidomain_retriever():
     print("\n【ステップ1】モジュールインポート")
     try:
         from src.rag.multi_domain_retriever import (
-            MultiDomainRetriever,
-            DomainIndex,
-            RetrievalResult,
-            MultiDomainRetrievalResult
+            MultiDomainRetriever
         )
         print("  ✅ MultiDomainRetriever モジュール インポート成功")
     except Exception as e:
@@ -37,7 +33,7 @@ def test_multidomain_retriever():
     try:
         retriever = MultiDomainRetriever()
         stats = retriever.get_domain_stats()
-        print(f"  ✅ Retriever初期化成功")
+        print("  ✅ Retriever初期化成功")
         print(f"     デフォルトドメイン数: {len(stats)}")
         for domain, stat in list(stats.items())[:3]:
             print(f"     - {domain}: {stat['index_count']} documents")
@@ -114,7 +110,7 @@ def test_multidomain_retriever():
             top_k_per_domain=2
         )
         
-        print(f"  ✅ マルチドメイン検索成功")
+        print("  ✅ マルチドメイン検索成功")
         print(f"     主要ドメイン: {result.primary_domain}")
         print(f"     関連ドメイン: {result.related_domains}")
         print(f"     合計結果: {len(result.merged_results)}件")
@@ -138,7 +134,7 @@ def test_multidomain_retriever():
     print("\n【ステップ6】キャッシング機構テスト")
     try:
         # 同じクエリで再検索（キャッシュヒット）
-        result2 = retriever.retrieve_from_multiple_domains(
+        retriever.retrieve_from_multiple_domains(
             query="医療費控除の申告方法",
             primary_domain="test_medical",
             related_domains=["test_legal"],

@@ -10,6 +10,7 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 import os
+import logging
 from docs_manager import DocumentManager
 from rag_agent_config import RAGAgentConfig
 
@@ -19,6 +20,9 @@ try:
 except ImportError:
     Retriever = None
     retriever_available = False
+
+# モジュールロガー
+logger = logging.getLogger(__name__)
 
 
 @st.cache_resource
@@ -344,6 +348,31 @@ def render_rag_sidebar():
 
 def perform_rag_query(question, model, search_method, top_k, manager, selected_categories):
     """RAG クエリを実行"""
+    # デバッグ用ログ: サーバ側で呼び出しを記録
+    try:
+        logger.warning(f"PERF_RAG_QUERY called. question={question!r}, model={model}, search_method={search_method}, top_k={top_k}")
+        # 確実に出力を確認するため、/tmp にも追記する（デバッグ用、後で削除可）
+        try:
+            with open('/tmp/perf_rag.log', 'a', encoding='utf-8') as _f:
+                _f.write(f"PERF_RAG_QUERY called. question={question!r}, model={model}, search_method={search_method}, top_k={top_k}\n")
+        except Exception:
+            pass
+    except Exception:
+        pass
+    # 日時に関する単純な問いはシステム時刻で応答する（固定日付誤答の回避）
+    q_lower = (question or "").lower()
+    date_keywords = ["今日", "何月", "何日", "何年", "現在の日付", "今日の日付", "今何日", "今の時刻", "現在の時刻", "日時"]
+    if any(kw in q_lower for kw in date_keywords):
+        now = datetime.now()
+        date_str = now.strftime("%Y年%m月%d日")
+        time_str = now.strftime("%H:%M:%S")
+        answer = f"現在の日付は {date_str}、時刻は {time_str} です。"
+        return {
+            "answer": answer,
+            "sources": [],
+            "model": model,
+            "search_method": search_method,
+        }
     doc_lookup = {doc['name']: doc for doc in manager.documents}
     retriever = get_retriever()
     corpus_results = _search_corpus(retriever, question, search_method, top_k)

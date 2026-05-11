@@ -3,7 +3,7 @@
 複数ドメインの知識を統合し、因果関係と不確実性を考慮した回答を生成
 """
 
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
 from src.self_improvement.reasoning_engine import (
@@ -76,7 +76,7 @@ class Phase7KnowledgeIntegrationEngine:
         """
         
         # 1. ドメイン別知識の抽出
-        domain_knowledge = self._extract_domain_knowledge(retrieved_documents)
+        self._extract_domain_knowledge(retrieved_documents)
         
         # 2. マルチドメイン知識統合
         integrated_result = self.knowledge_integrator.integrate_knowledge(

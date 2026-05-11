@@ -9,11 +9,8 @@ Phase 8 Step 4: 統合テスト・検証
 - 本番環境トラフィック下での挙動検証
 """
 
-import json
-import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, List, Tuple
-import hashlib
 import logging
 
 logger = logging.getLogger(__name__)
@@ -93,11 +90,9 @@ class IntegrationTestSuite:
         
         try:
             # シミュレーション: ロテーション中のメトリクス
-            rotation_events = []
-            alert_events = []
             
             # ロテーション開始
-            rotation_start = datetime.utcnow()
+            datetime.utcnow()
             rotation_duration_ms = 300  # 5分以内に完了
             
             # ロテーション中に大量のAPIコール発生 (正常な状況)
@@ -415,12 +410,12 @@ class IntegrationTestSuite:
         print("【パフォーマンス指標】")
         print("="*70)
         
-        print(f"✅ 検知から対応までの時間: < 100ms")
-        print(f"✅ ロテーション中エラー率: < 0.01%")
-        print(f"✅ 自動対応成功率: 99%以上")
-        print(f"✅ ダッシュボード稼働率: 99.9%以上")
-        print(f"✅ ストレス下での信頼性: 98%以上")
-        print(f"✅ 監査ログ記録率: 99.99%以上")
+        print("✅ 検知から対応までの時間: < 100ms")
+        print("✅ ロテーション中エラー率: < 0.01%")
+        print("✅ 自動対応成功率: 99%以上")
+        print("✅ ダッシュボード稼働率: 99.9%以上")
+        print("✅ ストレス下での信頼性: 98%以上")
+        print("✅ 監査ログ記録率: 99.99%以上")
         
         if success_rate == 100:
             print("\n" + "="*70)

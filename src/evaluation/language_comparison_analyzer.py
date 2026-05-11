@@ -157,7 +157,7 @@ class LanguageComparisonAnalyzer:
         else:
             analysis = {"comparisons": [], "summary": {}}
         
-        logger.info(f"Accuracy comparison complete")
+        logger.info("Accuracy comparison complete")
         self.comparison['accuracy'] = analysis
         return analysis
     
@@ -205,7 +205,7 @@ class LanguageComparisonAnalyzer:
         else:
             analysis = {"performance": [], "summary": {}}
         
-        logger.info(f"Performance comparison complete")
+        logger.info("Performance comparison complete")
         self.comparison['performance'] = analysis
         return analysis
     
@@ -239,7 +239,7 @@ class LanguageComparisonAnalyzer:
         else:
             domain_analysis = {}
         
-        logger.info(f"Domain analysis complete")
+        logger.info("Domain analysis complete")
         return domain_analysis
     
     def generate_report(self, output_path: Optional[str] = None) -> Dict:
@@ -310,7 +310,7 @@ class LanguageComparisonAnalyzer:
         print("🌍 言語別精度比較レポート")
         print("="*70)
         
-        print(f"\n📊 比較対象:")
+        print("\n📊 比較対象:")
         print(f"  英語モデル: {self.en_results.get('model', 'Unknown')}")
         print(f"  日本語モデル: {self.ja_results.get('model', 'Unknown')}")
         
@@ -368,7 +368,7 @@ def main():
     analyzer.load_results(args.en, args.ja)
     
     # 比較分析実行
-    report = analyzer.generate_report(output_path=args.output)
+    analyzer.generate_report(output_path=args.output)
     
     # サマリー表示
     analyzer.print_summary()

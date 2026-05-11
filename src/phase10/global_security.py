@@ -15,7 +15,7 @@ Phase 10 Step 4: グローバル統合セキュリティプラットフォーム
 
 import asyncio
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set, Any, Tuple
+from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, field, asdict
 from collections import defaultdict
 from enum import Enum
@@ -376,9 +376,9 @@ class GlobalSecurityOrchestrator:
                 
                 elif disaster_type == 'security_breach':
                     # セキュリティ侵害時の対応
-                    logger.info(f"    Implementing security breach procedures")
-                    logger.info(f"    Revoking compromised credentials")
-                    logger.info(f"    Increasing monitoring")
+                    logger.info("    Implementing security breach procedures")
+                    logger.info("    Revoking compromised credentials")
+                    logger.info("    Increasing monitoring")
             
             logger.info(f"✅ BCP activated for {disaster_type}")
             return True

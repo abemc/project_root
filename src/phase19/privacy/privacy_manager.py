@@ -1,13 +1,13 @@
 """Privacy Manager - Unified privacy and data management system."""
 
-from typing import Dict, List, Any, Optional, Tuple, Union
+from typing import Dict, Any, Optional, Tuple, Union
 from datetime import datetime
 import json
 
 from .encryption_manager import EncryptionManager
-from .pii_detector import PIIDetector, PIIType, PIIDetectionResult
+from .pii_detector import PIIDetector
 from .audit_logger import AuditLogger, AuditEventType, AuditSeverity
-from .gdpr_manager import GDPRManager, ConsentType, RequestStatus
+from .gdpr_manager import GDPRManager, ConsentType
 
 
 class PrivacyManager:

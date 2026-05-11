@@ -2,8 +2,6 @@ import os
 import tempfile
 import unittest
 import json
-import urllib.request
-import urllib.error
 
 from analyzer.collector import CollectorServer
 
@@ -15,7 +13,6 @@ class CollectorTest(unittest.TestCase):
             server = CollectorServer(path=path, host="127.0.0.1", port=0, max_bytes=200, backup_count=2, auth_secret="s3cr3t")
             port = server.start()
             try:
-                url = f"http://127.0.0.1:{port}/collect"
                 data = json.dumps({"timestamp": 1.23, "total_tokens": 5}).encode("utf-8")
                 # use http.client to assert status codes directly
                 import http.client

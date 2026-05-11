@@ -12,8 +12,8 @@ Phase 10最終統合・本番展開
 """
 
 import json
-from datetime import datetime, timedelta
-from typing import Dict, List, Any
+from datetime import datetime
+from typing import Dict, Any
 
 
 def run_phase10_integration_tests() -> Dict[str, Any]:
@@ -377,11 +377,11 @@ Phase 7-10の統合セキュリティアーキテクチャにより、
     
     print("\n【Phase 10完了レポート】")
     print(f"✅ ステータス: {report['status']}")
-    print(f"✅ 実装ステップ: 4個 (すべて完了)")
-    print(f"✅ テスト: 49/49 PASS (100%)")
-    print(f"✅ 本番展開: Go Live Decision = GO ✅")
-    print(f"✅ セキュリティ改善: 検出時間 4h → 15分")
-    print(f"✅ ビジネスインパクト: +45% 運用効率化")
+    print("✅ 実装ステップ: 4個 (すべて完了)")
+    print("✅ テスト: 49/49 PASS (100%)")
+    print("✅ 本番展開: Go Live Decision = GO ✅")
+    print("✅ セキュリティ改善: 検出時間 4h → 15分")
+    print("✅ ビジネスインパクト: +45% 運用効率化")
     
     return report
 
@@ -540,14 +540,14 @@ def generate_phases_7_to_10_consolidated_report() -> Dict[str, Any]:
     # コンソール出力
     print("\n【Phase 7-10統合成果】")
     print(f"✅ 完了したPhase: {len(consolidated_report['phases'])}個")
-    print(f"✅ 総テスト: 250個 (成功率 100%)")
-    print(f"✅ 総コンポーネント: 28個")
-    print(f"✅ セキュリティレイヤー: 7層")
-    print(f"✅ リージョン展開: 5カ所")
-    print(f"✅ コンプライアンス: GDPR/CCPA/PCI-DSS/HIPAA/APPI 100%準拠")
-    print(f"✅ 脅威検知時間: 4時間 → 15分 (-93.75%)")
-    print(f"✅ セキュリティチーム効率: +45%")
-    print(f"✅ 自動化カバレッジ: 92%")
+    print("✅ 総テスト: 250個 (成功率 100%)")
+    print("✅ 総コンポーネント: 28個")
+    print("✅ セキュリティレイヤー: 7層")
+    print("✅ リージョン展開: 5カ所")
+    print("✅ コンプライアンス: GDPR/CCPA/PCI-DSS/HIPAA/APPI 100%準拠")
+    print("✅ 脅威検知時間: 4時間 → 15分 (-93.75%)")
+    print("✅ セキュリティチーム効率: +45%")
+    print("✅ 自動化カバレッジ: 92%")
     
     return consolidated_report
 

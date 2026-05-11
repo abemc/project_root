@@ -3,7 +3,6 @@ Phase 17 Task 2: RAG統合エンジンテスト
 35個テスト: ハイブリッド検索・再ランキング・生成・引用追跡をカバー
 """
 
-import pytest
 from src.rag_integration.rag_engine import (
     RetrievalStrategy,
     RankingStrategy,
@@ -530,7 +529,7 @@ class TestRAGIntegration:
         ]
         engine.build_index(docs)
 
-        result = engine.generate("What is machine learning?")
+        engine.generate("What is machine learning?")
         stats = engine.get_rag_statistics()
 
         assert stats["total_queries"] == 1

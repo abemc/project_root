@@ -6,8 +6,8 @@ Redis/Memcached バックエンド対応
 """
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
 from typing import Any, Optional, Dict, List, Callable
 import json
@@ -386,13 +386,13 @@ class CacheInvalidationManager:
             keys = [
                 f"product:{product_id}",
                 f"product:{product_id}:details",
-                f"products:list"
+                "products:list"
             ]
         elif event_type == "inventory_changed":
             product_id = event_data.get("product_id")
             keys = [
                 f"product:{product_id}:inventory",
-                f"products:available"
+                "products:available"
             ]
         
         return keys

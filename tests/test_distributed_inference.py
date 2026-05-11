@@ -7,9 +7,7 @@ GPU クラスタ管理・ルーティング・結果集約テスト
 """
 
 import pytest
-import asyncio
 import numpy as np
-from datetime import datetime
 import sys
 import os
 
@@ -25,7 +23,6 @@ from inference.distributed_inference import (
     DistributedInferenceEngine,
     ResultAggregator,
     initialize_distributed_inference,
-    get_distributed_engine,
 )
 
 
@@ -298,7 +295,7 @@ class TestDistributedInferenceEngine:
         results = await engine.batch_infer(requests)
         elapsed_sec = time.time() - start
         
-        throughput = len(results) / elapsed_sec
+        len(results) / elapsed_sec
         avg_latency_ms = np.mean([r.total_time_ms for r in results])
         
         assert len(results) == 100
@@ -406,7 +403,7 @@ class TestDistributionPerformance:
         results = await engine.batch_infer(requests)
         elapsed = time.time() - start
         
-        throughput = len(results) / elapsed if elapsed > 0 else 0
+        len(results) / elapsed if elapsed > 0 else 0
         # シミュレーション環境では実際の値は異なるため、成功を確認
         assert len(results) == 50
     
@@ -427,9 +424,9 @@ class TestDistributionPerformance:
                 latencies.append(result.total_time_ms)
         
         if latencies:
-            p50 = np.percentile(latencies, 50)
-            p95 = np.percentile(latencies, 95)
-            p99 = np.percentile(latencies, 99)
+            np.percentile(latencies, 50)
+            np.percentile(latencies, 95)
+            np.percentile(latencies, 99)
             
             assert len(latencies) > 0
 

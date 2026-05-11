@@ -272,7 +272,7 @@ class OptimizedMultiDomainRetriever:
         logger.debug(f"ドメイン検索: domain={domain}, top_k={top_k}")
         
         # キーワード抽出（キャッシュ活用）
-        keywords = self._get_domain_keywords_cached(domain)
+        self._get_domain_keywords_cached(domain)
         
         # 埋め込み生成（実装時に具体化）
         if self.embedding_model:

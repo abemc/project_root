@@ -1,11 +1,11 @@
 """Scaling Manager - unified availability and scaling system."""
 
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any
 from datetime import datetime
 
 from .load_balancer import LoadBalancer, LoadBalancingStrategy, BackendStatus
-from .auto_scaler import AutoScaler, ScalingPolicy, ScalingRule, ScalingEvent
-from .cache_manager import CacheManager, CacheStrategy
+from .auto_scaler import AutoScaler, ScalingPolicy, ScalingRule
+from .cache_manager import CacheManager
 from .fault_detector import FaultDetector, FaultType, FaultEvent
 
 

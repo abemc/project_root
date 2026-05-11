@@ -5,6 +5,7 @@ from PIL import Image
 import pytesseract
 import torch
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from src.utils.async_helpers import run_in_executor, await_future
 
 # GPUを使用する
 DEVICE = "cuda"
@@ -35,15 +36,15 @@ def load_translator():
     # 200言語に対応した NLLB (No Language Left Behind) モデルの軽量版
     model_name = "facebook/nllb-200-distilled-600M"
 
-    print("Loading translation model (NLLB-200)...")
-    # 1-1. トークナイザの読み込み
-    #      テキストをモデルが理解できるIDのシーケンスに変換します。
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    print("Loading translation model (NLLB-200) in background...")
+    # Load tokenizer and model in background threads to avoid blocking callers.
+    tok_fut = run_in_executor(AutoTokenizer.from_pretrained, model_name)
+    model_fut = run_in_executor(AutoModelForSeq2SeqLM.from_pretrained, model_name, use_safetensors=True)
 
-    # 1-2. モデル本体の読み込み
-    #      AutoModelForSeq2SeqLM は、テキスト生成（翻訳など）タスクのためのモデルです。
-    #      .to(DEVICE) でモデルを適切なデバイスに転送します。
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_name, use_safetensors=True)
+    # Wait for completion with reasonable timeouts
+    tokenizer = await_future(tok_fut, timeout=60)
+    model = await_future(model_fut, timeout=180)
+
     # prefer explicit .cuda() when DEVICE is cuda and model supports it (tests expect .cuda())
     try:
         if DEVICE == "cuda" and hasattr(model, "cuda"):
@@ -51,7 +52,6 @@ def load_translator():
         else:
             model = model.to(DEVICE)
     except Exception:
-        # fall back to .to if .cuda() fails for any reason
         model = model.to(DEVICE)
 
     # キャッシュに保存
@@ -164,11 +164,9 @@ def extract_pdf(pdf_path: str, out_dir: str):
             # 3-6. 画像からテキストを抽出 (OCR)
             #      - lang="jpn+eng": 日本語と英語の両方を認識対象とする
             #      - config="--psm 6": ページレイアウトを「単一の均一なテキストブロック」として仮定
-            ocr_text = pytesseract.image_to_string(
-                img,
-                lang="jpn+eng",
-                config="--psm 6 --oem 3"
-            )
+            # Run OCR in background to avoid blocking heavy CPU work in main thread
+            ocr_fut = run_in_executor(pytesseract.image_to_string, img, "jpn+eng", "--psm 6 --oem 3")
+            ocr_text = await_future(ocr_fut, timeout=30)
         except Exception as e:
             print(f"[ERROR] Tesseract OCR failed for page {i}: {e}")
             # OCRが失敗しても画像は残す
@@ -181,7 +179,7 @@ def extract_pdf(pdf_path: str, out_dir: str):
         # 3-7. 抽出したテキストを翻訳 (英語 -> 日本語)
         try:
             translated_text = translate_en_to_ja(trans_tokenizer, trans_model, ocr_text)
-            print(f"  - OCR successful, translating...")
+            print("  - OCR successful, translating...")
         except Exception as e:
             print(f"[ERROR] Translation failed for page {i}: {e}")
             # 翻訳に失敗した場合は、OCRの結果をそのまま使う

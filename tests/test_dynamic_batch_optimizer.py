@@ -7,8 +7,6 @@ AI 駆動型バッチサイズ最適化・SLA 対応テスト
 """
 
 import pytest
-import asyncio
-import numpy as np
 import sys
 import os
 import time

@@ -6,8 +6,7 @@ Retry Manager Implementation
 
 from enum import Enum
 from dataclasses import dataclass, field
-from typing import Callable, Any, Optional, List, Tuple
-from datetime import datetime, timedelta
+from typing import Callable, Any, Optional, Tuple
 import asyncio
 import logging
 import random

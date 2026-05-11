@@ -15,12 +15,10 @@ Phase 6: 環境適応エンジン
 """
 
 import logging
-import json
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 from enum import Enum
 from datetime import datetime
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -644,7 +642,7 @@ if __name__ == "__main__":
         
         plan = adapter.adapt_to_context(context)
         
-        print(f"\nAdapted Execution Plan:")
+        print("\nAdapted Execution Plan:")
         print(f"  Model: {plan.model}")
         print(f"  Chunk Size: {plan.parameters.chunk_size}")
         print(f"  Batch Size: {plan.parameters.batch_size}")

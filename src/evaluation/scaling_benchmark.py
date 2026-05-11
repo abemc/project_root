@@ -5,8 +5,7 @@
 
 import json
 import time
-import os
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from datetime import datetime
 import logging
 from pathlib import Path
@@ -164,7 +163,7 @@ class ScalingBenchmarkRunner:
                 )
             
             # メトリクス計算
-            logger.info(f"📊 Computing metrics...")
+            logger.info("📊 Computing metrics...")
             metrics = metric_fn(predictions, references)
             
             # 結果集計
@@ -269,7 +268,7 @@ class ScalingBenchmarkRunner:
         print(f"Total time: {result['inference_statistics']['total_time']:.2f}s")
         print(f"Inference time: {result['inference_statistics']['inference_time']:.2f}s")
         print(f"Throughput: {result['inference_statistics']['samples_per_second']:.2f} samples/sec")
-        print(f"\nMetrics:")
+        print("\nMetrics:")
         for metric_name, value in result['metrics'].items():
             print(f"  {metric_name}: {value:.4f}")
         if result['error_count'] > 0:

@@ -14,15 +14,13 @@ Phase 10 Step 2: FIDO2 + 生体認証エンジン - メイン実装
 - 登録成功率: > 99.5%
 """
 
-import asyncio
 import json
 import hashlib
-import hmac
 import base64
 import os
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple, Any
-from dataclasses import dataclass, field, asdict
+from datetime import datetime
+from typing import Dict, List, Optional, Tuple
+from dataclasses import dataclass, field
 from enum import Enum
 import logging
 
@@ -274,7 +272,7 @@ class FIDO2AuthEngine:
             credential.sign_count = new_sign_count
             
             # 3. UserVerification & UserPresence 確認
-            user_verified = authenticator_data.get('userVerified', False)
+            authenticator_data.get('userVerified', False)
             user_present = authenticator_data.get('userPresent', False)
             
             if not user_present:
@@ -343,7 +341,7 @@ class FIDO2AuthEngine:
                 auth_data_str = authenticator_data if isinstance(authenticator_data, str) else str(authenticator_data)
             
             # authData + clientDataHash で署名検証
-            signed_data = auth_data_str.encode() + client_data_hash
+            auth_data_str.encode() + client_data_hash
             
             # 署名が有効（シミュレーション: ランダムで成功）
             return len(signature) > 0 and len(public_key) > 0

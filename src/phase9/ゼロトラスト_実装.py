@@ -13,13 +13,10 @@ Specifications:
 - Continuous monitoring and threat detection
 """
 
-import os
-import json
-import hashlib
 import uuid
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Tuple, Set, Any
+from typing import Optional, Dict, List, Tuple, Any
 from enum import Enum
 import time
 from collections import defaultdict
@@ -630,7 +627,7 @@ def test_zero_trust_system():
     # Test 1: System initialization
     print("\n【Test 1】システム初期化")
     init_result = system.initialize_system()
-    print(f"✅ システム初期化完了")
+    print("✅ システム初期化完了")
     print(f"  - ネットワークセグメント: {init_result['segments']}")
     print(f"  - アクセス制御ポリシー: {init_result['policies']}")
     for principle in init_result['principles']:
@@ -652,10 +649,10 @@ def test_zero_trust_system():
         typical_locations=["Tokyo", "Singapore"],
         typical_hours=[9, 10, 11, 14, 15, 16]
     )
-    print(f"✅ ユーザー行動基準設定完了: user_001")
-    print(f"  - 通常のIP: 2個")
-    print(f"  - 通常の位置情報: 2個")
-    print(f"  - 通常のアクセス時間: 6時間")
+    print("✅ ユーザー行動基準設定完了: user_001")
+    print("  - 通常のIP: 2個")
+    print("  - 通常の位置情報: 2個")
+    print("  - 通常のアクセス時間: 6時間")
     
     # Test 4: Normal access request
     print("\n【Test 4】通常のアクセスリクエスト")
@@ -668,7 +665,7 @@ def test_zero_trust_system():
         resource_type=ResourceType.DATA,
         geolocation="Tokyo"
     )
-    print(f"✅ アクセス評価完了")
+    print("✅ アクセス評価完了")
     print(f"  - 判定: {decision.value}")
     print(f"  - 信頼スコア: {trust_score:.2%}")
     
@@ -683,46 +680,46 @@ def test_zero_trust_system():
         resource_type=ResourceType.DATA,
         geolocation="New York"  # Unexpected location
     )
-    print(f"✅ 異常検知完了")
+    print("✅ 異常検知完了")
     print(f"  - 判定: {decision.value}")
     print(f"  - 信頼スコア: {trust_score:.2%}")
     if decision == AccessDecision.CHALLENGE:
-        print(f"  - ⚠️ 追加認証が必要")
+        print("  - ⚠️ 追加認証が必要")
     
     # Test 6: Microsegmentation
     print("\n【Test 6】ネットワークマイクロセグメンテーション")
     seg_check = system.microsegmentation.check_segment_access(
         "user_001", "public", "engineering", "api_gateway"
     )
-    print(f"✅ セグメント間アクセスチェック")
-    print(f"  - アクセス経路: public → engineering")
-    print(f"  - リソース: api_gateway")
+    print("✅ セグメント間アクセスチェック")
+    print("  - アクセス経路: public → engineering")
+    print("  - リソース: api_gateway")
     print(f"  - アクセス許可: {seg_check}")
     
     # Test 7: Device compliance check
     print("\n【Test 7】デバイス準拠性チェック")
     is_compliant, risk_score = system.device_checker.verify_device_posture("device_001")
-    print(f"✅ デバイス準拠性チェック")
+    print("✅ デバイス準拠性チェック")
     print(f"  - 準拠状態: {'✅ 準拠' if is_compliant else '❌ 非準拠'}")
     print(f"  - リスク スコア: {risk_score}/100")
     
     # Test 8: Multiple devices and users
     print("\n【Test 8】複数デバイス・ユーザー管理")
     for i in range(3):
-        sys_device = system.register_device(
+        system.register_device(
             f"device_{i+2:03d}",
             ["Windows", "Linux", "iOS"][i],
             ["11", "5.15", "17"][i]
         )
     
-    print(f"✅ デバイス登録完了")
+    print("✅ デバイス登録完了")
     stats = system.get_system_stats()
     print(f"  - 登録済みデバイス: {stats['devices_registered']}")
     print(f"  - アクティブセッション: {stats['active_sessions']}")
     
     # Test 9: Audit trail
     print("\n【Test 9】監査ログ")
-    print(f"✅ システム統計")
+    print("✅ システム統計")
     print(f"  - 総デバイス: {stats['devices_registered']}")
     print(f"  - アクセスポリシー: {stats['access_policies']}")
     print(f"  - ネットワークセグメント: {stats['network_segments']}")
@@ -746,11 +743,11 @@ def test_zero_trust_system():
     access_time = (time.time() - start) / 100
     print(f"✅ アクセス判定平均時間: {access_time * 1000:.3f}ms")
     
-    print(f"✅ デバイス準拠性チェック: < 100ms")
-    print(f"✅ 行動分析エンジン: < 50ms")
-    print(f"✅ マイクロセグメンテーション: < 10ms")
-    print(f"✅ セッション管理: < 5ms")
-    print(f"✅ 異常検知率: > 99%")
+    print("✅ デバイス準拠性チェック: < 100ms")
+    print("✅ 行動分析エンジン: < 50ms")
+    print("✅ マイクロセグメンテーション: < 10ms")
+    print("✅ セッション管理: < 5ms")
+    print("✅ 異常検知率: > 99%")
     
     print("\n" + "=" * 70)
     print("✅ Phase 9 Step 3 テスト完了 (すべてのチェック PASS)")

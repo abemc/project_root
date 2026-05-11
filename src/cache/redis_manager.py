@@ -7,14 +7,11 @@ L3 キャッシュ層実装
 - セキュリティコンテキスト考慮
 """
 
-import redis
 from redis.sentinel import Sentinel
 from typing import Any, Optional, List, Dict
 import json
 import logging
 import asyncio
-from datetime import datetime, timedelta
-from contextlib import asynccontextmanager
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -445,7 +442,7 @@ class CacheInvalidationEventSystem:
         patterns = [
             f"layer1_auth:*:*:{tenant_id}:*",
             f"layer3_network:*:*:{tenant_id}:*",
-            f"layer7_global:config:*:*",
+            "layer7_global:config:*:*",
         ]
         
         for pattern in patterns:
@@ -459,7 +456,7 @@ class CacheInvalidationEventSystem:
         await self.redis.delete(key)
         
         # キーマッピングもクリア
-        pattern = f"layer2_crypto:key_mapping:*"
+        pattern = "layer2_crypto:key_mapping:*"
         await self.redis.delete_pattern(pattern)
     
     async def on_threat_level_changed(self, user_id: str):

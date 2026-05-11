@@ -1,7 +1,6 @@
 """Encryption Manager for data encryption/decryption operations."""
 
 import os
-import json
 import hashlib
 import hmac
 from typing import Union, Tuple, Optional, Dict, Any

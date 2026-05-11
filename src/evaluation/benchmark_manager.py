@@ -13,10 +13,8 @@
 
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Callable
-import json
+from typing import Dict, Optional, Callable
 import argparse
-from datetime import datetime
 import logging
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -24,11 +22,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from src.evaluation.benchmark_runner import BenchmarkRunner, BenchmarkComparator
 from src.evaluation.metrics.metric_calculator import MetricCalculator
-from src.evaluation.datasets.mmlu_loader import MMULoader, MMUEvaluator
-from src.evaluation.datasets.gsm8k_loader import GSM8KLoader, GSM8KEvaluator
-from src.evaluation.datasets.humaneval_loader import HumanEvalLoader, HumanEvalEvaluator
+from src.evaluation.datasets.mmlu_loader import MMULoader
+from src.evaluation.datasets.gsm8k_loader import GSM8KLoader
+from src.evaluation.datasets.humaneval_loader import HumanEvalLoader
 from src.evaluation.datasets.truthfulqa_bbq_loaders import (
-    TruthfulQALoader, BBQLoader, BiasEvaluator
+    TruthfulQALoader, BBQLoader
 )
 
 # ログ設定

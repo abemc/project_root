@@ -13,9 +13,8 @@ IDEAL_LLM_RESEARCH_REPORT に基づく多層防御フレームワーク
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Set, Tuple, Optional
+from typing import Dict, List, Tuple
 import re
-import json
 from datetime import datetime
 import hashlib
 

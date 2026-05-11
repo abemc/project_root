@@ -1,16 +1,18 @@
 import os
 import json
-import numpy as np\nfrom typing import List, Dict
+import numpy as np
+from typing import List, Dict
 from pathlib import Path
 
 # Patch for torchao compatibility (torchao 0.16.0+ requires torch 2.5+, but we have 2.4.1)
 import torch
 if not hasattr(torch, "int1"):
     for i in range(1, 8):
-        for dtype in [f\"int{i}\", f\"uint{i}\"]:
+        for dtype in [f"int{i}", f"uint{i}"]:
             setattr(torch, dtype, type(dtype, (), {})())
 
 from sentence_transformers import SentenceTransformer
+from src.utils.async_helpers import run_in_executor, await_future
 from src.corpus.chunk_text import chunk_text
 from src.utils.path_utils import get_normalized_path, get_chunks_path, get_embeddings_path
 import tiktoken
@@ -19,7 +21,14 @@ import tiktoken
 # モデル設定（bge-m3）
 # ============================================================
 EMBED_MODEL = "BAAI/bge-m3"
-model = SentenceTransformer(EMBED_MODEL, device="cuda")
+_EMBED_MODEL_FUT = None
+
+
+def get_embed_model():
+    global _EMBED_MODEL_FUT
+    if _EMBED_MODEL_FUT is None:
+        _EMBED_MODEL_FUT = run_in_executor(SentenceTransformer, EMBED_MODEL, device="cuda")
+    return await_future(_EMBED_MODEL_FUT, timeout=180)
 
 enc = tiktoken.get_encoding("cl100k_base")
 
@@ -51,9 +60,9 @@ def process_book(book_id: str):
     chunks_dir = get_chunks_path()
     embed_dir = get_embeddings_path()
     
-    norm_path = norm_dir / f\"{book_id}.txt\"
-    chunk_path = chunks_dir / f\"{book_id}.jsonl\"
-    embed_path = embed_dir / f\"{book_id}.npy\"
+    norm_path = norm_dir / f"{book_id}.txt"
+    chunk_path = chunks_dir / f"{book_id}.jsonl"
+    embed_path = embed_dir / f"{book_id}.npy"
 
     print(f"\n=== Processing {book_id} ===")
 
@@ -80,6 +89,7 @@ def process_book(book_id: str):
 
     # --- Embedding ---
     texts = [r["text"] for r in records]
+    model = get_embed_model()
     embeddings = model.encode(texts, batch_size=2, normalize_embeddings=True)
     np.save(embed_path, embeddings)
     print(f"Saved embeddings to {embed_path}")

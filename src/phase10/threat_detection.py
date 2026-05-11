@@ -16,11 +16,10 @@ Phase 10 Step 3: AI/ML 脅威検出エンジン - メイン実装
 
 import numpy as np
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple, Any, Set
-from dataclasses import dataclass, field, asdict
+from typing import Dict, List, Optional, Set
+from dataclasses import dataclass, field
 from collections import defaultdict, deque
 import logging
-import json
 
 logger = logging.getLogger(__name__)
 
@@ -214,9 +213,9 @@ class AnomalyDetector:
         
         # グラフ密度
         if len(nodes) > 1:
-            graph_density = edges / (len(nodes) * (len(nodes) - 1))
+            edges / (len(nodes) * (len(nodes) - 1))
         else:
-            graph_density = 0
+            pass
         
         # 高度接点検出
         avg_degree = edges / len(nodes) if nodes else 0
@@ -322,7 +321,7 @@ class BehaviorProfiler:
         recently_accessed_hosts = set()
         
         # 直近5分のアクションから
-        five_min_ago = datetime.now() - timedelta(minutes=5)
+        datetime.now() - timedelta(minutes=5)
         
         if user_id in self.event_buffer:
             for past_event in self.event_buffer[user_id]:
@@ -330,7 +329,7 @@ class BehaviorProfiler:
                     event_time_str = past_event.get('timestamp', '')
                     if event_time_str:
                         try:
-                            event_time = datetime.fromisoformat(event_time_str)
+                            datetime.fromisoformat(event_time_str)
                             # デモモード: 時間チェックをスキップして、すべてのホストを集計
                             host = past_event.get('target_host') or past_event.get('resource')
                             if host:

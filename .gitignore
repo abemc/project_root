@@ -1,3 +1,16 @@
+# Virtual envs and local envs
+.venv/
+myenv/
+
+# HuggingFace cache and large model blobs (keep backups instead)
+hf_cache/
+
+# Backups archives (optional keep)
+backups/*.tar.gz
+
+# Python bytecode
+__pycache__/
+*.py[cod]
 
 # APIキー・トークンを含む設定ファイル
 config/onenote_token.json

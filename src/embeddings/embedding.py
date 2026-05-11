@@ -1,4 +1,3 @@
-import os
 import json
 import torch
 # Patch for torchao compatibility (torchao 0.16.0+ requires torch 2.5+, but we have 2.4.1)
@@ -21,8 +20,8 @@ EMB_DIR = get_embeddings_path()
 INDEX_PATH = CORPUS_ROOT / "corpus.index"
 META_PATH = CORPUS_ROOT / "corpus_meta.json"
  
-# GPUを使用する
-DEVICE = "cuda"
+# GPUを使用する（自動判定: 利用可能ならcuda、なければcpu）
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # バッチサイズ (GPUメモリ不足の場合は小さくする: 8 -> 2)
 BATCH_SIZE = 2
@@ -42,7 +41,16 @@ def load_bge_m3():
         model_name,
         trust_remote_code=True,
         use_safetensors=True
-    ).to(DEVICE)
+    )
+
+    # モデルをデバイスに移す。失敗した場合は CPU にフォールバックする。
+    global DEVICE
+    try:
+        model = model.to(DEVICE)
+    except Exception as e:
+        print(f"[WARN] Failed to move model to {DEVICE}: {e}. Falling back to CPU.")
+        DEVICE = "cpu"
+        model = model.to(DEVICE)
 
     return tokenizer, model
 

@@ -9,7 +9,6 @@ RAG キャッシング問題診断スクリプト
 """
 
 import json
-import os
 from pathlib import Path
 
 # プロジェクトルート設定
@@ -29,19 +28,19 @@ if meta_path.exists():
     with open(meta_path, "r", encoding="utf-8") as f:
         meta_data = json.load(f)
     
-    print(f"✅ コーパスメタデータが存在します")
+    print("✅ コーパスメタデータが存在します")
     print(f"   ファイル: {meta_path}")
     print(f"   保存ドキュメント数: {len(meta_data)}")
     
     if meta_data:
-        print(f"\n   最初の3件のドキュメント:")
+        print("\n   最初の3件のドキュメント:")
         for i, doc in enumerate(meta_data[:3]):
             source = doc.get("meta", {}).get("source") or doc.get("source", "不明")
             text_preview = (doc.get("text", doc.get("content", ""))[:100] + "...").replace("\n", " ")
             print(f"   [{i+1}] {source}")
             print(f"       テキスト: {text_preview}")
     else:
-        print(f"\n   ⚠️ ドキュメントが0件です！")
+        print("\n   ⚠️ ドキュメントが0件です！")
 else:
     print(f"❌ コーパスメタデータが見つかりません: {meta_path}")
 
@@ -55,14 +54,14 @@ index_path = CORPUS_BASE_PATH / "corpus.index"
 if index_path.exists():
     try:
         index = faiss.read_index(str(index_path))
-        print(f"✅ FAISSインデックスが存在します")
+        print("✅ FAISSインデックスが存在します")
         print(f"   ファイル: {index_path}")
         print(f"   インデックス内のベクトル数: {index.ntotal}")
         
         if meta_path.exists() and index.ntotal != len(meta_data):
             print(f"   ⚠️  警告: ベクトル数 ({index.ntotal}) とメタデータ数 ({len(meta_data)}) が一致しません！")
         else:
-            print(f"   ✅ ベクトル数とメタデータ数が一致しています")
+            print("   ✅ ベクトル数とメタデータ数が一致しています")
     except Exception as e:
         print(f"❌ インデックス読み込みエラー: {e}")
 else:
@@ -89,7 +88,7 @@ try:
         "calculus"
     ]
     
-    print(f"異なるクエリでの検索結果:")
+    print("異なるクエリでの検索結果:")
     for query in test_queries:
         try:
             results = retriever.search(query, top_k=3)
@@ -103,7 +102,7 @@ try:
                     print(f"     [{i+1}] (Score: {score:.4f}) {source}")
                     print(f"         {text_preview}")
             else:
-                print(f"  ❌ 検索結果: 0件")
+                print("  ❌ 検索結果: 0件")
         except Exception as e:
             print(f"  ❌ 検索エラー: {e}")
     
@@ -130,10 +129,10 @@ try:
     
     # 全て同じか確認
     if len(set(responses)) == 1:
-        print(f"\n  ⚠️  警告: 3回全て同じ応答が返されました（キャッシングが疑われます）")
+        print("\n  ⚠️  警告: 3回全て同じ応答が返されました（キャッシングが疑われます）")
         print(f"     応答: {responses[0]}")
     else:
-        print(f"\n  ✅ 異なる応答が返されました（キャッシングは見られません）")
+        print("\n  ✅ 異なる応答が返されました（キャッシングは見られません）")
         for i, resp in enumerate(set(responses), 1):
             print(f"     パターン {i}: {resp[:50]}")
     
@@ -183,7 +182,7 @@ try:
                 print(f"       最初のドキュメント: {doc_preview}...")
             else:
                 responses_agent[question] = "(なし)"
-                print(f"       ドキュメント: なし")
+                print("       ドキュメント: なし")
         except Exception as e:
             print(f"    ❌ エラー: {e}")
     
@@ -192,10 +191,10 @@ try:
     print(f"\n  結果: {len(test_questions)}個の質問に対して {unique_responses}種類の異なるドキュメントが検索されました")
     
     if unique_responses == 1:
-        print(f"  ⚠️  警告: 全ての質問で同じドキュメントが返されています！")
+        print("  ⚠️  警告: 全ての質問で同じドキュメントが返されています！")
         print(f"     内容: {list(responses_agent.values())[0]}")
     else:
-        print(f"  ✅ 異なるドキュメントが返されています（正常）")
+        print("  ✅ 異なるドキュメントが返されています（正常）")
     
 except Exception as e:
     print(f"❌ RAGAgent テストエラー: {e}")

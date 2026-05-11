@@ -1,4 +1,3 @@
-import os
 import requests
 from pathlib import Path
 
@@ -29,7 +28,7 @@ def download_sample_pdf():
             f.write(response.content)
         
         print("Download successful!")
-        print(f"You can now run: python -m src.corpus.pdf_converter")
+        print("You can now run: python -m src.corpus.pdf_converter")
         
     except Exception as e:
         print(f"Failed to download: {e}")

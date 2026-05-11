@@ -5,8 +5,8 @@
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
-from dataclasses import dataclass, asdict
+from typing import Dict, List, Any, Optional
+from dataclasses import dataclass
 from datetime import datetime
 import json
 

@@ -6,7 +6,7 @@ Failover Strategy Implementation
 
 from dataclasses import dataclass, field
 from typing import Callable, Any, Optional, List, Dict
-from datetime import datetime, timedelta
+from datetime import datetime
 import asyncio
 import logging
 

@@ -8,11 +8,10 @@ Phase 8 Step 2: リアルタイムセキュリティアラート機構
 - Slack / PagerDuty通知
 """
 
-import json
 import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from enum import Enum
 import logging
 import re
@@ -520,7 +519,7 @@ class SecurityAlertNotifier:
                     "fields": [
                         {
                             "type": "mrkdwn",
-                            "text": f"*自動対応:*\n" + "\n".join(
+                            "text": "*自動対応:*\n" + "\n".join(
                                 [f"✅ {a.value}" for a in (incident.auto_response_actions or [])]
                             ),
                         },
@@ -624,7 +623,7 @@ def test_security_alerts():
     incident = handler.process_event(event)
     if incident:
         print(f"✅ インシデント検知: {incident.incident_type.value}")
-        print(f"  - IP自動ブロック: 30分間")
+        print("  - IP自動ブロック: 30分間")
         notifier.notify_incident(incident, notify_slack=True)
 
     # テストケース4: データ流出検知
@@ -679,10 +678,10 @@ def test_security_alerts():
     print(f"✅ CRITICAL: {critical_count}件")
     print(f"✅ HIGH: {high_count}件")
     print(f"✅ MEDIUM: {medium_count}件")
-    print(f"✅ 自動対応成功率: 100% (全インシデント自動対応)")
-    print(f"✅ 検知遅延: < 100ms")
+    print("✅ 自動対応成功率: 100% (全インシデント自動対応)")
+    print("✅ 検知遅延: < 100ms")
     print(f"✅ IPブロック: {len(handler.blocked_ips)}件のIPをブロック中")
-    print(f"✅ 誤検知率: 0% (すべてのテストケースが意図的)")
+    print("✅ 誤検知率: 0% (すべてのテストケースが意図的)")
 
     print("\n" + "="*70)
     print("✅ Phase 8 Step 2 テスト完了 (すべてのチェック PASS)")

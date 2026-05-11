@@ -4,14 +4,12 @@
 """
 
 import logging
-import asyncio
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Callable, Dict, Any
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
-from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 
 logger = logging.getLogger(__name__)
 
@@ -335,7 +333,7 @@ class AutomationEngine:
             stats = self.feedback_manager.get_summary_stats()
             improvement_areas = self.feedback_manager.get_improvement_areas()
             
-            logger.info(f"📊 Feedback Analysis:")
+            logger.info("📊 Feedback Analysis:")
             logger.info(f"   Total feedback: {stats['total_count']}")
             logger.info(f"   Average rating: {stats['average_rating']:.2%}")
             logger.info(f"   Improvement areas: {improvement_areas}")
@@ -363,7 +361,7 @@ class AutomationEngine:
                 templates = self.prompt_optimizer.list_templates()
                 best_template = self.prompt_optimizer.get_best_template()
                 
-                logger.info(f"✨ Prompt Optimization:")
+                logger.info("✨ Prompt Optimization:")
                 logger.info(f"   Active templates: {len(templates)}")
                 logger.info(f"   Best template: {best_template}")
                 logger.info(f"   Improvement areas: {improvement_areas}")
@@ -414,7 +412,7 @@ class AutomationEngine:
             dashboard = self.metric_tracker.get_dashboard()
             current = dashboard.get("current", {})
             
-            logger.info(f"📈 Metrics Verification:")
+            logger.info("📈 Metrics Verification:")
             logger.info(f"   Average rating: {current.get('average_rating', 'N/A'):.2%}")
             logger.info(f"   Feedback count: {current.get('feedback_count', 0)}")
             logger.info(f"   Training steps: {current.get('training_steps', 0)}")

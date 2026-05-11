@@ -9,9 +9,8 @@ Phase 7 Post-Deployment フェーズ
 - チーム教育・ナレッジ共有
 """
 
-import json
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 
 class PostDeploymentValidator:
@@ -123,7 +122,7 @@ class PostDeploymentValidator:
             print(f"【{stage}】")
             print(f"  実施時刻: {details['実施時刻']}")
             print(f"  所要時間: {details['所要時間']}")
-            print(f"  確認事項:")
+            print("  確認事項:")
             for item in details["確認事項"]:
                 print(f"    {item}")
             print()
@@ -206,7 +205,7 @@ class PostDeploymentValidator:
             print(f"📚 {material_name}")
             print(f"   対象: {details['対象']}")
             print(f"   所要時間: {details['所要時間']}")
-            print(f"   内容:")
+            print("   内容:")
             for content in details["内容"]:
                 print(f"     - {content}")
             
@@ -314,10 +313,10 @@ def main():
     validator = PostDeploymentValidator()
     
     # 1. 本番環境安定稼働確認
-    stability = validator.validate_production_stability()
+    validator.validate_production_stability()
     
     # 2. レガシーシステムシャットダウン計画
-    shutdown_plan = validator.plan_legacy_system_shutdown()
+    validator.plan_legacy_system_shutdown()
     
     # 3. ナレッジ移行資料生成
     knowledge_materials = validator.generate_knowledge_transfer_materials()

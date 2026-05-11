@@ -14,7 +14,6 @@ Specifications:
 """
 
 import os
-import json
 import hashlib
 import hmac
 from datetime import datetime, timedelta
@@ -22,7 +21,6 @@ from dataclasses import dataclass, field
 from typing import Optional, Dict, List, Tuple, Any
 from enum import Enum
 import base64
-import sqlite3
 from collections import defaultdict
 import time
 
@@ -107,7 +105,6 @@ class AES256GCMEncryptor:
         Returns: (ciphertext, tag, iv)
         """
         import hmac
-        import struct
         
         # Simulate AES-256-GCM using HMAC (for demo purposes)
         # In production, use cryptography.hazmat.primitives.ciphers.Cipher
@@ -179,7 +176,7 @@ class RSA4096Handler:
     def decrypt_with_private(ciphertext: str, private_key: str) -> Optional[bytes]:
         """Decrypt with private key"""
         try:
-            key_bytes = base64.b64decode(private_key.encode())
+            base64.b64decode(private_key.encode())
             cipher_bytes = base64.b64decode(ciphertext.encode())
             # Verification via HMAC
             return cipher_bytes
@@ -579,7 +576,7 @@ def test_e2e_encryption_system():
     # Test 1: System initialization
     print("\n【Test 1】システム初期化")
     init_result = system.initialize_system()
-    print(f"✅ システム初期化完了")
+    print("✅ システム初期化完了")
     print(f"  - マスターキー: {init_result['master_key']}")
     print(f"  - アクティブキー: {init_result['active_keys']}")
     print(f"  - 暗号化対象カラム: {init_result['encrypted_columns']}")
@@ -592,7 +589,7 @@ def test_e2e_encryption_system():
     print(f"  - 暗号文 (最初の50文字): {encrypted_msg.ciphertext[:50]}...")
     
     decrypted_msg = system.decrypt_message(encrypted_msg)
-    print(f"✅ メッセージ復号化完了")
+    print("✅ メッセージ復号化完了")
     print(f"  - 元のメッセージ: {decrypted_msg == original_msg}")
     
     # Test 3: Database column encryption
@@ -602,13 +599,13 @@ def test_e2e_encryption_system():
         ["credit_card", "bank_account"],
         "dek_user_data"
     )
-    print(f"✅ カラム暗号化設定完了: 2カラム")
+    print("✅ カラム暗号化設定完了: 2カラム")
     
     # Test 4: Key rotation
     print("\n【Test 4】キーローテーション")
     new_key = system.perform_key_rotation("dek_user_data")
     if new_key:
-        print(f"✅ キーローテーション完了")
+        print("✅ キーローテーション完了")
         print(f"  - 新しいキーID: {new_key.key_id}")
         print(f"  - キーバージョン: {new_key.key_version}")
     
@@ -617,7 +614,7 @@ def test_e2e_encryption_system():
     backup_data = b"System backup data with all encrypted information"
     success = system.create_encrypted_backup("backup_20260415_001", backup_data)
     if success:
-        print(f"✅ 暗号化バックアップ作成完了: backup_20260415_001")
+        print("✅ 暗号化バックアップ作成完了: backup_20260415_001")
         backup_meta = system.backup_encryption.backup_registry["backup_20260415_001"]
         print(f"  - バックアップサイズ: {backup_meta['size']} bytes")
         print(f"  - チェックサム: {backup_meta['checksum'][:16]}...")
@@ -625,13 +622,13 @@ def test_e2e_encryption_system():
     # Test 6: RS cryptography (asymmetric)
     print("\n【Test 6】RSA-4096 非対称暗号化")
     pub_key, priv_key = RSA4096Handler.generate_keypair()
-    print(f"✅ RSA-4096 キーペア生成完了")
+    print("✅ RSA-4096 キーペア生成完了")
     print(f"  - 公開鍵 (最初の20文字): {pub_key[:20]}...")
     print(f"  - 秘密鍵 (最初の20文字): {priv_key[:20]}...")
     
     sensitive_data = b"RSA encrypted sensitive data"
     encrypted_rsa = RSA4096Handler.encrypt_with_public(sensitive_data, pub_key)
-    print(f"✅ RSA公開鍵での暗号化完了")
+    print("✅ RSA公開鍵での暗号化完了")
     print(f"  - 暗号文 (最初の30文字): {encrypted_rsa[:30]}...")
     
     # Test 7: Multiple key management
@@ -650,7 +647,7 @@ def test_e2e_encryption_system():
     # Test 8: Audit trail
     print("\n【Test 8】監査ログ")
     system_stats = system.get_system_stats()
-    print(f"✅ システム統計")
+    print("✅ システム統計")
     print(f"  - 総キー数: {system_stats['total_keys']}")
     print(f"  - アクティブキー: {system_stats['active_keys']}")
     print(f"  - 暗号化バックアップ: {system_stats['encrypted_backups']}")
@@ -668,14 +665,14 @@ def test_e2e_encryption_system():
     print(f"✅ メッセージ暗号化フロー: {encryption_time * 1000:.2f}ms/msg")
     
     start = time.time()
-    test_encrypted = system.tde.encrypt_data("test", "dek_user_data")
+    system.tde.encrypt_data("test", "dek_user_data")
     single_encrypt = time.time() - start
     print(f"✅ TDE暗号化時間: {single_encrypt * 1000:.2f}ms")
     
-    print(f"✅ キーローテーション: < 1秒")
-    print(f"✅ 暗号化バックアップ: < 5秒")
-    print(f"✅ RSA-4096キーペア生成: < 2秒")
-    print(f"✅ 復号化失敗検出率: 100%")
+    print("✅ キーローテーション: < 1秒")
+    print("✅ 暗号化バックアップ: < 5秒")
+    print("✅ RSA-4096キーペア生成: < 2秒")
+    print("✅ 復号化失敗検出率: 100%")
     
     print("\n" + "=" * 70)
     print("✅ Phase 9 Step 2 テスト完了 (すべてのチェック PASS)")

@@ -6,7 +6,6 @@
 from typing import List, Dict, Any, Optional, Callable
 import logging
 from dataclasses import dataclass
-from datetime import datetime
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -310,7 +309,7 @@ class ParallelBatchProcessor:
         # 注: 実際の並列処理はマルチプロセッシングやマルチスレッドで実装
         # ここでは順序処理のシミュレーション
         results = []
-        items_per_worker = len(batch) // self.num_workers
+        len(batch) // self.num_workers
         
         worker_id = 0
         for idx, item in enumerate(batch):

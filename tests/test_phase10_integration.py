@@ -10,13 +10,8 @@ Phase 10 統合テスト
 """
 
 import pytest
-import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime
 from src.phase10 import (
-    SecurityOperationsCenter,
-    FIDO2AuthEngine,
-    AnomalyDetector,
-    GlobalSecurityOrchestrator,
     ThreatLevel
 )
 
@@ -58,7 +53,7 @@ class TestEndToEndWorkflow:
                     'alert',
                     incident
                 )
-                assert result == True
+                assert result
             else:
                 # インシデント存在の確認
                 assert incident is not None or True
@@ -68,12 +63,6 @@ class TestEndToEndWorkflow:
     ):
         """脆弱性検出からパッチ適用までのフロー"""
         # Step 1: 脆弱性検出
-        vuln = {
-            'id': 'CVE-2024-001',
-            'severity': 'critical',
-            'affected_systems': ['us-east-1', 'eu-west-1'],
-            'patch_available': True
-        }
         
         # Step 2: グローバルパッチポリシー作成
         policy = {
@@ -90,7 +79,7 @@ class TestEndToEndWorkflow:
             regions=['us-east-1', 'eu-west-1']
         )
         
-        assert deployed == True
+        assert deployed
     
     @pytest.mark.asyncio
     async def test_threat_detection_to_escalation_flow(
@@ -98,11 +87,6 @@ class TestEndToEndWorkflow:
     ):
         """脅威検出からエスカレーションまでのフロー"""
         # Step 1: 異常検出
-        events = [
-            {'action': 'failed_login', 'attempts': 5},
-            {'action': 'privilege_escalation'},
-            {'action': 'data_access', 'sensitivity': 'high'}
-        ]
         
         # Step 2: 脅威スコアリング
         threat_level = ThreatLevel.CRITICAL
@@ -169,7 +153,7 @@ class TestEndToEndWorkflow:
         user_id = 'new_user_e2e'
         
         # Step 2: 認証器登録
-        credential = mock_fido2_engine.register_fido2_credential(
+        mock_fido2_engine.register_fido2_credential(
             user_id=user_id,
             device_name='Employee Device'
         )
@@ -217,7 +201,7 @@ class TestMultiRegionScenarios:
             regions=regions
         )
         
-        assert applied == True
+        assert applied
     
     def test_data_residency_enforcement(self, mock_global_orchestrator):
         """データレジデンシ要件の強制実行"""
@@ -239,7 +223,7 @@ class TestMultiRegionScenarios:
             regions=eu_regions
         )
         
-        assert enforced == True
+        assert enforced
     
     def test_backup_and_recovery_across_regions(self, mock_global_orchestrator):
         """リージョン間バックアップ・復旧"""
@@ -260,7 +244,7 @@ class TestMultiRegionScenarios:
         
         configured = mock_global_orchestrator.configure_replication(backup_config)
         
-        assert configured == True
+        assert configured
     
     def test_latency_aware_routing(self, mock_global_orchestrator):
         """レイテンシ最適化ルーティング"""
@@ -317,16 +301,11 @@ class TestDisasterRecovery:
         # フェイルオーバー実行
         recovery = mock_global_orchestrator.failover_to_region(backup_region)
         
-        assert recovery == True
+        assert recovery
     
     def test_ransomware_attack_recovery(self, mock_soc_engine):
         """ランサムウェア攻撃からの復旧"""
         # ランサムウェア検出
-        ransomware_indicators = {
-            'mass_file_encryption': True,
-            'ransom_note_detection': True,
-            'encryption_speed': 'high'
-        }
         
         # 復旧プロセス
         recovery_plan = {
@@ -335,7 +314,7 @@ class TestDisasterRecovery:
             'timeline': '4_hours'
         }
         
-        assert recovery_plan['isolate_systems'] == True
+        assert recovery_plan['isolate_systems']
     
     def test_credential_compromise_recovery(
         self, mock_fido2_engine, mock_password_manager
@@ -373,7 +352,7 @@ class TestDisasterRecovery:
             regions=['all']
         )
         
-        assert applied == True
+        assert applied
     
     def test_communication_restoration(self, mock_global_orchestrator):
         """通信の復旧"""
@@ -399,7 +378,7 @@ class TestDisasterRecovery:
         
         activated = mock_global_orchestrator.activate_business_continuity_plan(bcp)
         
-        assert activated == True
+        assert activated
     
     def test_recovery_verification(self, mock_soc_engine):
         """復旧検証"""
@@ -413,7 +392,7 @@ class TestDisasterRecovery:
         
         all_healthy = all(health_checks.values())
         
-        assert all_healthy == True
+        assert all_healthy
 
 
 # ========== コンプライアンス監査テスト (6個) ==========
@@ -480,12 +459,6 @@ class TestComplianceAudit:
     
     def test_compliance_dashboard_reporting(self, mock_metrics_aggregator):
         """コンプライアンスダッシュボード報告"""
-        compliance_metrics = {
-            'gdpr_compliance': 0.98,
-            'ccpa_compliance': 0.95,
-            'hipaa_compliance': 0.97,
-            'overall_compliance': 0.965
-        }
         
         dashboard = getattr(mock_metrics_aggregator, 'generate_compliance_dashboard',
                            lambda: {'status': 'ok'})()
@@ -592,7 +565,7 @@ class TestStressScenarios:
         start = time.time()
         
         for _ in range(100):
-            result = getattr(mock_metrics_aggregator, 'aggregate_global_metrics',
+            getattr(mock_metrics_aggregator, 'aggregate_global_metrics',
                             lambda x: {})(metrics_by_region)
         
         elapsed = time.time() - start
@@ -618,7 +591,7 @@ class TestStressScenarios:
         start = time.time()
         
         # events を dict 形式に変書
-        signals = mock_soc_engine.correlate_events_from_multiple_regions(
+        mock_soc_engine.correlate_events_from_multiple_regions(
             {'region_events': events}  # dict を dict で需素
         )
         

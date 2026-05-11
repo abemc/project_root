@@ -5,9 +5,8 @@ Phase 7: 文脈分析レイヤー - 高度な文脈理解エンジン
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from datetime import datetime
-import re
 import logging
 
 logger = logging.getLogger(__name__)
@@ -138,7 +137,7 @@ class ContextAnalyzer:
         """複雑性を計算"""
         # 単純な指標: 文字数、句読点数、複合語数
         length = len(query)
-        punctuation_count = query.count('、') + query.count('。') + query.count('？')
+        query.count('、') + query.count('。') + query.count('？')
         
         if length < self.SIMPLE_THRESHOLD:
             return 'SIMPLE'
@@ -350,7 +349,7 @@ class MetaContextTracker:
     def _update_vocabulary_level(self, query: str) -> None:
         """語彙レベルを更新"""
         # 簡易的な実装
-        sentence_count = query.count('。') + query.count('？')
+        query.count('。') + query.count('？')
         word_count = len(query.split())
         
         if word_count > 50:

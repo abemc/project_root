@@ -55,13 +55,13 @@ def test_batch_inference_simple():
     
     # キャッシュ統計
     cache_stats = pipeline.get_cache_statistics()
-    print(f"\n📦 Cache Statistics:")
+    print("\n📦 Cache Statistics:")
     print(f"   Cache hits: {cache_stats['cache_hits']}")
     print(f"   Cache misses: {cache_stats['cache_misses']}")
     print(f"   Hit rate: {cache_stats['hit_rate']:.2f}%")
     
     assert len(results) == len(dataset), "Result count mismatch"
-    print(f"   ✅ All items processed successfully")
+    print("   ✅ All items processed successfully")
 
 
 def test_batch_sizes():
@@ -168,7 +168,7 @@ def test_dynamic_optimization():
     print(f"\n✅ Suggested batch size: {suggested}")
     
     # メモリに基づいた調整
-    print(f"\nMemory-based adjustment:")
+    print("\nMemory-based adjustment:")
     
     # メモリ使用量が多い場合
     new_size = optimizer.adjust_batch_size(1950)  # 95%使用
@@ -179,7 +179,7 @@ def test_dynamic_optimization():
     new_size = optimizer.adjust_batch_size(800)  # 39%使用
     print(f"  Low memory (39%): {prev_size} → {new_size}")
     
-    print(f"\n✅ Dynamic optimization test completed")
+    print("\n✅ Dynamic optimization test completed")
 
 
 def test_configuration():
@@ -190,23 +190,23 @@ def test_configuration():
     
     config = ScalingBenchmarkConfig()
     
-    print(f"\nBatch sizes:")
+    print("\nBatch sizes:")
     for benchmark, size in config.batch_sizes.items():
         print(f"  {benchmark}: {size}")
     
-    print(f"\nMemory limits (MB):")
+    print("\nMemory limits (MB):")
     for benchmark, limit in config.memory_limits.items():
         print(f"  {benchmark}: {limit}")
     
-    print(f"\nTimeouts (seconds):")
+    print("\nTimeouts (seconds):")
     for benchmark, timeout in config.timeouts.items():
         print(f"  {benchmark}: {timeout}s ({timeout/60:.1f}m)")
     
-    print(f"\nOther settings:")
+    print("\nOther settings:")
     print(f"  Number of workers: {config.num_workers}")
     print(f"  Sampling rate: {config.sampling_rate*100:.1f}%")
     
-    print(f"\n✅ Configuration test completed")
+    print("\n✅ Configuration test completed")
 
 
 def main():

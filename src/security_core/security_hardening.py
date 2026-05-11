@@ -11,7 +11,6 @@ Phase 7 セキュリティ強化
 """
 
 import hashlib
-import hmac
 import logging
 from typing import Any, Dict, List, Optional
 from datetime import datetime, timedelta
@@ -180,7 +179,7 @@ class AccessController:
         key_hash = self._hash_api_key(api_key)
         
         if key_hash not in self.api_keys:
-            logger.warning(f"無効なAPIキーでアクセス試行")
+            logger.warning("無効なAPIキーでアクセス試行")
             return {
                 "authenticated": False,
                 "access_level": AccessLevel.RESTRICTED,
@@ -417,7 +416,7 @@ class SecurityChecker:
             "details": [
                 f"正常なクエリ検証: {'✅' if result1['valid'] else '❌'}",
                 f"SQLインジェクション検出: {'✅' if not result2['valid'] else '❌'}",
-                f"XSS対策実装: ✅",
+                "XSS対策実装: ✅",
             ]
         }
     
@@ -441,7 +440,7 @@ class SecurityChecker:
         return {
             "passed": passed,
             "details": [
-                f"APIキー登録: ✅",
+                "APIキー登録: ✅",
                 f"認証機構: {'✅' if auth_result['authenticated'] else '❌'}",
                 f"レート制限: {'✅' if rate_limit_result['allowed'] else '❌'}",
             ]
@@ -468,8 +467,8 @@ class SecurityChecker:
             "passed": passed,
             "details": [
                 f"アクセスログ記録: {'✅' if passed else '❌'}",
-                f"ログ取得機構: ✅",
-                f"ログエクスポート機構: ✅",
+                "ログ取得機構: ✅",
+                "ログエクスポート機構: ✅",
             ]
         }
     
@@ -484,13 +483,13 @@ class SecurityChecker:
         except Exception as e:
             result = error_handler.handle_error(e, user_facing=True)
         
-        passed = not ("Test error message" in result["error"])  # 詳細情報は隠れている
+        passed = "Test error message" not in result["error"]  # 詳細情報は隠れている
         
         return {
             "passed": passed,
             "details": [
                 f"エラーメッセージ隠蔽: {'✅' if passed else '❌'}",
-                f"エラーログ記録: ✅",
+                "エラーログ記録: ✅",
                 f"ユーザーに安全なエラー応答: {'✅' if passed else '❌'}",
             ]
         }

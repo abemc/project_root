@@ -10,13 +10,10 @@ Phase 19 Task 2: セキュリティ・プライバシー テスト
 """
 
 import pytest
-from datetime import datetime, timedelta
 
 # Import security modules
 from src.phase19.security.encryption_engine import (
     CryptoEngine,
-    EncryptionConfig,
-    initialize_crypto,
 )
 from src.phase19.security.pii_detector import (
     PIIDetector,
@@ -26,7 +23,6 @@ from src.phase19.security.pii_detector import (
 from src.phase19.security.audit_log import (
     AuditLog,
     EventType,
-    Severity,
 )
 from src.phase19.security.compliance import (
     ComplianceChecker,
@@ -34,7 +30,6 @@ from src.phase19.security.compliance import (
 )
 from src.phase19.security_manager import (
     SecurityManager,
-    initialize_security_system,
 )
 
 

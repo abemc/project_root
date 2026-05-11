@@ -7,10 +7,9 @@
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional, Any, Set
+from typing import Dict, List, Optional, Any
 from enum import Enum
 import re
-import json
 
 
 class AdvancedThreatType(Enum):
@@ -89,7 +88,7 @@ class PromptInjectionDetector:
     def detect_injection(self, prompt: str) -> List[AdversarialIndicator]:
         """プロンプトインジェクションを検出"""
         results = []
-        prompt_lower = prompt.lower()
+        prompt.lower()
 
         for pattern in self.injection_patterns:
             if re.search(pattern, prompt):

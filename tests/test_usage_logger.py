@@ -1,7 +1,6 @@
 import os
 import tempfile
 import unittest
-import json
 
 from analyzer.llm_client import OpenAIClient
 
@@ -9,7 +8,8 @@ from analyzer.llm_client import OpenAIClient
 class UsageLoggerTest(unittest.TestCase):
     def test_flush_creates_file_and_rotates(self):
         # inject fake openai to avoid import errors
-        import sys, types
+        import sys
+        import types
 
         fake = types.SimpleNamespace()
 

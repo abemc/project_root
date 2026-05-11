@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from src.utils.path_utils import get_corpus_path, get_normalized_path
 

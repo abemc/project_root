@@ -1,10 +1,8 @@
 import os
 import json
 import logging
-import time
-from typing import Any, Optional, Dict
+from typing import Any, Optional
 import redis
-from functools import lru_cache
 from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)

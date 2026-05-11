@@ -9,9 +9,9 @@ Phase 10 Step 1: 24/7 SOC - サブコンポーネント
 """
 
 import asyncio
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set, Tuple, Any
-from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Dict, List, Optional
+from dataclasses import dataclass
 from collections import defaultdict, deque
 import statistics
 import numpy as np

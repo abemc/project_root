@@ -5,7 +5,7 @@ RAG評価エンジン テストスイート
 import pytest
 from src.evaluation.rag_evaluation import (
     RetrievalEvaluator, GenerationEvaluator, RAGEvaluator,
-    RetrievalResult, RetrievalMetrics
+    RetrievalResult
 )
 
 

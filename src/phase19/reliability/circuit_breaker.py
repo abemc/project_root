@@ -5,12 +5,11 @@ Circuit Breaker Pattern Implementation
 """
 
 from enum import Enum
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable, Any, Optional, Dict
-from datetime import datetime, timedelta
+from datetime import datetime
 import asyncio
 import logging
-import json
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +120,7 @@ class CircuitBreaker:
             await self._on_success()
             return result
             
-        except Exception as e:
+        except Exception:
             # 失敗時の処理
             await self._on_failure()
             raise

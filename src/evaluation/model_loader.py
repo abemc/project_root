@@ -9,7 +9,6 @@ import torch
 import logging
 from pathlib import Path
 from typing import Optional, Dict, Any
-import json
 
 logger = logging.getLogger(__name__)
 
@@ -269,25 +268,25 @@ def demo():
         
         # チェックポイント情報を取得
         info = loader.get_checkpoint_info(str(latest_checkpoint))
-        print(f"\n📊 チェックポイント情報:")
+        print("\n📊 チェックポイント情報:")
         print(f"  ├─ サイズ: {info.get('size_mb', 0):.1f} MB")
         print(f"  ├─ パラメータ数: {info.get('params', 0):,}")
         print(f"  ├─ ステップ: {info.get('step', 'N/A')}")
         print(f"  └─ キー: {info.get('keys', [])}")
         
         # モデルを読込
-        print(f"\n📥 モデルを読込中...")
+        print("\n📥 モデルを読込中...")
         model = loader.load_checkpoint(str(latest_checkpoint))
         
         if model:
-            print(f"✅ モデル読込成功")
+            print("✅ モデル読込成功")
             print(f"  └─ モデル: {model.__class__.__name__}")
             
             # 推論エンジンを初期化
             engine = InferenceEngine(model, device='cpu')
             
             # サンプル推論
-            print(f"\n🔄 サンプル推論:")
+            print("\n🔄 サンプル推論:")
             prompt = "What is 2 + 2?"
             result = engine.generate(prompt, max_new_tokens=20)
             print(f"  Prompt: {prompt}")

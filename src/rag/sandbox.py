@@ -13,10 +13,8 @@ Usage:
     output = sandbox.execute("print('hello')")
 """
 
-import builtins
 import io
 import contextlib
-from types import SimpleNamespace
 
 # RestrictedPython imports – will be available in the runtime environment.
 # If the library is not installed, the import will raise at import time.

@@ -6,7 +6,7 @@
 #
 # 依存管理の詳細はAIベギナーガイドFAQも参照。
 # ---
-torch==2.4.1
+torch>=2.6.0
 torchvision>=0.19.0
 torchao==0.5.0
 numpy>=1.24.0

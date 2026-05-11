@@ -7,7 +7,6 @@ Week 3 Day 3-5: 実ベンチマーク実行 - テスト版
 
 import sys
 from pathlib import Path
-from typing import Dict, List
 import json
 import time
 from dataclasses import dataclass, asdict
@@ -198,11 +197,11 @@ def main():
     
     # MMLU テスト
     print("\n📊 Test 1: MMLU Benchmark (100 samples)")
-    mmlu_result = runner.run_mmlu_test(num_samples=100)
+    runner.run_mmlu_test(num_samples=100)
     
     # GSM8K テスト
     print("\n📊 Test 2: GSM8K Benchmark (50 samples)")
-    gsm8k_result = runner.run_gsm8k_test(num_samples=50)
+    runner.run_gsm8k_test(num_samples=50)
     
     # 結果保存
     runner.save_results()

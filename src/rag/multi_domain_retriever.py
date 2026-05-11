@@ -13,7 +13,7 @@ import torch
 from transformers import AutoTokenizer, AutoModel
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from datetime import datetime
 import logging
 import os

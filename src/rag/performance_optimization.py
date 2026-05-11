@@ -278,7 +278,7 @@ class Phase7PerformanceOptimizer:
         # ボトルネック操作の分析
         bottlenecks = self.optimized_preprocessor.profiler.get_bottleneck_operations(top_n=3)
         if bottlenecks:
-            recommendations.append(f"\n📊 ボトルネック操作:")
+            recommendations.append("\n📊 ボトルネック操作:")
             for op_name, total_time in bottlenecks:
                 if total_time > 0.5:
                     recommendations.append(f"  ⚠️  {op_name}: {total_time*1000:.1f}ms（最適化推奨）")

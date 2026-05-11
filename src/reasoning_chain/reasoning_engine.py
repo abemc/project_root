@@ -7,7 +7,6 @@ Chain-of-Thought、Tree-of-Thought、Few-shot学習、自動検証・修正
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional, Tuple, Any, Callable
-import math
 import logging
 from datetime import datetime
 
@@ -314,7 +313,7 @@ class FewShotExampleSelector:
         
         examples = await self.select_relevant_examples(query, task_type, num_examples)
         
-        prompt = f"Solve the following task:\n\nExamples:\n"
+        prompt = "Solve the following task:\n\nExamples:\n"
         
         for i, example in enumerate(examples, 1):
             prompt += f"\n{i}. Input: {example.get('input', '')}\n"

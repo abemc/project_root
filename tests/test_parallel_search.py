@@ -243,10 +243,10 @@ class TestParallelSearchEngine:
         )
         
         # 1回目の検索
-        result1 = await engine.search_parallel(request)
+        await engine.search_parallel(request)
         
         # 2回目の検索（キャッシュヒット）
-        result2 = await engine.search_parallel(request)
+        await engine.search_parallel(request)
         
         # キャッシュサイズを確認
         cache_stats = engine.get_cache_stats()

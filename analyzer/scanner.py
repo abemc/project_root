@@ -2,6 +2,18 @@ import os
 import fnmatch
 import hashlib
 from typing import List, Dict, Optional
+import logging
+
+# simple file logger for scanner when run under Streamlit
+scanner_logger = logging.getLogger('analyzer.scanner')
+if not scanner_logger.handlers:
+    try:
+        fh = logging.FileHandler('/tmp/scanner.log')
+        fh.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+        scanner_logger.addHandler(fh)
+        scanner_logger.setLevel(logging.DEBUG)
+    except Exception:
+        pass
 
 DEFAULT_EXCLUDES = [".git", "node_modules", "__pycache__", ".venv", "venv", "build", "dist"]
 DEFAULT_EXTENSIONS = [
@@ -53,6 +65,7 @@ def scan(
     files = []
     total_lines = 0
     lang_count = {}
+    scanner_logger.debug('scan start root=%s include_exts=%s', root, include_extensions)
 
     for dirpath, dirnames, filenames in os.walk(root):
         # prune excluded directories in-place
@@ -110,11 +123,14 @@ def scan(
                 "is_large": is_large,
             }
             files.append(file_meta)
+            if len(files) % 500 == 0:
+                scanner_logger.debug('scanned %d files, latest=%s', len(files), rel)
 
     summary = {
         "total_files": len(files),
         "top_languages": sorted(lang_count.items(), key=lambda x: -x[1])[:5],
     }
+    scanner_logger.debug('scan completed total_files=%d', len(files))
 
     return {"project_summary": summary, "files": files}
 

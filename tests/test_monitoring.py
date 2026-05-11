@@ -8,11 +8,9 @@ Phase 18: Monitoring & Observability Tests
 - パフォーマンスダッシュボード
 """
 
-import pytest
-from datetime import datetime, timedelta
 from src.monitoring.monitoring_engine import (
     MetricsCollector, DistributedTracer, LogAggregator, PerformanceDashboard,
-    Metric, LogEntry, Span, MetricType, LogLevel, TraceStatus
+    MetricType, LogLevel, TraceStatus
 )
 
 

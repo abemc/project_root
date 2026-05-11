@@ -3,10 +3,9 @@
 import logging
 import shutil
 import tarfile
-import gzip
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 import os
 
 from .manifest import BackupManifest, BackupItem

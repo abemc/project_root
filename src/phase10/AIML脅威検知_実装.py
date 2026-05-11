@@ -11,14 +11,11 @@ Features:
 - Automated Response based on ML Confidence
 """
 
-import json
 import hashlib
-import math
-from datetime import datetime, timedelta
+from datetime import datetime
 from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Tuple, Any, Set
+from typing import Dict, List, Tuple, Any, Set
 from enum import Enum
-import random
 
 
 class AnomalyType(Enum):
@@ -708,14 +705,14 @@ def test_ai_ml_threat_detection():
     # Test 1: System Initialization
     print("\n【Test 1】システム初期化")
     init_result = system.initialize_system()
-    print(f"✅ システム初期化完了")
+    print("✅ システム初期化完了")
     print(f"  - コンポーネント: {init_result['components']}個")
     print(f"  - 検知方法: {len(init_result['detection_methods'])}種類")
     
     # Test 2: Anomaly Detection Engine
     print("\n【Test 2】異常検知エンジン")
     profile = system.anomaly_engine.create_user_profile("user_ml_001")
-    print(f"✅ ユーザープロファイル作成")
+    print("✅ ユーザープロファイル作成")
     print(f"  - 平均ログイン時刻: {profile.avg_login_time:.0f}時")
     
     normal_event = {
@@ -779,7 +776,7 @@ def test_ai_ml_threat_detection():
         system.ueba_engine.analyze_user_session("user_ml_002", risky_session)
     
     insider_threat = system.ueba_engine.detect_insider_threat("user_ml_002")
-    print(f"✅ インサイダー脅威分析:")
+    print("✅ インサイダー脅威分析:")
     print(f"  - 脅威検知: {'はい' if insider_threat['threat_detected'] else 'いいえ'}")
     print(f"  - 信頼度: {insider_threat['confidence']:.2%}")
     print(f"  - 推奨対応: {insider_threat['recommendation']}")
@@ -817,7 +814,7 @@ def test_ai_ml_threat_detection():
     }
     
     detection = system.detect_threats("user_ml_003", event_with_ioc)
-    print(f"✅ 脅威検知完了")
+    print("✅ 脅威検知完了")
     print(f"  - アラート重度: {detection.alert_severity.name}")
     print(f"  - 検知信頼度: {detection.confidence:.2%}")
     print(f"  - マッチIOC: {len(detection.threat_indicators_matched)}件")
@@ -825,7 +822,7 @@ def test_ai_ml_threat_detection():
     # Test 10: ML-Based Response
     print("\n【Test 10】ML自動応答")
     response = system.response_engine.generate_response(detection)
-    print(f"✅ 自動応答実行:")
+    print("✅ 自動応答実行:")
     print(f"  - 統合信頼度: {response['combined_confidence']:.2%}")
     print(f"  - 実行アクション: {len(response['response_actions'])}個")
     if response['response_actions']:
@@ -834,7 +831,7 @@ def test_ai_ml_threat_detection():
     # Test 11: System Statistics
     print("\n【Test 11】システム統計")
     stats = system.get_system_status()
-    print(f"✅ システム状態:")
+    print("✅ システム状態:")
     print(f"  - 異常検知: {stats['anomaly_detections']}件")
     print(f"  - ユーザープロファイル: {stats['user_profiles']}個")
     print(f"  - 脅威インジケータ: {stats['threat_indicators']}個")
@@ -843,24 +840,24 @@ def test_ai_ml_threat_detection():
     
     # Test 12: Phase 9 Integration
     print("\n【Test 12】Phase 9との統合")
-    print(f"✅ セキュリティレイヤー統合:")
-    print(f"  - MFA (Phase 9): ✅ リスクベース応答時にトリガー")
-    print(f"  - 暗号化 (Phase 9): ✅ データアクセス監視に統合")
-    print(f"  - ゼロトラスト (Phase 9): ✅ 行動分析で連携")
-    print(f"  - SOC (Phase 10 Step 1): ✅ アラート生成")
+    print("✅ セキュリティレイヤー統合:")
+    print("  - MFA (Phase 9): ✅ リスクベース応答時にトリガー")
+    print("  - 暗号化 (Phase 9): ✅ データアクセス監視に統合")
+    print("  - ゼロトラスト (Phase 9): ✅ 行動分析で連携")
+    print("  - SOC (Phase 10 Step 1): ✅ アラート生成")
     
     # Performance metrics
     print("\n" + "=" * 70)
     print("【パフォーマンスメトリクス】")
     print("=" * 70)
     
-    print(f"✅ 異常検智: < 50ms")
-    print(f"✅ UEBA分析: < 100ms")
-    print(f"✅ IOCマッチング: < 20ms")
-    print(f"✅ 脅威検知: < 150ms")
-    print(f"✅ ML応答生成: < 30ms")
-    print(f"✅ インサイダー脅威分析: < 200ms")
-    print(f"✅ スループット: 10000+ イベント/分")
+    print("✅ 異常検智: < 50ms")
+    print("✅ UEBA分析: < 100ms")
+    print("✅ IOCマッチング: < 20ms")
+    print("✅ 脅威検知: < 150ms")
+    print("✅ ML応答生成: < 30ms")
+    print("✅ インサイダー脅威分析: < 200ms")
+    print("✅ スループット: 10000+ イベント/分")
     
     print("\n" + "=" * 70)
     print("✅ Phase 10 Step 3 テスト完了 (すべてのチェック PASS)")

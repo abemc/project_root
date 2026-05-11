@@ -1,7 +1,10 @@
 import os
 import requests
-import json
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict
+from concurrent.futures import ThreadPoolExecutor, Future
+
+# Module-level executor for async LLM calls
+_LLM_EXECUTOR = ThreadPoolExecutor(max_workers=4)
 
 # -----------------------------
 # LLM 呼び出し
@@ -17,6 +20,15 @@ def call_llm(prompt: str, model: str = "qwen2.5:7b", system_prompt: Optional[str
         return _call_openai_compatible(prompt, model, system_prompt, chat_history, **kwargs)
     else:
         return _call_ollama_chat(prompt, model, system_prompt, chat_history, **kwargs)
+
+
+def call_llm_async(prompt: str, model: str = "qwen2.5:7b", system_prompt: Optional[str] = None, chat_history: Optional[List[Dict[str, str]]] = None, **kwargs) -> Future:
+    """Submit a call_llm request to the background executor and return a Future."""
+    # Use a wrapper to call the synchronous call_llm inside the thread
+    def _worker():
+        return call_llm(prompt=prompt, model=model, system_prompt=system_prompt, chat_history=chat_history, **kwargs)
+
+    return _LLM_EXECUTOR.submit(_worker)
 
 
 def _call_ollama_chat(prompt: str, model: str, system_prompt: Optional[str] = None, chat_history: Optional[List[Dict[str, str]]] = None, **kwargs):
@@ -60,8 +72,9 @@ def _call_ollama_chat(prompt: str, model: str, system_prompt: Optional[str] = No
         # タイムアウトを設定（接続に10秒、応答待ちに300秒 = 5分）
         res = requests.post(url, json=payload, timeout=(10, 300))
     except requests.exceptions.RequestException as e:
-        print(f"[Error] Request failed: {e}")
-        return {"error": str(e)}
+        err = f"[Error] Request failed: {e}"
+        print(err)
+        return f"Error: {err}"
 
     try:
         res.raise_for_status()
@@ -119,4 +132,40 @@ def _call_openai_compatible(prompt: str, model: str, system_prompt: Optional[str
     except Exception as e:
         error_msg = f"[Error] OpenAI API call failed: {e}"
         print(error_msg)
+        # フォールバック: OpenAI互換エンドポイントが使えない場合はローカルのOllamaにフォールバックしてみる
+        try:
+            print("[Info] Attempting fallback to Ollama chat...")
+            fallback = _call_ollama_chat(prompt, model, system_prompt=system_prompt, chat_history=chat_history, **kwargs)
+            if isinstance(fallback, str) and not fallback.startswith("Error:"):
+                return fallback
+            else:
+                print(f"[Info] Ollama fallback also failed: {fallback}")
+        except Exception as ex2:
+            print(f"[Error] Ollama fallback exception: {ex2}")
+
+        # 追加フォールバック: ローカルの Hugging Face モデルを試す
+        try:
+            print("[Info] Attempting fallback to local Hugging Face model...")
+            try:
+                from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+            except Exception as imp_e:
+                raise RuntimeError(f"transformers import failed: {imp_e}")
+
+            model_id = os.environ.get("LOCAL_FALLBACK_MODEL", "gpt2")
+            max_new = int(kwargs.get("max_new_tokens", kwargs.get("max_tokens", 128)))
+
+            # ロードは遅いので慎重に行う
+            tokenizer = AutoTokenizer.from_pretrained(model_id)
+            model_hf = AutoModelForCausalLM.from_pretrained(model_id)
+
+            import torch as _torch
+            device = 0 if _torch.cuda.is_available() else -1
+            gen = pipeline("text-generation", model=model_hf, tokenizer=tokenizer, device=device)
+            out = gen(prompt, max_new_tokens=max_new, do_sample=False)
+            if out and isinstance(out, list):
+                text = out[0].get("generated_text") or out[0].get("text") or ""
+                return text.strip()
+        except Exception as hf_e:
+            print(f"[Error] Local HF fallback failed: {hf_e}")
+
         return f"Error: {error_msg}"

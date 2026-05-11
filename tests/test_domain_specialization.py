@@ -3,11 +3,10 @@
 """
 
 import pytest
-from datetime import datetime
 from src.domain_specialization.domain_models import (
-    DomainType, SpecializationLevel, DomainVocabulary,
-    DomainAdapter as DomainAdapterConfig, DomainDetector,
-    DomainAdapter, DomainSpecificPrompter, DomainKnowledgeRetriever,
+    DomainType, DomainVocabulary,
+    DomainDetector,
+    DomainSpecificPrompter, DomainKnowledgeRetriever,
     DomainQualityAssurance, DomainModelManager
 )
 from src.domain_specialization.lora_adapter import (

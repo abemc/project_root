@@ -4,8 +4,6 @@
 """
 
 import sys
-import json
-from pathlib import Path
 
 # モジュールをインポート
 try:
@@ -66,7 +64,7 @@ def test_feedback_manager():
     
     # 統計取得
     stats = mgr.get_summary_stats()
-    print(f"\n📊 統計:")
+    print("\n📊 統計:")
     print(f"   総フィードバック数: {stats['total_count']}")
     print(f"   平均評価: {stats['average_rating']:.2%}")
     print(f"   中央値: {stats['median_rating']:.2%}")
@@ -234,7 +232,6 @@ def test_continuous_trainer():
     print("   完全なテストには torch.nn.Module が必要です")
     
     # テスト用のダミーモデル
-    import torch
     import torch.nn as nn
     
     class DummyModel(nn.Module):
@@ -289,18 +286,18 @@ def test_integration():
     response = "回答テスト"
     
     # フィードバック記録
-    feedback = feedback_mgr.record_feedback(
+    feedback_mgr.record_feedback(
         user_query=query,
         model_response=response,
         rating=0.8,
         tags=["テスト"],
         suggestions="改善案"
     )
-    print(f"✅ フィードバック記録")
+    print("✅ フィードバック記録")
     
     # テンプレート性能更新
     prompt_opt.update_template_performance("default", 0.8)
-    print(f"✅ プロンプト性能更新")
+    print("✅ プロンプト性能更新")
     
     # メトリクス記録
     stats = feedback_mgr.get_summary_stats()
@@ -311,12 +308,12 @@ def test_integration():
         model_loss=0.2,
         improvement_percentage=5.0
     )
-    print(f"✅ メトリクス記録")
+    print("✅ メトリクス記録")
     
     # ダッシュボード確認
     dashboard = metrics.get_dashboard()
     assert dashboard["current"]["average_rating"] > 0
-    print(f"✅ ダッシュボード生成")
+    print("✅ ダッシュボード生成")
     
     return "✅ PASSED"
 

@@ -14,7 +14,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "src"))
 
-from src.evaluation.benchmark_runner import BenchmarkRunner, BenchmarkComparator
+from src.evaluation.benchmark_runner import BenchmarkRunner
 from src.evaluation.metrics.metric_calculator import MetricCalculator
 
 
@@ -74,14 +74,14 @@ def test_metric_calculator():
     
     # 完全一致テスト
     metrics = calculator.compute_all_metrics(predictions, references, task_type="classification")
-    print(f"\n完全一致テスト:")
+    print("\n完全一致テスト:")
     print(f"  精度: {metrics['accuracy']:.4f}")
     print(f"  完全一致: {metrics['exact_match']:.4f}")
     
     # 部分一致テスト
     predictions_partial = ["4", "24", "Tokyo", "France", "5"]
     metrics_partial = calculator.compute_all_metrics(predictions_partial, references, task_type="classification")
-    print(f"\n部分一致テスト:")
+    print("\n部分一致テスト:")
     print(f"  精度: {metrics_partial['accuracy']:.4f}")
     print(f"  F1スコア: {metrics_partial['f1']:.4f}")
 
@@ -102,7 +102,7 @@ def test_benchmark_runner():
     
     # MMLU ベンチマーク実行
     print("\nMMUベンチマークを実行中...")
-    mmlu_result = runner.run_benchmark(
+    runner.run_benchmark(
         benchmark_name="MMLU",
         task_type="classification",
         test_data=datasets["mmlu"],
@@ -114,7 +114,7 @@ def test_benchmark_runner():
     
     # GSM8K ベンチマーク実行
     print("\nGSM8Kベンチマークを実行中...")
-    gsm8k_result = runner.run_benchmark(
+    runner.run_benchmark(
         benchmark_name="GSM8K",
         task_type="math",
         test_data=datasets["gsm8k"],
@@ -144,7 +144,7 @@ def main():
     test_metric_calculator()
     
     # ベンチマーク実行エンジンテスト
-    results_file = test_benchmark_runner()
+    test_benchmark_runner()
     
     print("\n" + "="*80)
     print("✓ テスト完了")

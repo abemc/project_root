@@ -11,10 +11,17 @@ if not hasattr(torch, "int1"):
 
 # このスクリプトの場所を基準にプロジェクトルートをsys.pathに追加
 # これにより、`src`パッケージ内のモジュールを正しくインポートできる
-project_root = Path(__file__).resolve().parent
+# project_root をスクリプトの親ディレクトリではなくプロジェクトルートに設定
+project_root = Path(__file__).resolve().parents[2]
 sys.path.append(str(project_root))
 
 # 各ステップの処理をインポート
+print(f"[debug] project_root={project_root}")
+import os
+print(f"[debug] cwd={os.getcwd()}")
+import sys as _sys
+print(f"[debug] sys.path[0:5]={_sys.path[0:5]}")
+
 from src.corpus.process_all_pdfs import process_all_pdfs
 from src.corpus.normalize_all import normalize_all
 from src.corpus.create_dataset import create_dataset

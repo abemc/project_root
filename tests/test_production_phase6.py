@@ -39,7 +39,7 @@ def test_production_config():
         
         for name, config in configs.items():
             print(f"\n【{name}設定】")
-            cfg_dict = config.to_dict()
+            config.to_dict()
             
             print(f"  リソース制約: {config.resource_constraint.value}")
             print(f"  キャッシュ: {config.max_cache_size_mb}MB")
@@ -181,7 +181,7 @@ def test_security_management():
                 print(f"  リクエスト{i+1}: ✓ 許可")
         
         metrics = security_mgr.get_security_metrics()
-        print(f"\n【セキュリティメトリクス】")
+        print("\n【セキュリティメトリクス】")
         print(f"  総リクエスト: {metrics['total_requests']}")
         print(f"  拒否: {metrics['blocked_requests']}")
         print(f"  拒否率: {metrics['block_rate']}")
@@ -230,7 +230,7 @@ def test_production_manager():
             loaded_config = ProductionManager.load_config_from_file(config_file)
             print(f"  ✓ 設定ロード: {loaded_config.max_cache_size_mb}MB")
         else:
-            print(f"  ✗ ファイル保存失敗")
+            print("  ✗ ファイル保存失敗")
             return False
         
         print("\n✅ 本番化マネージャー: 正常")

@@ -1,4 +1,3 @@
-import os
 import sys
 from pathlib import Path
 
@@ -7,7 +6,6 @@ project_root = str(Path(__file__).parent.parent)
 sys.path.append(project_root)
 
 from src.performance.cache_optimizer import get_cache_optimizer
-import time
 
 def test_redis_caching():
     print("Testing Redis Caching...")

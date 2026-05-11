@@ -180,7 +180,7 @@ class SecurityDashboard:
             incident_status = StatusIndicator(
                 name="CRITICAL インシデント",
                 status="OK",
-                value=f"0件",
+                value="0件",
                 threshold="< 1件/週",
             )
         else:
@@ -515,14 +515,14 @@ def test_security_dashboard():
                     "⚠️" if health_status == "WARNING" else \
                     "❌" if health_status == "CRITICAL" else "🟢"
     
-    print(f"✅ ダッシュボード稼働率: 99.9%")
-    print(f"✅ データ更新遅延: < 2秒")
-    print(f"✅ UIレスポンス時間: < 500ms")
+    print("✅ ダッシュボード稼働率: 99.9%")
+    print("✅ データ更新遅延: < 2秒")
+    print("✅ UIレスポンス時間: < 500ms")
     print(f"{health_symbol} システムヘルス: {health_status}")
-    print(f"✅ 表示メトリクス項目: 15以上")
-    print(f"✅ コンプライアンス表示: GDPR/PCI DSS/HIPAA対応")
-    print(f"✅ レポート生成形式: Text/JSON/CSV")
-    print(f"✅ 過去データ保持: 24時間以上")
+    print("✅ 表示メトリクス項目: 15以上")
+    print("✅ コンプライアンス表示: GDPR/PCI DSS/HIPAA対応")
+    print("✅ レポート生成形式: Text/JSON/CSV")
+    print("✅ 過去データ保持: 24時間以上")
 
     print("\n" + "="*70)
     print("✅ Phase 8 Step 3 テスト完了 (すべてのチェック PASS)")

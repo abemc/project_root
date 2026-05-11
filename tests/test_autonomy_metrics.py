@@ -8,7 +8,6 @@ import pytest
 from datetime import datetime
 from src.agent.autonomy.autonomy_scorer import (
     AutonomyScorer,
-    AutonomyDimension,
     DimensionalAutonomy,
     evaluate_autonomy_simple,
 )
@@ -16,12 +15,10 @@ from src.agent.autonomy.decision_analyzer import (
     DecisionAnalyzer,
     DecisionType,
     DecisionQuality,
-    DecisionStep,
 )
 from src.agent.autonomy.planning_measurer import (
     PlanningCapacityMeasurer,
     PlanQuality,
-    PlanStep,
 )
 from src.agent.autonomy.task_tracker import (
     TaskSuccessTracker,

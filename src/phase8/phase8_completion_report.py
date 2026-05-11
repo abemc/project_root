@@ -11,7 +11,7 @@ Phase 8 完成レポート
 """
 
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 def generate_phase8_completion_report():
@@ -383,9 +383,9 @@ def print_phase8_completion():
     for phase, desc, duration, result in phases:
         print(f"  {phase:10} | {desc:20} | {duration:10} | {result}")
     
-    print(f"\n  📊 総デプロイメント時間: 33時間 (1.4日)")
-    print(f"  ✅ ダウンタイム: 0秒 (ゼロダウンタイム達成)")
-    print(f"  🎯 展開完了: 本番環境100%へ安全に移行")
+    print("\n  📊 総デプロイメント時間: 33時間 (1.4日)")
+    print("  ✅ ダウンタイム: 0秒 (ゼロダウンタイム達成)")
+    print("  🎯 展開完了: 本番環境100%へ安全に移行")
     
     print("\n" + "="*75)
     print("【ビジネス価値実現】")

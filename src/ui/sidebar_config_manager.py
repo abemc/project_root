@@ -7,10 +7,9 @@ Streamlit サイドバー設定の永続化管理モジュール
 """
 
 import json
-import os
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, List
 import logging
 
 logger = logging.getLogger(__name__)

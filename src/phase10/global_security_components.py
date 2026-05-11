@@ -14,14 +14,12 @@ Phase 10 Step 4: グローバル統合セキュリティプラットフォーム
 """
 
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set, Tuple, Any
-from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass
 from collections import defaultdict
-from enum import Enum
 import json
 import logging
 import hashlib
-import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -557,7 +555,7 @@ class GlobalSecurityMetricsAggregator:
         if not self.regional_metrics:
             return {}
         
-        metrics = list(self.regional_metrics.values())
+        list(self.regional_metrics.values())
         
         sla_targets = {
             'availability': 99.99,

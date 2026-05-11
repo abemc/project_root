@@ -33,7 +33,7 @@ def create_backup():
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     zip_filename = BACKUP_DIR / f"project_backup_{timestamp}.zip"
 
-    print(f"Creating backup...")
+    print("Creating backup...")
     print(f"Target file:        {zip_filename}")
 
     # バックアップ対象リスト: (実際のディレクトリパス, ZIP内でのフォルダ名)
@@ -63,7 +63,7 @@ def create_backup():
                         arcname = Path(arc_prefix) / file_path.relative_to(src_dir)
                         zipf.write(file_path, str(arcname))
 
-        print(f"Backup created successfully!")
+        print("Backup created successfully!")
         print(f"Size: {zip_filename.stat().st_size / (1024*1024):.2f} MB")
 
         cleanup_old_backups()

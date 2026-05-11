@@ -9,9 +9,8 @@
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 from enum import Enum
-import math
 
 
 class PlanQuality(Enum):
@@ -92,7 +91,7 @@ class ExecutionPlan:
         
         # 理想的なステップ数は sqrt(task_complexity) の関係にあると仮定
         # 複雑さをステップ数で推定
-        task_complexity_estimate = len(self.steps) ** 2
+        len(self.steps) ** 2
         
         # 5-15ステップが最適と仮定
         if 5 <= len(self.steps) <= 15:

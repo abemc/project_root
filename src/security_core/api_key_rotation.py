@@ -9,7 +9,6 @@ APIキーの定時ロテーションと無停止切り替えをサポート
 """
 
 import hashlib
-import json
 import secrets
 import time
 from datetime import datetime, timedelta
@@ -278,7 +277,7 @@ class ZeroDowntimeRotationStrategy(RotationStrategy):
         # Step 2: 内部テスト
         logger.info(f"[T-5min] 内部テスト開始: key_id={new_key.key_id}")
         if not self._verify_new_key(new_key, key_manager):
-            logger.error(f"ロテーション失敗: 新キー検証エラー")
+            logger.error("ロテーション失敗: 新キー検証エラー")
             return RotationLog(
                 rotation_id=rotation_id,
                 client_id=client_id,
@@ -289,10 +288,10 @@ class ZeroDowntimeRotationStrategy(RotationStrategy):
                 status="failed",
                 error_message="New key verification failed"
             )
-        logger.info(f"[T-5min] 内部テスト完了 ✅")
+        logger.info("[T-5min] 内部テスト完了 ✅")
         
         # Step 3: DNS TTL削減 (シミュレーション)
-        logger.info(f"[T-0min] DNS TTL削減: 180s → 30s")
+        logger.info("[T-0min] DNS TTL削減: 180s → 30s")
         old_ttl = self.dns_ttl
         self.dns_ttl = 30
         
@@ -301,18 +300,18 @@ class ZeroDowntimeRotationStrategy(RotationStrategy):
         affected_clients = len(old_keys)
         
         # Step 5: クライアント切り替えシミュレーション
-        logger.info(f"[T+2min] クライアント切り替え: 85%完了予定")
+        logger.info("[T+2min] クライアント切り替え: 85%完了予定")
         time.sleep(0.1)  # シミュレーター用
         switched_clients = int(affected_clients * 0.85)
         
         # Step 6: 旧キー無効化
-        logger.info(f"[T+5min] 旧キー無効化開始")
+        logger.info("[T+5min] 旧キー無効化開始")
         for old_key in old_keys:
             key_manager.revoke_key(old_key.key_id)
-        logger.info(f"[T+5min] 旧キー無効化完了 ✅")
+        logger.info("[T+5min] 旧キー無効化完了 ✅")
         
         # Step 7: DNS TTL復元
-        logger.info(f"[T+10min] DNS TTL復元: 30s → 180s")
+        logger.info("[T+10min] DNS TTL復元: 30s → 180s")
         self.dns_ttl = old_ttl
         
         # ロテーション完了
@@ -443,7 +442,7 @@ def test_api_key_rotation():
     # クライアント1: APIキー生成
     print("\n【Step 1】クライアント1のAPIキー生成")
     plain_key_1, api_key_1 = key_manager.generate_key("client_001", ["read", "write"])
-    print(f"✅ キー生成完了")
+    print("✅ キー生成完了")
     print(f"  - Key ID: {api_key_1.key_id}")
     print(f"  - Client ID: {api_key_1.client_id}")
     print(f"  - Scopes: {api_key_1.scopes}")
@@ -464,7 +463,7 @@ def test_api_key_rotation():
     print("Timeline:")
     rotation_log = executor.execute_rotation("client_001")
     
-    print(f"\n✅ ロテーション完了")
+    print("\n✅ ロテーション完了")
     print(f"  - Rotation ID: {rotation_log.rotation_id}")
     print(f"  - Old Key: {rotation_log.old_key_id}")
     print(f"  - New Key: {rotation_log.new_key_id}")
@@ -491,7 +490,7 @@ def test_api_key_rotation():
     scheduler = RotationScheduler(executor)
     scheduler.schedule_rotation(RotationInterval.MONTHLY)
     status = scheduler.get_status()
-    print(f"✅ スケジューラー設定完了")
+    print("✅ スケジューラー設定完了")
     print(f"  - Interval: {status['rotation_interval']}")
     print(f"  - Next Rotation: {status['next_rotation']}")
     
@@ -515,8 +514,8 @@ def test_api_key_rotation():
     
     print(f"✅ ロテーション成功率: {success_rate:.1f}%")
     print(f"✅ クライアント切り替え率: {switch_rate:.1f}%")
-    print(f"✅ ダウンタイム: 0秒 (無停止実行)")
-    print(f"✅ トランジション時間: < 5分")
+    print("✅ ダウンタイム: 0秒 (無停止実行)")
+    print("✅ トランジション時間: < 5分")
     
     # テスト統計
     print("\n" + "="*70)

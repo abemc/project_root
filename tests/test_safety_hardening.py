@@ -3,7 +3,6 @@ Phase 17 Task 1: 安全性強化エンジンテスト
 35個テスト: Layer 1-4の全機能をカバー
 """
 
-import pytest
 from src.safety_hardening.safety_engine import (
     SafetyThreatLevel,
     ContentCategory,

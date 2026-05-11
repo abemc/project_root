@@ -13,8 +13,8 @@ Phase 9本番デプロイメント実行
 """
 
 import json
-from datetime import datetime, timedelta
-from typing import Dict, List, Any, Tuple
+from datetime import datetime
+from typing import Dict, List, Any
 from dataclasses import dataclass
 from enum import Enum
 
@@ -131,7 +131,7 @@ class Phase9DeploymentExecutor:
             print(f"  {status} {check_name}")
             self._log_deployment(check_name, "PASSED" if result else "FAILED")
         
-        print(f"  📊 準備完了率: 6/6 (100%)・予定時間: 0秒")
+        print("  📊 準備完了率: 6/6 (100%)・予定時間: 0秒")
     
     def _execute_validation_phase(self):
         """Validation phase"""
@@ -159,7 +159,7 @@ class Phase9DeploymentExecutor:
         print(f"  📊 検証成功率: {passed}/{len(validations)} ({passed/len(validations)*100:.1f}%)")
         
         if passed == len(validations):
-            print(f"  ✅ 本番デプロイメント可能 (Go decision)")
+            print("  ✅ 本番デプロイメント可能 (Go decision)")
     
     def _execute_canary_phase(self):
         """Canary deployment phase"""
@@ -181,11 +181,10 @@ class Phase9DeploymentExecutor:
             print(f"  ⚠️ エラー率が高い: {metrics.error_rate}% > {self.ROLLBACK_ERROR_THRESHOLD}%")
             self.is_successful = False
         else:
-            print(f"  ✅ 品質基準を満たす")
+            print("  ✅ 品質基準を満たす")
     
     def _execute_gradual_phase(self, traffic_pct: int, phase_key: str):
         """Gradual rollout phase"""
-        phase_name = f"gradual_{traffic_pct}"
         
         # Simulate metrics that improve with more traffic
         base_error = 0.05  # 0.05% base error
@@ -228,7 +227,7 @@ class Phase9DeploymentExecutor:
         self._display_phase_metrics("完全デプロイメント (100%)", metrics)
         self.phase_results[self.current_phase] = metrics
         
-        print(f"  ✅ 全トラフィック (100%) への移行完了")
+        print("  ✅ 全トラフィック (100%) への移行完了")
     
     def _execute_stabilization_phase(self):
         """Stabilization phase"""
@@ -243,7 +242,7 @@ class Phase9DeploymentExecutor:
             health_status=HealthStatus.EXCELLENT
         )
         
-        print(f"  📊 安定化期間メトリクス")
+        print("  📊 安定化期間メトリクス")
         print(f"    - エラー率: {metrics.error_rate:.2f}%")
         print(f"    - P99レイテンシ: {metrics.p99_latency_ms:.1f}ms")
         print(f"    - ユーザー満足度: {metrics.user_satisfaction:.1f}/10")
@@ -252,7 +251,7 @@ class Phase9DeploymentExecutor:
         
         self.phase_results[self.current_phase] = metrics
         
-        print(f"  ✅ システムは安定状態に達しました")
+        print("  ✅ システムは安定状態に達しました")
     
     def _display_phase_metrics(self, phase_name: str, metrics: DeploymentMetrics):
         """Display phase metrics"""
@@ -281,21 +280,21 @@ class Phase9DeploymentExecutor:
         
         total_duration = (datetime.now() - self.start_time).total_seconds()
         
-        print(f"\n✅ デプロイメント完了")
+        print("\n✅ デプロイメント完了")
         print(f"  - 開始時刻: {self.start_time.isoformat()}")
         print(f"  - 終了時刻: {datetime.now().isoformat()}")
         print(f"  - 所要時間: {total_duration:.2f} 秒 (実測)")
-        print(f"  - 計画期間: 7日間")
+        print("  - 計画期間: 7日間")
         print(f"  - ステータス: {'✅ 成功' if self.is_successful else '❌ 失敗'}")
         
-        print(f"\n📊 フェーズ別結果")
+        print("\n📊 フェーズ別結果")
         for phase, metrics in self.phase_results.items():
             status = "✅ PASS" if metrics.error_rate < 0.1 else "⚠️ WARNING"
             print(f"  {status} {phase.value}")
             print(f"      → {metrics.traffic_percentage}% traffic")
             print(f"      → Error rate: {metrics.error_rate:.2f}%")
         
-        print(f"\n🎯 セキュリティ機構の本番稼働")
+        print("\n🎯 セキュリティ機構の本番稼働")
         features_production = [
             ("多要素認証 (MFA)", "✅ 全ユーザーに展開"),
             ("エンドツーエンド暗号化", "✅ 全データに適用"),
@@ -308,7 +307,7 @@ class Phase9DeploymentExecutor:
         for feature, status in features_production:
             print(f"  {status} {feature}")
         
-        print(f"\n📈 ビジネス成果")
+        print("\n📈 ビジネス成果")
         business_metrics = {
             "セキュリティインシデント削減": "78%",
             "ユーザー満足度向上": "+12%",
@@ -320,8 +319,8 @@ class Phase9DeploymentExecutor:
         for metric, value in business_metrics.items():
             print(f"  📊 {metric}: {value}")
         
-        print(f"\n✅ 【最終判定】Phase 9 本番導入完了・成功")
-        print(f"   エンタープライズグレードのセキュリティインフラ構築完了")
+        print("\n✅ 【最終判定】Phase 9 本番導入完了・成功")
+        print("   エンタープライズグレードのセキュリティインフラ構築完了")
         print("=" * 70)
         
         return {

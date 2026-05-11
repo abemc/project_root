@@ -5,7 +5,7 @@
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from typing import Dict, Optional, Any, List
 import logging
@@ -356,10 +356,10 @@ class VerticalPodAutoscaler:
             return {}
         
         # CPU平均
-        avg_cpu = sum(u.get("cpu", 0) for u in usage_history) / len(usage_history)
+        sum(u.get("cpu", 0) for u in usage_history) / len(usage_history)
         
         # メモリ平均
-        avg_memory = sum(u.get("memory", 0) for u in usage_history) / len(usage_history)
+        sum(u.get("memory", 0) for u in usage_history) / len(usage_history)
         
         # ピーク
         peak_cpu = max(u.get("cpu", 0) for u in usage_history)

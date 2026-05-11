@@ -10,14 +10,9 @@ Phase 10 Step 1: 24/7 SOC テスト
 """
 
 import pytest
-import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime
 from src.phase10 import (
-    SecurityOperationsCenter,
     EventProcessor,
-    ThreatClassifier,
-    AutoResponder,
-    EscalationManager,
     ThreatLevel,
     EventType,
     ResponseAction
@@ -42,8 +37,8 @@ class TestEventProcessing:
         assert result.event_type == EventType.AUTHENTICATION
         assert result.source_user == 'testuser'
         assert result.source_ip == '192.168.1.100'
-        assert result.details['success'] == True
-        assert result.details['mfa_used'] == True
+        assert result.details['success']
+        assert result.details['mfa_used']
     
     def test_access_event_processing(self, mock_event_processor, sample_access_event):
         """アクセスイベント処理テスト"""
@@ -54,7 +49,7 @@ class TestEventProcessing:
         assert result is not None
         assert result.event_type == EventType.ACCESS
         assert result.resource == 'admin_panel'
-        assert result.details['granted'] == True
+        assert result.details['granted']
     
     def test_data_event_processing(self, mock_event_processor, sample_data_event):
         """データイベント処理テスト"""
@@ -236,7 +231,7 @@ class TestAutoResponse:
             incident
         )
         
-        assert result == True
+        assert result
     
     @pytest.mark.asyncio
     async def test_revoke_session_response(self, mock_auto_responder):
@@ -260,7 +255,7 @@ class TestAutoResponse:
             incident
         )
         
-        assert result == True
+        assert result
     
     @pytest.mark.asyncio
     async def test_isolate_system_response(self, mock_auto_responder):
@@ -284,7 +279,7 @@ class TestAutoResponse:
             incident
         )
         
-        assert result == True
+        assert result
     
     @pytest.mark.asyncio
     async def test_quarantine_resource_response(self, mock_auto_responder):
@@ -308,7 +303,7 @@ class TestAutoResponse:
             incident
         )
         
-        assert result == True
+        assert result
     
     @pytest.mark.asyncio
     async def test_trigger_audit_response(self, mock_auto_responder):
@@ -332,7 +327,7 @@ class TestAutoResponse:
             incident
         )
         
-        assert result == True
+        assert result
     
     @pytest.mark.asyncio
     async def test_auto_response_execution_history(self, mock_auto_responder):

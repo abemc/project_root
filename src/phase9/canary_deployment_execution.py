@@ -5,10 +5,8 @@ Phase 7 Canaryデプロイメント実行フェーズ
 実行: 5フェーズ (Phase 0-4)
 """
 
-import json
-import sys
-from datetime import datetime, timedelta
-from typing import Dict, Any, List
+from datetime import datetime
+from typing import Dict, Any
 from enum import Enum
 
 
@@ -475,7 +473,7 @@ def main():
                 
                 if phase_3_result["status"] == "PASSED":
                     # Phase 4: 完全移行
-                    phase_4_result = executor.execute_phase_4_full_migration()
+                    executor.execute_phase_4_full_migration()
     
     # サマリー表示
     print(executor.get_deployment_summary())

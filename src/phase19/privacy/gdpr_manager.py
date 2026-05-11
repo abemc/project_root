@@ -1,6 +1,5 @@
 """GDPR Manager for handling GDPR compliance requirements."""
 
-import json
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 from enum import Enum

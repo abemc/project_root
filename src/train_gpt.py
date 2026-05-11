@@ -1,9 +1,7 @@
 import torch
-import torch.nn as nn
 from torch.nn import functional as F
 import tiktoken
 import json
-import numpy as np
 from pathlib import Path
 import time
 from src.model import GPT, GPTConfig

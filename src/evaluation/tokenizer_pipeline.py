@@ -7,7 +7,7 @@
 
 import torch
 import logging
-from typing import List, Tuple, Optional, Union
+from typing import List, Optional, Union
 import re
 
 logger = logging.getLogger(__name__)

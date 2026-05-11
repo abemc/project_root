@@ -7,7 +7,6 @@ Days 6-7: 本番環境準備
 - 本番環境設定
 """
 
-import os
 import psutil
 from typing import Dict, Optional, List, Any
 from dataclasses import dataclass, field

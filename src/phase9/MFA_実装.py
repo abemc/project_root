@@ -16,7 +16,7 @@ import time
 import base64
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from enum import Enum
 import logging
 
@@ -496,7 +496,7 @@ def test_mfa_system():
     # テストケース1: TOTP登録と検証
     print("\n【Test 1】TOTP登録と認証")
     credential_id, secret, qr_code = manager.register_totp("user_001")
-    print(f"✅ TOTP登録完了")
+    print("✅ TOTP登録完了")
     print(f"  - Credential ID: {credential_id}")
     print(f"  - Secret: {secret[:10]}****")
     
@@ -583,12 +583,12 @@ def test_mfa_system():
     print(f"   - TOTP: {totp_count}個")
     print(f"   - SMS: {sms_count}個")
     print(f"✅ バックアップコード生成: {len([bc for bcs in manager.backup_codes.values() for bc in bcs])}個")
-    print(f"✅ TOTP認証成功率: 100% (テスト中)")
-    print(f"✅ SMS認証成功率: 100% (テスト中)")
-    print(f"✅ バックアップコード利用率: 100% (テスト中)")
-    print(f"✅ 登録からMFA有効化までの時間: < 3分")
-    print(f"✅ 認証フロー所要時間: < 30秒")
-    print(f"✅ コード検証時間: < 100ms")
+    print("✅ TOTP認証成功率: 100% (テスト中)")
+    print("✅ SMS認証成功率: 100% (テスト中)")
+    print("✅ バックアップコード利用率: 100% (テスト中)")
+    print("✅ 登録からMFA有効化までの時間: < 3分")
+    print("✅ 認証フロー所要時間: < 30秒")
+    print("✅ コード検証時間: < 100ms")
     
     print("\n" + "="*70)
     print("✅ Phase 9 Step 1 テスト完了 (すべてのチェック PASS)")

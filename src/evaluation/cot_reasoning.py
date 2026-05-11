@@ -128,7 +128,7 @@ class CoTReasoner:
         ])
         
         # プロンプト構築
-        prompt = self.prompt_templates.MMLU_COT.format(
+        self.prompt_templates.MMLU_COT.format(
             question=question,
             options=options_str,
             reasoning="{reasoning_placeholder}"  # 後で入力

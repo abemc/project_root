@@ -2,8 +2,7 @@
 多言語推論エンジン - 言語別の最適化推論を提供
 """
 
-from typing import Dict, Any, List, Optional, Tuple
-import json
+from typing import Dict, Any, List, Tuple
 from datetime import datetime
 
 from .language_detection import LanguageDetector
@@ -89,7 +88,7 @@ class MultilingualInferenceEngine:
                 answer = self.inference_engine.predict_classification(
                     optimized_prompt, choices
                 )
-            except Exception as e:
+            except Exception:
                 # フォールバック
                 answer = choices[len(prompt) % len(choices)]
         else:
@@ -133,7 +132,7 @@ class MultilingualInferenceEngine:
         if self.inference_engine is not None:
             try:
                 answer = self.inference_engine.predict_math(optimized_prompt)
-            except Exception as e:
+            except Exception:
                 # フォールバック
                 answer = str(len(problem) % 100)
         else:

@@ -6,8 +6,6 @@ Phase 7ステージング環境統合テスト
 テスト方式: 統合テスト (エンドツーエンド)
 """
 
-import sys
-import os
 from datetime import datetime
 import logging
 
@@ -63,7 +61,6 @@ class StagingTestSuite:
         
         # テスト1-1: Context Analyzerインポート
         try:
-            from src.self_improvement.context_analyzer import ContextAnalyzer
             result = "✅ PASS"
             tests.append(("ContextAnalyzer インポート", result))
             logger.info("ContextAnalyzer インポート成功")
@@ -74,7 +71,6 @@ class StagingTestSuite:
         
         # テスト1-2: DomainKnowledgeManager インポート
         try:
-            from src.self_improvement.domain_knowledge import DomainKnowledgeManager
             result = "✅ PASS"
             tests.append(("DomainKnowledgeManager インポート", result))
             logger.info("DomainKnowledgeManager インポート成功")
@@ -85,7 +81,6 @@ class StagingTestSuite:
         
         # テスト1-3: ReasoningEngine インポート
         try:
-            from src.self_improvement.reasoning_engine import ReasoningEngine
             result = "✅ PASS"
             tests.append(("ReasoningEngine インポート", result))
             logger.info("ReasoningEngine インポート成功")
@@ -97,7 +92,7 @@ class StagingTestSuite:
         # テスト1-4: Phase7QueryPreprocessor インポート
         try:
             from src.rag.query_preprocessor import Phase7QueryPreprocessor
-            preprocessor = Phase7QueryPreprocessor()
+            Phase7QueryPreprocessor()
             result = "✅ PASS"
             tests.append(("Phase7QueryPreprocessor インポート", result))
             logger.info("Phase7QueryPreprocessor インポート成功")
@@ -109,7 +104,7 @@ class StagingTestSuite:
         # テスト1-5: Phase7KnowledgeIntegrationEngine インポート
         try:
             from src.rag.knowledge_integration_engine import Phase7KnowledgeIntegrationEngine
-            engine = Phase7KnowledgeIntegrationEngine()
+            Phase7KnowledgeIntegrationEngine()
             result = "✅ PASS"
             tests.append(("Phase7KnowledgeIntegrationEngine インポート", result))
             logger.info("Phase7KnowledgeIntegrationEngine インポート成功")
@@ -151,7 +146,7 @@ class StagingTestSuite:
             tests.append((f"検索レイテンシ: {elapsed:.1f}ms (目標: < 500ms)", status))
             logger.info(f"検索レイテンシ: {elapsed:.1f}ms")
         except Exception as e:
-            tests.append((f"検索レイテンシテスト", f"❌ FAIL: {e}"))
+            tests.append(("検索レイテンシテスト", f"❌ FAIL: {e}"))
             logger.error(f"検索レイテンシテスト失敗: {e}")
         
         # テスト2-2: キャッシング
@@ -174,7 +169,7 @@ class StagingTestSuite:
             tests.append((f"キャッシュ効果: {cached_time:.2f}ms", status))
             logger.info(f"キャッシュ効果: {cached_time:.2f}ms")
         except Exception as e:
-            tests.append((f"キャッシュテスト", f"❌ FAIL: {e}"))
+            tests.append(("キャッシュテスト", f"❌ FAIL: {e}"))
             logger.error(f"キャッシュテスト失敗: {e}")
         
         # 結果表示
@@ -192,7 +187,6 @@ class StagingTestSuite:
         
         # テスト3-1: 既存RAGAgentとの互換性
         try:
-            from src.rag.agent import RAGAgent
             result = "✅ PASS"
             tests.append(("RAGAgent との互換性", result))
             logger.info("RAGAgent 互換性確認")
@@ -203,7 +197,6 @@ class StagingTestSuite:
         
         # テスト3-2: 既存Retrieverとの互換性
         try:
-            from src.rag.retriever import Retriever
             result = "✅ PASS"
             tests.append(("Retriever との互換性", result))
             logger.info("Retriever 互換性確認")
@@ -390,18 +383,18 @@ class StagingTestSuite:
             icon = "✅" if fail_count == 0 else "❌"
             print(f"\n{icon} {test_name}: {pass_count}/{total} 成功")
         
-        print(f"\n【全体結果】")
+        print("\n【全体結果】")
         print(f"  成功: {total_pass}件 ✅")
         print(f"  失敗: {total_fail}件 ❌")
         print(f"  警告: {total_warn}件 ⚠️")
         print(f"  実行時間: {duration:.2f}秒")
         
         if total_fail == 0:
-            print(f"\n🎉 すべてのステージングテストが成功しました！")
-            print(f"   本番環境デプロイメント準備完了 ✅")
+            print("\n🎉 すべてのステージングテストが成功しました！")
+            print("   本番環境デプロイメント準備完了 ✅")
         else:
             print(f"\n⚠️  {total_fail}件のテスト失敗があります")
-            print(f"   本番環境デプロイメント前に対応が必要です")
+            print("   本番環境デプロイメント前に対応が必要です")
         
         print("\n" + "="*70 + "\n")
 

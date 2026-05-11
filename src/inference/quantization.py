@@ -8,11 +8,10 @@ INT4/INT2 量子化、精度キャリブレーション
 """
 
 import numpy as np
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
 import asyncio
-from collections import OrderedDict
 import math
 
 
@@ -388,7 +387,7 @@ class QuantizationEngine:
         """完全な量子化パイプライン"""
         
         import time
-        start_time = time.time()
+        time.time()
         
         # キャリブレーション
         stats_dict = await self.calibrate_model(model_name, calibration_batches)

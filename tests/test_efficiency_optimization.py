@@ -3,9 +3,8 @@
 """
 
 import pytest
-import math
 from src.efficiency_optimization.efficiency_engine import (
-    QuantizationType, DistillationStrategy, QuantizationConfig,
+    QuantizationType, QuantizationConfig,
     DistillationConfig, QuantizationEngine, KnowledgeDistillerEngine,
     FlashAttentionOptimizer, KVCacheOptimizer, EfficiencyOptimizationManager
 )

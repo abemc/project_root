@@ -1,7 +1,5 @@
 import faiss
 import json
-import os
-from pathlib import Path
 
 # ============================================================
 # 設定
@@ -16,7 +14,7 @@ def main():
     """
     生成された知識ベース（インデックスとメタデータ）の内容を検証するツール。
     """
-    print(f"=== Inspecting Knowledge Base ===")
+    print("=== Inspecting Knowledge Base ===")
     print(f"Root Directory: {CORPUS_ROOT.resolve()}")
     print(f"Index File:     {INDEX_PATH}")
     print(f"Metadata File:  {META_PATH}\n")

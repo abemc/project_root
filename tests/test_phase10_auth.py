@@ -11,19 +11,10 @@ Phase 10 Step 2: 次世代認証テスト
 
 import pytest
 import asyncio
-from datetime import datetime, timedelta
 from src.phase10 import (
-    FIDO2AuthEngine,
-    BiometricAuthEngine,
-    AdaptiveAuthStrategy,
-    DeviceTrustVerifier,
-    FIDO2Credential,
-    BiometricTemplate,
-    AuthenticationSession,
     UserAuthContext,
     AuthenticationMethod,
-    BiometricType,
-    ThreatLevel
+    BiometricType
 )
 
 
@@ -349,7 +340,7 @@ class TestFIDO2Authentication:
             'transports': ['usb']
         }
         
-        credential_id = await mock_fido2_engine.register_fido2_credential(
+        await mock_fido2_engine.register_fido2_credential(
             user_id=user_id,
             attestation_object=attestation_object
         )
@@ -396,7 +387,7 @@ class TestBiometricAuthentication:
         assert template is not None
         assert template.user_id == user_id
         assert template.biometric_type == BiometricType.FINGERPRINT
-        assert template.registration_complete == True
+        assert template.registration_complete
     
     @pytest.mark.asyncio
     async def test_fingerprint_verification(self, mock_biometric_engine):
@@ -404,7 +395,7 @@ class TestBiometricAuthentication:
         user_id = "user_010"
         
         # 登録
-        template_id = await mock_biometric_engine.register_biometric(
+        await mock_biometric_engine.register_biometric(
             user_id=user_id,
             biometric_type=BiometricType.FINGERPRINT,
             biometric_data=b"fingerprint_template",
@@ -418,7 +409,7 @@ class TestBiometricAuthentication:
             biometric_sample=b"fingerprint_template"
         )
         
-        assert success == True
+        assert success
         assert 0.0 <= match_score <= 1.0
     
     @pytest.mark.asyncio
@@ -468,7 +459,7 @@ class TestBiometricAuthentication:
             biometric_sample=b"iris_code"
         )
         
-        assert success == True
+        assert success
         assert match_score > 0.85
 
 

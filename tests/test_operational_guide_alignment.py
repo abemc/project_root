@@ -6,8 +6,7 @@ DEPLOYMENT_GUIDE_FINAL.md に記載された運用タスクが
 
 import sys
 from pathlib import Path
-from datetime import datetime
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 sys.path.insert(0, '/home/abemc/project_root')
 
@@ -65,7 +64,7 @@ class OperationalGuideValidator:
                 for alert in alerts:
                     print(f"        - {alert}")
             else:
-                print(f"      アラート: なし")
+                print("      アラート: なし")
             checks_passed += 1
         except Exception as e:
             print(f"   ❌ エラー: {e}")
@@ -135,7 +134,7 @@ class OperationalGuideValidator:
             for i in range(5):
                 retriever._store_cache(f"key_{i}", {"data": f"value_{i}"})
             
-            print(f"   ✅ キャッシュクリア実行可能: OptimizedMultiDomainRetriever.clear_cache()")
+            print("   ✅ キャッシュクリア実行可能: OptimizedMultiDomainRetriever.clear_cache()")
             print(f"      クリア前キャッシュサイズ: {len(retriever._query_cache)}")
             
             retriever.clear_cache()
@@ -270,8 +269,8 @@ class OperationalGuideValidator:
             stats = retriever.get_cache_stats()
             print("   ✅ パフォーマンス監視実行可能:")
             print(f"      キャッシュヒット率: {stats.hit_rate:.1%}")
-            print(f"      クエリ応答時間: p50=~100ms, p95=~150ms, p99=~200ms (推定)")
-            print(f"      エラー発生率: 0.0% (テスト環境)")
+            print("      クエリ応答時間: p50=~100ms, p95=~150ms, p99=~200ms (推定)")
+            print("      エラー発生率: 0.0% (テスト環境)")
             checks_passed += 1
         except Exception as e:
             print(f"   ❌ エラー: {e}")
@@ -295,7 +294,7 @@ class OperationalGuideValidator:
             print("   ✅ セキュリティ監視実行可能:")
             print(f"      拒否リクエスト数: {metrics['blocked_requests']}")
             print(f"      ブロック率: {metrics['block_rate']}")
-            print(f"      異常パターン検出: 実装済み (入力検証)")
+            print("      異常パターン検出: 実装済み (入力検証)")
             checks_passed += 1
         except Exception as e:
             print(f"   ❌ エラー: {e}")
@@ -324,7 +323,7 @@ class OperationalGuideValidator:
         print("\n1️⃣  メモリ不足対応")
         try:
             config = ProductionConfig(max_cache_size_mb=500)
-            print(f"   ✅ 対応実行可能:")
+            print("   ✅ 対応実行可能:")
             print(f"      デフォルト設定: {config.max_cache_size_mb}MB")
             
             # reduced_config
@@ -333,7 +332,7 @@ class OperationalGuideValidator:
             retriever.clear_cache()
             
             print(f"      削減後設定: {config.max_cache_size_mb}MB")
-            print(f"      キャッシュクリア: 実行可能")
+            print("      キャッシュクリア: 実行可能")
             checks_passed += 1
         except Exception as e:
             print(f"   ❌ エラー: {e}")
@@ -342,7 +341,7 @@ class OperationalGuideValidator:
         print("\n2️⃣  CPU高負荷対応")
         try:
             config = ProductionConfig(max_workers=4)
-            print(f"   ✅ 対応実行可能:")
+            print("   ✅ 対応実行可能:")
             print(f"      デフォルト: {config.max_workers} ワーカー")
             
             config.max_workers = 2
@@ -356,7 +355,7 @@ class OperationalGuideValidator:
         print("\n3️⃣  タイムアウト対応")
         try:
             config = ProductionConfig()
-            print(f"   ✅ 対応実行可能:")
+            print("   ✅ 対応実行可能:")
             print(f"      クエリタイムアウト: {config.query_timeout_sec}秒")
             print(f"      検索タイムアウト: {config.retrieval_timeout_sec}秒")
             
@@ -376,13 +375,13 @@ class OperationalGuideValidator:
             manager.security_manager.blocked_requests = 10
             metrics = manager.security_manager.get_security_metrics()
             
-            print(f"   ✅ 対応実行可能:")
+            print("   ✅ 対応実行可能:")
             print(f"      ブロック記録確認: {metrics['blocked_requests']}件")
             
             # キャッシュクリア
             manager.resource_monitor = manager.resource_monitor
-            print(f"      キャッシュクリア: 実行可能")
-            print(f"      設定リロード: 実行可能")
+            print("      キャッシュクリア: 実行可能")
+            print("      設定リロード: 実行可能")
             checks_passed += 1
         except Exception as e:
             print(f"   ❌ エラー: {e}")
@@ -419,7 +418,7 @@ class OperationalGuideValidator:
         
         overall_rate = (total_passed / total_checks * 100) if total_checks > 0 else 0
         
-        print(f"\n【総合結果】")
+        print("\n【総合結果】")
         print(f"  実行可能チェック数: {total_passed}/{total_checks}")
         print(f"  成功率: {overall_rate:.1f}%")
         

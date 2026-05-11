@@ -2,7 +2,6 @@ import os
 import json
 import numpy as np
 import faiss
-from pathlib import Path
 from src.utils.path_utils import get_corpus_path, get_embeddings_path, get_chunks_path, get_meta_dir
 
 CORPUS_PATH = get_corpus_path()

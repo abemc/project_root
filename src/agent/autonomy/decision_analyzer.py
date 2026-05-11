@@ -6,12 +6,12 @@
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 from enum import Enum
 from datetime import datetime
 import json
 import csv
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 
 
@@ -592,15 +592,15 @@ class DecisionAnalyzer:
         print("エージェント自律性分析レポート")
         print("="*60)
         print(f"タイムスタンプ: {report['timestamp']}")
-        print(f"\n【総合指標】")
+        print("\n【総合指標】")
         print(f"  自律性スコア: {report['autonomy_score']:.2%}")
-        print(f"\n【タスク統計】")
+        print("\n【タスク統計】")
         print(f"  処理タスク数: {summary['total_tasks']}")
         print(f"  成功率: {summary['overall_success_rate']:.2%}")
-        print(f"\n【自律性指標】")
+        print("\n【自律性指標】")
         print(f"  平均自律性: {summary['average_autonomy']:.2%}")
         print(f"  ユーザー介入率: {summary['intervention_rate']:.2%}")
-        print(f"\n【品質指標】")
+        print("\n【品質指標】")
         print(f"  平均品質スコア: {summary['average_quality']:.2%}")
         print(f"  失敗率: {summary['failure_rate']:.2%}")
         print("="*60 + "\n")

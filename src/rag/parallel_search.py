@@ -7,12 +7,11 @@ RAG検索並列化エンジン
 import asyncio
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Tuple, Any, Callable
+from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
 import time
 import logging
 from collections import defaultdict
-import json
 
 logger = logging.getLogger(__name__)
 

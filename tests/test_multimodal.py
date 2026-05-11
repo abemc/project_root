@@ -5,7 +5,6 @@ import tempfile
 from pathlib import Path
 from datetime import datetime
 import json
-import os
 
 # テスト用のモック画像とオーディオデータを作成
 try:
@@ -123,7 +122,7 @@ class TestMultimodalIntegrator(unittest.TestCase):
     
     def test_get_input_history(self):
         """入力履歴取得テスト"""
-        initial_count = len(self.integrator.input_history)
+        len(self.integrator.input_history)
         self.integrator.process_multimodal_input(text="履歴テスト")
         
         history = self.integrator.get_input_history(limit=10)

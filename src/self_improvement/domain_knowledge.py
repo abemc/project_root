@@ -7,7 +7,6 @@ Phase 7: マルチドメイン知識管理レイヤー
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime
-import json
 import logging
 
 logger = logging.getLogger(__name__)

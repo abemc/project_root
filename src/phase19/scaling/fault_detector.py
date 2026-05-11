@@ -1,12 +1,10 @@
 """Fault Detector - detects and recovers from system failures."""
 
-import time
 import threading
 from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from collections import deque
 
 
 class FaultType(Enum):

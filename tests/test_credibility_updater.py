@@ -3,7 +3,6 @@
 """
 
 import pytest
-from datetime import datetime, timedelta
 from src.quality_assurance.credibility_updater import (
     CredibilityScoreUpdater,
     UpdateReason,

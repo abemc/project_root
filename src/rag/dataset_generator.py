@@ -1,6 +1,5 @@
 import json
 import os
-from pathlib import Path
 
 def generate_dataset(log_path="logs/history.jsonl", output_path="logs/finetune_dataset.jsonl"):
     """
