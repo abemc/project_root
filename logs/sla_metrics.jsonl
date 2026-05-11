@@ -149,3 +149,9 @@
 {"timestamp": 1778461534.756204, "availability": 0.0, "p99_latency": 9.0361, "total_requests": 1, "success_rate": 0.0}
 {"timestamp": 1778461544.0572937, "availability": 0.0, "p99_latency": 8.9853, "total_requests": 1, "success_rate": 0.0}
 {"timestamp": 1778461552.020167, "availability": 0.0, "p99_latency": 7.7158, "total_requests": 1, "success_rate": 0.0}
+{"timestamp": 1778468435.2914336, "availability": 0.0, "p99_latency": 9.7463, "total_requests": 1, "success_rate": 0.0}
+{"timestamp": 1778468444.6586761, "availability": 0.0, "p99_latency": 8.8824, "total_requests": 1, "success_rate": 0.0}
+{"timestamp": 1778468452.9195418, "availability": 0.0, "p99_latency": 7.9072, "total_requests": 1, "success_rate": 0.0}
+{"timestamp": 1778468484.6325643, "availability": 0.0, "p99_latency": 8.8343, "total_requests": 1, "success_rate": 0.0}
+{"timestamp": 1778468494.73731, "availability": 0.0, "p99_latency": 9.502, "total_requests": 1, "success_rate": 0.0}
+{"timestamp": 1778468505.1335876, "availability": 0.0, "p99_latency": 9.538, "total_requests": 1, "success_rate": 0.0}
