@@ -1,0 +1,57 @@
+# Ignore backups and their contents
+backups/
+test_backups/
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Virtual environment and package manager
+pip-wheel-metadata/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs and runtime files
+*.log
+logs/
+tmp/
+*.tmp
+
+# Databases and large binaries
+*.sqlite3
+*.db
+*.tar.gz
+*.tar
+*.zip
+
+# Model, embeddings, and data directories (large)
+embeddings/
+models/
+fine_tuned_model/
+checkpoints/
+corpus/
+raw_pdfs/
+ocr_cache/
+pages/
+chroma_db/
+faiss_ci.index
+
+# OS and editor
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Node
+node_modules/
+
+# Ignore egg-info generated at build
+src/project_root.egg-info/
