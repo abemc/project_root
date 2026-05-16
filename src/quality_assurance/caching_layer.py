@@ -52,7 +52,7 @@ class CacheEntry:
             return False
         
         elapsed = (datetime.utcnow() - self.created_at).total_seconds()
-        return elapsed > self.ttl_seconds
+        return elapsed >= self.ttl_seconds
     
     def touch(self) -> None:
         """アクセス情報を更新"""
