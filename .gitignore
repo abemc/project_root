@@ -10,3 +10,6 @@ __pycache__/
 
 # Generated benchmark/test outputs
 results/
+
+# Local model caches (downloaded artifacts)
+models/
