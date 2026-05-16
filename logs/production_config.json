@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-07T10:33:28.375292",
+  "timestamp": "2026-05-17T08:46:59.087814",
   "config": {
     "resource": {
       "max_cache_size_mb": 300,
@@ -32,12 +32,12 @@
     }
   },
   "resources": {
-    "total_memory_gb": 14.460968017578125,
-    "available_memory_gb": 9.710750579833984,
-    "memory_usage_percent": "32.8%",
+    "total_memory_gb": 14.460975646972656,
+    "available_memory_gb": 10.202438354492188,
+    "memory_usage_percent": "29.4%",
     "cpu_count": 24,
     "cpu_percent": "0.0%",
-    "disk_available_gb": 557.8440628051758,
-    "timestamp": "2026-05-07T10:33:28.475985"
+    "disk_available_gb": 599.2292366027832,
+    "timestamp": "2026-05-17T08:46:59.190017"
   }
 }

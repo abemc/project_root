@@ -11,7 +11,7 @@ requires-python = ">=3.10"
 dependencies = [
     # 必要なパッケージのみ記載。requirements.txtと重複しないよう注意。
     "streamlit",
-    "torch==2.4.1",
+    "torch>=2.6.0,<2.7.0",
     "torchvision",
     "faiss-cpu",
     "transformers",
@@ -40,7 +40,7 @@ package-dir = {"" = "src"}
 testpaths = ["tests"]
 # phase19 は別環境向けのため通常の CI ではスキップ
 addopts = "--ignore=tests/phase19"
-pythonpath = ["src"]
+pythonpath = [".", "src"]
 asyncio_mode = "auto"
 markers = [
     "asyncio: marks tests as async (deselect with '-m \"not asyncio\"')",

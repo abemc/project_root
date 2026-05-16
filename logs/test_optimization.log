@@ -958,3 +958,403 @@ ValueError: テスト用エラーメッセージ
 2026-05-08 10:07:31,553 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
 2026-05-08 10:07:31,553 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
 2026-05-08 10:07:31,553 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-16 23:58:55,096 - OptimizationTest - INFO - キャッシング機構テスト開始
+2026-05-16 23:58:55,145 - OptimizationTest - INFO - 検索実行: '機械学習とは'
+2026-05-16 23:58:55,145 - OptimizationTest - INFO - 検索実行: '医療過誤訴訟'
+2026-05-16 23:58:55,146 - OptimizationTest - INFO - 検索実行: 'COVID-19ワクチン'
+2026-05-16 23:58:55,146 - OptimizationTest - INFO - 検索実行: '機械学習とは'
+2026-05-16 23:58:55,146 - OptimizationTest - INFO - キャッシング機構テスト完了: キャッシュ統計: 総クエリ=4, ヒット=1, ミス=3, ヒット率=25.0%
+2026-05-16 23:58:55,147 - OptimizationTest - INFO - パフォーマンス最適化テスト開始
+2026-05-16 23:58:55,147 - OptimizationTest - INFO - パフォーマンス最適化テスト開始
+2026-05-16 23:58:55,149 - OptimizationTest - INFO - パフォーマンステスト完了: 同期=0.01ms, 非同期=0.66ms
+2026-05-16 23:58:55,149 - OptimizationTest - INFO - パフォーマンステスト完了: 同期=0.01ms, 非同期=0.66ms
+2026-05-16 23:58:55,150 - OptimizationTest - INFO - エラー処理テスト開始
+2026-05-16 23:58:55,150 - OptimizationTest - INFO - エラー処理テスト開始
+2026-05-16 23:58:55,150 - OptimizationTest - INFO - エラー処理テスト開始
+2026-05-16 23:58:55,150 - OptimizationTest - DEBUG - デバッグログメッセージ
+2026-05-16 23:58:55,150 - OptimizationTest - DEBUG - デバッグログメッセージ
+2026-05-16 23:58:55,150 - OptimizationTest - DEBUG - デバッグログメッセージ
+2026-05-16 23:58:55,150 - OptimizationTest - INFO - 情報ログメッセージ
+2026-05-16 23:58:55,150 - OptimizationTest - INFO - 情報ログメッセージ
+2026-05-16 23:58:55,150 - OptimizationTest - INFO - 情報ログメッセージ
+2026-05-16 23:58:55,150 - OptimizationTest - WARNING - 警告ログメッセージ
+2026-05-16 23:58:55,150 - OptimizationTest - WARNING - 警告ログメッセージ
+2026-05-16 23:58:55,150 - OptimizationTest - WARNING - 警告ログメッセージ
+2026-05-16 23:58:55,150 - OptimizationTest - ERROR - エラーログメッセージ
+2026-05-16 23:58:55,150 - OptimizationTest - ERROR - エラーログメッセージ
+2026-05-16 23:58:55,150 - OptimizationTest - ERROR - エラーログメッセージ
+2026-05-16 23:58:55,150 - OptimizationTest - INFO - エラーハンドラテスト開始
+2026-05-16 23:58:55,150 - OptimizationTest - INFO - エラーハンドラテスト開始
+2026-05-16 23:58:55,150 - OptimizationTest - INFO - エラーハンドラテスト開始
+2026-05-16 23:58:55,220 - OptimizationTest - ERROR - ValueErrorが発生しました (テスト操作)
+2026-05-16 23:58:55,220 - OptimizationTest - ERROR - ValueErrorが発生しました (テスト操作)
+2026-05-16 23:58:55,220 - OptimizationTest - ERROR - ValueErrorが発生しました (テスト操作)
+2026-05-16 23:58:55,220 - OptimizationTest - DEBUG - トレース情報:
+Traceback (most recent call last):
+  File "/home/abemc/project_root/tests/test_optimization_phase4.py", line 203, in test_error_handling
+    raise ValueError("テスト用エラーメッセージ")
+ValueError: テスト用エラーメッセージ
+
+2026-05-16 23:58:55,220 - OptimizationTest - DEBUG - トレース情報:
+Traceback (most recent call last):
+  File "/home/abemc/project_root/tests/test_optimization_phase4.py", line 203, in test_error_handling
+    raise ValueError("テスト用エラーメッセージ")
+ValueError: テスト用エラーメッセージ
+
+2026-05-16 23:58:55,220 - OptimizationTest - DEBUG - トレース情報:
+Traceback (most recent call last):
+  File "/home/abemc/project_root/tests/test_optimization_phase4.py", line 203, in test_error_handling
+    raise ValueError("テスト用エラーメッセージ")
+ValueError: テスト用エラーメッセージ
+
+2026-05-16 23:58:55,220 - OptimizationTest - INFO - エラー処理テスト完了
+2026-05-16 23:58:55,220 - OptimizationTest - INFO - エラー処理テスト完了
+2026-05-16 23:58:55,220 - OptimizationTest - INFO - エラー処理テスト完了
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-16 23:58:55,222 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-16 23:58:55,223 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-16 23:58:55,223 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-16 23:58:55,223 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-16 23:58:55,223 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-17 07:21:30,381 - OptimizationTest - INFO - キャッシング機構テスト開始
+2026-05-17 07:21:30,382 - OptimizationTest - INFO - 検索実行: '機械学習とは'
+2026-05-17 07:21:30,382 - OptimizationTest - INFO - 検索実行: '医療過誤訴訟'
+2026-05-17 07:21:30,382 - OptimizationTest - INFO - 検索実行: 'COVID-19ワクチン'
+2026-05-17 07:21:30,382 - OptimizationTest - INFO - 検索実行: '機械学習とは'
+2026-05-17 07:21:30,382 - OptimizationTest - INFO - キャッシング機構テスト完了: キャッシュ統計: 総クエリ=4, ヒット=1, ミス=3, ヒット率=25.0%
+2026-05-17 07:21:30,382 - OptimizationTest - INFO - パフォーマンス最適化テスト開始
+2026-05-17 07:21:30,382 - OptimizationTest - INFO - パフォーマンス最適化テスト開始
+2026-05-17 07:21:30,385 - OptimizationTest - INFO - パフォーマンステスト完了: 同期=0.01ms, 非同期=0.77ms
+2026-05-17 07:21:30,385 - OptimizationTest - INFO - パフォーマンステスト完了: 同期=0.01ms, 非同期=0.77ms
+2026-05-17 07:21:30,386 - OptimizationTest - INFO - エラー処理テスト開始
+2026-05-17 07:21:30,386 - OptimizationTest - INFO - エラー処理テスト開始
+2026-05-17 07:21:30,386 - OptimizationTest - INFO - エラー処理テスト開始
+2026-05-17 07:21:30,386 - OptimizationTest - DEBUG - デバッグログメッセージ
+2026-05-17 07:21:30,386 - OptimizationTest - DEBUG - デバッグログメッセージ
+2026-05-17 07:21:30,386 - OptimizationTest - DEBUG - デバッグログメッセージ
+2026-05-17 07:21:30,386 - OptimizationTest - INFO - 情報ログメッセージ
+2026-05-17 07:21:30,386 - OptimizationTest - INFO - 情報ログメッセージ
+2026-05-17 07:21:30,386 - OptimizationTest - INFO - 情報ログメッセージ
+2026-05-17 07:21:30,386 - OptimizationTest - WARNING - 警告ログメッセージ
+2026-05-17 07:21:30,386 - OptimizationTest - WARNING - 警告ログメッセージ
+2026-05-17 07:21:30,386 - OptimizationTest - WARNING - 警告ログメッセージ
+2026-05-17 07:21:30,386 - OptimizationTest - ERROR - エラーログメッセージ
+2026-05-17 07:21:30,386 - OptimizationTest - ERROR - エラーログメッセージ
+2026-05-17 07:21:30,386 - OptimizationTest - ERROR - エラーログメッセージ
+2026-05-17 07:21:30,386 - OptimizationTest - INFO - エラーハンドラテスト開始
+2026-05-17 07:21:30,386 - OptimizationTest - INFO - エラーハンドラテスト開始
+2026-05-17 07:21:30,386 - OptimizationTest - INFO - エラーハンドラテスト開始
+2026-05-17 07:21:31,165 - OptimizationTest - ERROR - ValueErrorが発生しました (テスト操作)
+2026-05-17 07:21:31,165 - OptimizationTest - ERROR - ValueErrorが発生しました (テスト操作)
+2026-05-17 07:21:31,165 - OptimizationTest - ERROR - ValueErrorが発生しました (テスト操作)
+2026-05-17 07:21:31,166 - OptimizationTest - DEBUG - トレース情報:
+Traceback (most recent call last):
+  File "/home/abemc/project_root/tests/test_optimization_phase4.py", line 203, in test_error_handling
+    raise ValueError("テスト用エラーメッセージ")
+ValueError: テスト用エラーメッセージ
+
+2026-05-17 07:21:31,166 - OptimizationTest - DEBUG - トレース情報:
+Traceback (most recent call last):
+  File "/home/abemc/project_root/tests/test_optimization_phase4.py", line 203, in test_error_handling
+    raise ValueError("テスト用エラーメッセージ")
+ValueError: テスト用エラーメッセージ
+
+2026-05-17 07:21:31,166 - OptimizationTest - DEBUG - トレース情報:
+Traceback (most recent call last):
+  File "/home/abemc/project_root/tests/test_optimization_phase4.py", line 203, in test_error_handling
+    raise ValueError("テスト用エラーメッセージ")
+ValueError: テスト用エラーメッセージ
+
+2026-05-17 07:21:31,166 - OptimizationTest - INFO - エラー処理テスト完了
+2026-05-17 07:21:31,166 - OptimizationTest - INFO - エラー処理テスト完了
+2026-05-17 07:21:31,166 - OptimizationTest - INFO - エラー処理テスト完了
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-17 07:21:31,167 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-17 07:21:31,168 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-17 07:21:31,168 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-17 07:21:31,168 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-17 07:21:31,168 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-17 07:42:16,634 - OptimizationTest - INFO - キャッシング機構テスト開始
+2026-05-17 07:42:16,661 - OptimizationTest - INFO - 検索実行: '機械学習とは'
+2026-05-17 07:42:16,661 - OptimizationTest - INFO - 検索実行: '医療過誤訴訟'
+2026-05-17 07:42:16,661 - OptimizationTest - INFO - 検索実行: 'COVID-19ワクチン'
+2026-05-17 07:42:16,661 - OptimizationTest - INFO - 検索実行: '機械学習とは'
+2026-05-17 07:42:16,661 - OptimizationTest - INFO - キャッシング機構テスト完了: キャッシュ統計: 総クエリ=4, ヒット=1, ミス=3, ヒット率=25.0%
+2026-05-17 07:42:16,663 - OptimizationTest - INFO - パフォーマンス最適化テスト開始
+2026-05-17 07:42:16,663 - OptimizationTest - INFO - パフォーマンス最適化テスト開始
+2026-05-17 07:42:16,665 - OptimizationTest - INFO - パフォーマンステスト完了: 同期=0.01ms, 非同期=0.67ms
+2026-05-17 07:42:16,665 - OptimizationTest - INFO - パフォーマンステスト完了: 同期=0.01ms, 非同期=0.67ms
+2026-05-17 07:42:16,666 - OptimizationTest - INFO - エラー処理テスト開始
+2026-05-17 07:42:16,666 - OptimizationTest - INFO - エラー処理テスト開始
+2026-05-17 07:42:16,666 - OptimizationTest - INFO - エラー処理テスト開始
+2026-05-17 07:42:16,666 - OptimizationTest - DEBUG - デバッグログメッセージ
+2026-05-17 07:42:16,666 - OptimizationTest - DEBUG - デバッグログメッセージ
+2026-05-17 07:42:16,666 - OptimizationTest - DEBUG - デバッグログメッセージ
+2026-05-17 07:42:16,666 - OptimizationTest - INFO - 情報ログメッセージ
+2026-05-17 07:42:16,666 - OptimizationTest - INFO - 情報ログメッセージ
+2026-05-17 07:42:16,666 - OptimizationTest - INFO - 情報ログメッセージ
+2026-05-17 07:42:16,666 - OptimizationTest - WARNING - 警告ログメッセージ
+2026-05-17 07:42:16,666 - OptimizationTest - WARNING - 警告ログメッセージ
+2026-05-17 07:42:16,666 - OptimizationTest - WARNING - 警告ログメッセージ
+2026-05-17 07:42:16,666 - OptimizationTest - ERROR - エラーログメッセージ
+2026-05-17 07:42:16,666 - OptimizationTest - ERROR - エラーログメッセージ
+2026-05-17 07:42:16,666 - OptimizationTest - ERROR - エラーログメッセージ
+2026-05-17 07:42:16,667 - OptimizationTest - INFO - エラーハンドラテスト開始
+2026-05-17 07:42:16,667 - OptimizationTest - INFO - エラーハンドラテスト開始
+2026-05-17 07:42:16,667 - OptimizationTest - INFO - エラーハンドラテスト開始
+2026-05-17 07:42:16,696 - OptimizationTest - ERROR - ValueErrorが発生しました (テスト操作)
+2026-05-17 07:42:16,696 - OptimizationTest - ERROR - ValueErrorが発生しました (テスト操作)
+2026-05-17 07:42:16,696 - OptimizationTest - ERROR - ValueErrorが発生しました (テスト操作)
+2026-05-17 07:42:16,696 - OptimizationTest - DEBUG - トレース情報:
+Traceback (most recent call last):
+  File "/home/abemc/project_root/tests/test_optimization_phase4.py", line 203, in test_error_handling
+    raise ValueError("テスト用エラーメッセージ")
+ValueError: テスト用エラーメッセージ
+
+2026-05-17 07:42:16,696 - OptimizationTest - DEBUG - トレース情報:
+Traceback (most recent call last):
+  File "/home/abemc/project_root/tests/test_optimization_phase4.py", line 203, in test_error_handling
+    raise ValueError("テスト用エラーメッセージ")
+ValueError: テスト用エラーメッセージ
+
+2026-05-17 07:42:16,696 - OptimizationTest - DEBUG - トレース情報:
+Traceback (most recent call last):
+  File "/home/abemc/project_root/tests/test_optimization_phase4.py", line 203, in test_error_handling
+    raise ValueError("テスト用エラーメッセージ")
+ValueError: テスト用エラーメッセージ
+
+2026-05-17 07:42:16,696 - OptimizationTest - INFO - エラー処理テスト完了
+2026-05-17 07:42:16,696 - OptimizationTest - INFO - エラー処理テスト完了
+2026-05-17 07:42:16,696 - OptimizationTest - INFO - エラー処理テスト完了
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-17 07:42:16,698 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-17 07:58:19,464 - OptimizationTest - INFO - キャッシング機構テスト開始
+2026-05-17 07:58:19,465 - OptimizationTest - INFO - 検索実行: '機械学習とは'
+2026-05-17 07:58:19,465 - OptimizationTest - INFO - 検索実行: '医療過誤訴訟'
+2026-05-17 07:58:19,465 - OptimizationTest - INFO - 検索実行: 'COVID-19ワクチン'
+2026-05-17 07:58:19,465 - OptimizationTest - INFO - 検索実行: '機械学習とは'
+2026-05-17 07:58:19,465 - OptimizationTest - INFO - キャッシング機構テスト完了: キャッシュ統計: 総クエリ=4, ヒット=1, ミス=3, ヒット率=25.0%
+2026-05-17 07:58:19,466 - OptimizationTest - INFO - パフォーマンス最適化テスト開始
+2026-05-17 07:58:19,466 - OptimizationTest - INFO - パフォーマンス最適化テスト開始
+2026-05-17 07:58:19,500 - OptimizationTest - INFO - パフォーマンステスト完了: 同期=0.01ms, 非同期=11.24ms
+2026-05-17 07:58:19,500 - OptimizationTest - INFO - パフォーマンステスト完了: 同期=0.01ms, 非同期=11.24ms
+2026-05-17 07:58:19,501 - OptimizationTest - INFO - エラー処理テスト開始
+2026-05-17 07:58:19,501 - OptimizationTest - INFO - エラー処理テスト開始
+2026-05-17 07:58:19,501 - OptimizationTest - INFO - エラー処理テスト開始
+2026-05-17 07:58:19,502 - OptimizationTest - DEBUG - デバッグログメッセージ
+2026-05-17 07:58:19,502 - OptimizationTest - DEBUG - デバッグログメッセージ
+2026-05-17 07:58:19,502 - OptimizationTest - DEBUG - デバッグログメッセージ
+2026-05-17 07:58:19,502 - OptimizationTest - INFO - 情報ログメッセージ
+2026-05-17 07:58:19,502 - OptimizationTest - INFO - 情報ログメッセージ
+2026-05-17 07:58:19,502 - OptimizationTest - INFO - 情報ログメッセージ
+2026-05-17 07:58:19,502 - OptimizationTest - WARNING - 警告ログメッセージ
+2026-05-17 07:58:19,502 - OptimizationTest - WARNING - 警告ログメッセージ
+2026-05-17 07:58:19,502 - OptimizationTest - WARNING - 警告ログメッセージ
+2026-05-17 07:58:19,502 - OptimizationTest - ERROR - エラーログメッセージ
+2026-05-17 07:58:19,502 - OptimizationTest - ERROR - エラーログメッセージ
+2026-05-17 07:58:19,502 - OptimizationTest - ERROR - エラーログメッセージ
+2026-05-17 07:58:19,502 - OptimizationTest - INFO - エラーハンドラテスト開始
+2026-05-17 07:58:19,502 - OptimizationTest - INFO - エラーハンドラテスト開始
+2026-05-17 07:58:19,502 - OptimizationTest - INFO - エラーハンドラテスト開始
+2026-05-17 07:58:19,520 - OptimizationTest - ERROR - ValueErrorが発生しました (テスト操作)
+2026-05-17 07:58:19,520 - OptimizationTest - ERROR - ValueErrorが発生しました (テスト操作)
+2026-05-17 07:58:19,520 - OptimizationTest - ERROR - ValueErrorが発生しました (テスト操作)
+2026-05-17 07:58:19,520 - OptimizationTest - DEBUG - トレース情報:
+Traceback (most recent call last):
+  File "/home/abemc/project_root/tests/test_optimization_phase4.py", line 203, in test_error_handling
+    raise ValueError("テスト用エラーメッセージ")
+ValueError: テスト用エラーメッセージ
+
+2026-05-17 07:58:19,520 - OptimizationTest - DEBUG - トレース情報:
+Traceback (most recent call last):
+  File "/home/abemc/project_root/tests/test_optimization_phase4.py", line 203, in test_error_handling
+    raise ValueError("テスト用エラーメッセージ")
+ValueError: テスト用エラーメッセージ
+
+2026-05-17 07:58:19,520 - OptimizationTest - DEBUG - トレース情報:
+Traceback (most recent call last):
+  File "/home/abemc/project_root/tests/test_optimization_phase4.py", line 203, in test_error_handling
+    raise ValueError("テスト用エラーメッセージ")
+ValueError: テスト用エラーメッセージ
+
+2026-05-17 07:58:19,520 - OptimizationTest - INFO - エラー処理テスト完了
+2026-05-17 07:58:19,520 - OptimizationTest - INFO - エラー処理テスト完了
+2026-05-17 07:58:19,520 - OptimizationTest - INFO - エラー処理テスト完了
+2026-05-17 07:58:19,521 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-17 07:58:19,521 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-17 07:58:19,521 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-17 07:58:19,521 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-17 07:58:19,521 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-17 07:58:19,521 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-17 07:58:19,521 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-17 07:58:19,521 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-17 07:58:19,521 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-17 07:58:19,521 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-17 07:58:19,521 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-17 07:58:19,521 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-17 07:58:19,522 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-17 07:58:19,522 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-17 07:58:19,522 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-17 07:58:19,522 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-17 07:58:19,522 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-17 07:58:19,522 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-17 07:58:19,522 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-17 07:58:19,522 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-17 07:58:19,522 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-17 07:58:19,522 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-17 07:58:19,522 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-17 07:58:19,522 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-17 07:58:19,543 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-17 07:58:19,543 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-17 07:58:19,543 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-17 07:58:19,543 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-17 08:46:08,650 - OptimizationTest - INFO - キャッシング機構テスト開始
+2026-05-17 08:46:08,651 - OptimizationTest - INFO - 検索実行: '機械学習とは'
+2026-05-17 08:46:08,651 - OptimizationTest - INFO - 検索実行: '医療過誤訴訟'
+2026-05-17 08:46:08,651 - OptimizationTest - INFO - 検索実行: 'COVID-19ワクチン'
+2026-05-17 08:46:08,651 - OptimizationTest - INFO - 検索実行: '機械学習とは'
+2026-05-17 08:46:08,651 - OptimizationTest - INFO - キャッシング機構テスト完了: キャッシュ統計: 総クエリ=4, ヒット=1, ミス=3, ヒット率=25.0%
+2026-05-17 08:46:08,652 - OptimizationTest - INFO - パフォーマンス最適化テスト開始
+2026-05-17 08:46:08,652 - OptimizationTest - INFO - パフォーマンス最適化テスト開始
+2026-05-17 08:46:08,654 - OptimizationTest - INFO - パフォーマンステスト完了: 同期=0.01ms, 非同期=0.78ms
+2026-05-17 08:46:08,654 - OptimizationTest - INFO - パフォーマンステスト完了: 同期=0.01ms, 非同期=0.78ms
+2026-05-17 08:46:08,655 - OptimizationTest - INFO - エラー処理テスト開始
+2026-05-17 08:46:08,655 - OptimizationTest - INFO - エラー処理テスト開始
+2026-05-17 08:46:08,655 - OptimizationTest - INFO - エラー処理テスト開始
+2026-05-17 08:46:08,655 - OptimizationTest - DEBUG - デバッグログメッセージ
+2026-05-17 08:46:08,655 - OptimizationTest - DEBUG - デバッグログメッセージ
+2026-05-17 08:46:08,655 - OptimizationTest - DEBUG - デバッグログメッセージ
+2026-05-17 08:46:08,655 - OptimizationTest - INFO - 情報ログメッセージ
+2026-05-17 08:46:08,655 - OptimizationTest - INFO - 情報ログメッセージ
+2026-05-17 08:46:08,655 - OptimizationTest - INFO - 情報ログメッセージ
+2026-05-17 08:46:08,655 - OptimizationTest - WARNING - 警告ログメッセージ
+2026-05-17 08:46:08,655 - OptimizationTest - WARNING - 警告ログメッセージ
+2026-05-17 08:46:08,655 - OptimizationTest - WARNING - 警告ログメッセージ
+2026-05-17 08:46:08,656 - OptimizationTest - ERROR - エラーログメッセージ
+2026-05-17 08:46:08,656 - OptimizationTest - ERROR - エラーログメッセージ
+2026-05-17 08:46:08,656 - OptimizationTest - ERROR - エラーログメッセージ
+2026-05-17 08:46:08,656 - OptimizationTest - INFO - エラーハンドラテスト開始
+2026-05-17 08:46:08,656 - OptimizationTest - INFO - エラーハンドラテスト開始
+2026-05-17 08:46:08,656 - OptimizationTest - INFO - エラーハンドラテスト開始
+2026-05-17 08:46:08,672 - OptimizationTest - ERROR - ValueErrorが発生しました (テスト操作)
+2026-05-17 08:46:08,672 - OptimizationTest - ERROR - ValueErrorが発生しました (テスト操作)
+2026-05-17 08:46:08,672 - OptimizationTest - ERROR - ValueErrorが発生しました (テスト操作)
+2026-05-17 08:46:08,672 - OptimizationTest - DEBUG - トレース情報:
+Traceback (most recent call last):
+  File "/home/abemc/project_root/tests/test_optimization_phase4.py", line 203, in test_error_handling
+    raise ValueError("テスト用エラーメッセージ")
+ValueError: テスト用エラーメッセージ
+
+2026-05-17 08:46:08,672 - OptimizationTest - DEBUG - トレース情報:
+Traceback (most recent call last):
+  File "/home/abemc/project_root/tests/test_optimization_phase4.py", line 203, in test_error_handling
+    raise ValueError("テスト用エラーメッセージ")
+ValueError: テスト用エラーメッセージ
+
+2026-05-17 08:46:08,672 - OptimizationTest - DEBUG - トレース情報:
+Traceback (most recent call last):
+  File "/home/abemc/project_root/tests/test_optimization_phase4.py", line 203, in test_error_handling
+    raise ValueError("テスト用エラーメッセージ")
+ValueError: テスト用エラーメッセージ
+
+2026-05-17 08:46:08,673 - OptimizationTest - INFO - エラー処理テスト完了
+2026-05-17 08:46:08,673 - OptimizationTest - INFO - エラー処理テスト完了
+2026-05-17 08:46:08,673 - OptimizationTest - INFO - エラー処理テスト完了
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - ロギング永続化テスト開始
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - テストログエントリ 1
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - テストログエントリ 2
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - テストログエントリ 3
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-17 08:46:08,674 - OptimizationTest - INFO - テストログエントリ 4
+2026-05-17 08:46:08,675 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-17 08:46:08,675 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-17 08:46:08,675 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-17 08:46:08,675 - OptimizationTest - INFO - テストログエントリ 5
+2026-05-17 08:46:08,675 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-17 08:46:08,675 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-17 08:46:08,675 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
+2026-05-17 08:46:08,675 - OptimizationTest - INFO - ログ履歴をエクスポート: /home/abemc/project_root/logs/test_export.json
