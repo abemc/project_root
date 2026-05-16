@@ -1,0 +1,1 @@
+移動: プロジェクト整理の一環として `models/fine_tuned_model/` に配置

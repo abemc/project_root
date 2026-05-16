@@ -1,0 +1,34 @@
+flowchart LR
+    subgraph "Day 0-7 Prompt Optimization"
+        A1["User Feedback<br/>~100 samples"] -->|Extract Patterns| A2["Prompt A/B Test"]
+        A2 -->|Best Prompt| A3["Quality +5-10%"]
+    end
+    
+    subgraph "Day 8-14 Parameter Tuning"
+        B1["Feedback<br/>~500 samples"] -->|Error Analysis| B2["Adjust Parameters<br/>temp, top-k, top-p"]
+        B2 -->|Expand Corpus| B3["Quality +3-5%"]
+    end
+    
+    subgraph "Day 15-30 Micro Fine-tuning"
+        C1["Feedback Dataset<br/>Auto-generated"] -->|LoRA Training| C2["Update Model"]
+        C2 -->|Checkpoint Save| C3["Quality +10-20%"]
+    end
+    
+    subgraph "Day 31+ Continuous Improvement"
+        D1["Monitoring"] -->|Monthly KPI| D2["Evaluate Performance"]
+        D2 -->|Improvement Plan| D3["+3-5% per month"]
+        D3 -->|Feedback Loop| D1
+    end
+    
+    A3 --> B1
+    B3 --> C1
+    C3 --> D1
+    
+    style A1 fill:#e3f2fd
+    style A3 fill:#c8e6c9
+    style B1 fill:#fff3e0
+    style B3 fill:#c8e6c9
+    style C1 fill:#f3e5f5
+    style C3 fill:#c8e6c9
+    style D1 fill:#fff9c4
+    style D3 fill:#c8e6c9

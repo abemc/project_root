@@ -1,0 +1,42 @@
+---
+id: 54ed4bf9-1433-4614-ac50-866da6005a63
+---
+stateDiagram-v2
+    [*] --> Initialize
+    
+    Initialize --> FeedbackCollection: Ready
+    
+    FeedbackCollection --> Analysis
+    Analysis --> PromptOptimization
+    PromptOptimization --> Testing
+    Testing --> Evaluation
+    
+    Evaluation --> Decision1
+    Decision1 --> Day8: Success
+    Decision1 --> FeedbackCollection: Retry
+    
+    Day8 --> ParameterTuning
+    ParameterTuning --> ErrorAnalysis
+    ErrorAnalysis --> AdjustParams
+    AdjustParams --> ExpandCorpus
+    ExpandCorpus --> Eval2
+    
+    Eval2 --> Decision2
+    Decision2 --> Day15: Success
+    Decision2 --> ParameterTuning: Retry
+    
+    Day15 --> AutoTraining
+    AutoTraining --> LoRA
+    LoRA --> SaveCheckpoint
+    SaveCheckpoint --> Eval3
+    
+    Eval3 --> Decision3
+    Decision3 --> Continuous: Success
+    Decision3 --> Day15: Retry
+    
+    Continuous --> Monitor
+    Monitor --> Monthly
+    Monthly --> Decision4
+    Decision4 --> Monitor: Continue
+    Decision4 --> Rollback: Degrade
+    Rollback --> Monitor: Restore
