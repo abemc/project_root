@@ -1,0 +1,62 @@
+---
+id: 1c3c0293-a82f-4800-8587-a22f57fa1aad
+---
+flowchart TB
+    subgraph "Dependencies"
+        direction LR
+        
+        subgraph "必須コンポーネント"
+            C1["1. LLM推論<br/>src/model.py"]
+            C2["2. フィードバック<br/>feedback_manager.py"]
+            C3["3. 改善提案<br/>prompt_optimizer.py"]
+            C4["4. メトリクス<br/>metric_tracker.py"]
+            C5["5. RAG統合<br/>src/rag/"]
+            C6["6. マルチモーダル<br/>src/multimodal/"]
+            
+            style C1 fill:#ffcdd2
+            style C2 fill:#ffcdd2
+            style C3 fill:#ffcdd2
+            style C4 fill:#ffcdd2
+            style C5 fill:#c8e6c9
+            style C6 fill:#c8e6c9
+        end
+        
+        subgraph "重要コンポーネント"
+            C7["ロールバック機構"]
+            C8["ダッシュボード"]
+            C9["監査ログ"]
+            
+            style C7 fill:#fff9c4
+            style C8 fill:#fff9c4
+            style C9 fill:#fff9c4
+        end
+        
+        subgraph "判定基準"
+            J1["🔴 必須9項目"]
+            J2["🟡 重要3項目"]
+            
+            C1 -.->|All required| J1
+            C2 -.->|for autonomy| J1
+            C3 -.->|All required| J1
+            C4 -.->|for autonomy| J1
+            C5 -.->|Optional| J2
+            C6 -.->|Optional| J2
+            
+            style J1 fill:#e3f2fd
+            style J2 fill:#f3e5f5
+        end
+    end
+    
+    subgraph "System Status"
+        S1["✅ Is Autonomous?"]
+        S2["9/9 Required = YES"]
+        S3["&lt;9/9 = NO"]
+        
+        J1 --> S1
+        S1 --> S2
+        S1 --> S3
+        
+        style S1 fill:#e8f5e9
+        style S2 fill:#a5d6a7
+        style S3 fill:#ef9a9a
+    end
