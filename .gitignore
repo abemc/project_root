@@ -7,3 +7,6 @@ config/onenote_settings.json
 __pycache__/
 *.py[cod]
 .pytest_cache/
+
+# Generated benchmark/test outputs
+results/
