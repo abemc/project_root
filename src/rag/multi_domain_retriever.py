@@ -12,7 +12,7 @@ import json
 import torch
 from transformers import AutoTokenizer, AutoModel
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any, Callable
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 import logging
@@ -128,13 +128,46 @@ class DomainIndex:
         self.meta.extend(metadata)
         logger.info(f"Added {len(embeddings)} documents to domain '{self.domain}'")
     
-    def search(self, query_embedding: np.ndarray, top_k: int = 5) -> Tuple[List[int], List[float]]:
+    def search(self, query_embedding: np.ndarray, top_k: int = 5, filters: Optional[Dict[str, Any]] = None) -> Tuple[List[int], List[float]]:
         """ドメイン別インデックスを検索"""
         if self.index.ntotal == 0:
             return [], []
-        
-        distances, indices = self.index.search(query_embedding.reshape(1, -1), min(top_k, self.index.ntotal))
-        return indices[0].tolist(), distances[0].tolist()
+        # when filters are provided, search a larger candidate set and then apply meta filtering
+        candidate_k = top_k * 5 if filters else top_k
+        candidate_k = min(self.index.ntotal, max(1, int(candidate_k)))
+
+        distances, indices = self.index.search(query_embedding.reshape(1, -1), int(candidate_k))
+
+        if not filters:
+            return indices[0].tolist()[:top_k], distances[0].tolist()[:top_k]
+
+        # apply metadata filters
+        results_idx = []
+        results_dist = []
+
+        def meta_matches(meta_entry: dict, filters: dict) -> bool:
+            for k, v in filters.items():
+                if k not in meta_entry:
+                    return False
+                mv = meta_entry.get(k)
+                if isinstance(v, (list, tuple, set)):
+                    if mv not in v:
+                        return False
+                else:
+                    if mv != v:
+                        return False
+            return True
+
+        for idx, dist in zip(indices[0], distances[0]):
+            if idx < 0 or idx >= len(self.meta):
+                continue
+            if meta_matches(self.meta[idx], filters):
+                results_idx.append(int(idx))
+                results_dist.append(float(dist))
+            if len(results_idx) >= top_k:
+                break
+
+        return results_idx, results_dist
     
     def get_size(self) -> int:
         """インデックスサイズを取得"""
@@ -149,30 +182,37 @@ class MultiDomainRetriever:
     複数ドメインからの効率的な情報検索を実現します。
     """
     
-    def __init__(self, default_domains: Optional[List[str]] = None):
+    def __init__(self, default_domains: Optional[List[str]] = None, embed_fn: Optional[Callable[[str], "np.ndarray"]]=None):
         """
         初期化
         
         Args:
             default_domains: デフォルトドメインリスト
         """
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        logger.info(f"MultiDomainRetriever is using device: {self.device}")
-        
-        # 埋め込みモデルをロード
-        logger.info("Loading local embedding model (bge-m3, safetensors)...")
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            "BAAI/bge-m3",
-            trust_remote_code=True,
-        )
-        self.model = AutoModel.from_pretrained(
-            "BAAI/bge-m3",
-            use_safetensors=True,
-            trust_remote_code=True,
-        ).to(self.device)
-        logger.info("Local embedding model loaded successfully.")
-        
-        self.embedding_dim = 1024
+        # allow injecting a custom embed function for tests or light-weight environments
+        self._embed_fn = embed_fn
+        if self._embed_fn is None:
+            self.device = "cuda" if torch.cuda.is_available() else "cpu"
+            logger.info(f"MultiDomainRetriever is using device: {self.device}")
+            # 埋め込みモデルをロード
+            logger.info("Loading local embedding model (bge-m3, safetensors)...")
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                "BAAI/bge-m3",
+                trust_remote_code=True,
+            )
+            self.model = AutoModel.from_pretrained(
+                "BAAI/bge-m3",
+                use_safetensors=True,
+                trust_remote_code=True,
+            ).to(self.device)
+            logger.info("Local embedding model loaded successfully.")
+            self.embedding_dim = 1024
+        else:
+            # when embed_fn is injected, avoid heavy model loading
+            self.device = "cpu"
+            logger.info("Using injected embedding function; skipping model load.")
+            # assume embedding dim of injected fn is 1024 unless caller provides vectors of different size
+            self.embedding_dim = 1024
         
         # ドメイン別インデックスを管理
         self.domain_indices: Dict[str, DomainIndex] = {}
@@ -190,6 +230,10 @@ class MultiDomainRetriever:
     
     def embed_query(self, text: str) -> np.ndarray:
         """クエリを埋め込みベクトルに変換"""
+        if self._embed_fn is not None:
+            v = self._embed_fn(text)
+            return v.astype('float32')
+
         inputs = self.tokenizer(text, return_tensors="pt").to(self.device)
         with torch.no_grad():
             outputs = self.model(**inputs)
@@ -199,6 +243,10 @@ class MultiDomainRetriever:
     
     def embed_documents(self, texts: List[str]) -> np.ndarray:
         """ドキュメントテキストを埋め込みベクトルに変換"""
+        if self._embed_fn is not None:
+            embs = [self._embed_fn(t).astype('float32') for t in texts]
+            return np.array(embs)
+
         embeddings = []
         for text in texts:
             inputs = self.tokenizer(text, return_tensors="pt", truncation=True, max_length=512).to(self.device)
@@ -213,7 +261,8 @@ class MultiDomainRetriever:
         self,
         query: str,
         domain: str,
-        top_k: int = 5
+        top_k: int = 5,
+        filters: Optional[Dict[str, Any]] = None
     ) -> RetrievalResult:
         """
         特定ドメインから検索
@@ -238,7 +287,12 @@ class MultiDomainRetriever:
         query_embedding = self.embed_query(query)
         
         # ドメイン別インデックスを検索
-        indices, scores = domain_index.search(query_embedding, top_k)
+        # pass filters through to DomainIndex.search if provided
+        try:
+            indices, scores = domain_index.search(query_embedding, top_k, filters=filters)
+        except TypeError:
+            # backward-compatible call if DomainIndex.search doesn't accept filters
+            indices, scores = domain_index.search(query_embedding, top_k)
         
         # メタデータを取得
         results = []

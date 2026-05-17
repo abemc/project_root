@@ -1,106 +1,86 @@
-import json
-import chromadb
-from chromadb.utils import embedding_functions
-from pathlib import Path
-import sys
+"""Ingest pipeline: chunking, normalization, embedding and upsert into EmbedStore
 
-# ============================================================
-# RAG用データベース構築スクリプト
-# dataset.jsonl を読み込み、ChromaDB (Vector DB) に保存します。
-# ============================================================
+Provides simple functions to prepare documents and push them into an EmbedStore (FaissStore).
+"""
+from typing import List, Dict, Optional
+import re
+from datetime import datetime
 
-# パス設定 (src/rag/ingest.py から見たプロジェクトルート)
-ROOT = Path(__file__).resolve().parents[2]
-CORPUS_ROOT = ROOT / "corpus"
-DATASET_PATH = CORPUS_ROOT / "dataset.jsonl"
-CHROMA_DB_DIR = CORPUS_ROOT / "chroma_db"
-COLLECTION_NAME = "rag_knowledge_base"
+from .embed_store import FaissStore
 
-# 使用する埋め込みモデル
-# 日本語・多言語対応のモデルを指定 (初回実行時に自動ダウンロードされます)
-EMBEDDING_MODEL_NAME = "intfloat/multilingual-e5-small"
 
-def ingest():
-    print(f"Dataset:   {DATASET_PATH}")
-    print(f"ChromaDB:  {CHROMA_DB_DIR}")
-    
-    if not DATASET_PATH.exists():
-        print(f"[ERROR] Dataset not found: {DATASET_PATH}")
-        print("Please run 'python -m src.corpus.create_dataset' first.")
-        return
+def normalize_text(text: str) -> str:
+    text = text.replace('\r', ' ').replace('\n', ' ')
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
 
-    # 1. ChromaDB クライアントの初期化 (永続化設定)
-    print("Initializing ChromaDB Client...")
-    client = chromadb.PersistentClient(path=str(CHROMA_DB_DIR))
 
-    # 2. 埋め込み関数の設定 (SentenceTransformersを使用)
-    print(f"Loading embedding model: {EMBEDDING_MODEL_NAME} ...")
-    emb_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
-        model_name=EMBEDDING_MODEL_NAME
-    )
+def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> List[str]:
+    words = text.split()
+    if len(words) <= chunk_size:
+        return [text]
+    chunks = []
+    i = 0
+    while i < len(words):
+        chunk = ' '.join(words[i:i+chunk_size])
+        chunks.append(chunk)
+        i += chunk_size - overlap
+    return chunks
 
-    # 3. コレクションの取得または作成
-    #    get_or_create_collection は既存ならロード、なければ作成します
-    collection = client.get_or_create_collection(
-        name=COLLECTION_NAME,
-        embedding_function=emb_fn
-    )
 
-    print("Start indexing documents...")
-    
-    batch_size = 100
-    batch_docs = []
-    batch_metas = []
-    batch_ids = []
-    total_count = 0
+def ingest_documents(
+    documents: List[Dict],
+    store: Optional[FaissStore] = None,
+    chunk_size: int = 500,
+    overlap: int = 50
+) -> List[str]:
+    """Ingest a list of documents into the provided FaissStore.
 
-    with open(DATASET_PATH, "r", encoding="utf-8") as f:
-        for i, line in enumerate(f):
-            try:
-                data = json.loads(line)
-                text = data.get("text", "").strip()
-                meta = data.get("meta", {})
-                
-                # ソース情報などがなければデフォルト値を設定
-                if "source" not in meta:
-                    meta["source"] = "unknown"
-                
-                if not text:
-                    continue
+    documents: list of {"id":..., "text":..., ...}
+    Returns list of upserted ids
+    """
+    if store is None:
+        store = FaissStore()
 
-                # ChromaDBへの登録用リストに追加
-                batch_docs.append(text)
-                batch_metas.append(meta)
-                batch_ids.append(f"doc_{i}")
+    to_upsert = []
+    for doc in documents:
+        doc_id = doc.get('id')
+        text = normalize_text(doc.get('text') or doc.get('content') or '')
+        chunks = chunk_text(text, chunk_size=chunk_size, overlap=overlap)
+        for ci, chunk in enumerate(chunks):
+            meta = dict(doc)
+            meta['text'] = chunk
+            meta['chunk_index'] = ci
+            # standardized metadata fields
+            meta['ingested_at'] = datetime.now().isoformat()
+            if 'created_at' not in meta:
+                meta['created_at'] = meta['ingested_at']
+            if 'domain' not in meta:
+                meta['domain'] = doc.get('domain') or 'general'
+            if 'tags' not in meta:
+                # allow older 'tag' field
+                if 'tag' in meta:
+                    meta['tags'] = [meta.pop('tag')]
+                else:
+                    meta['tags'] = []
+            # create unique id for chunk
+            if doc_id:
+                meta['id'] = f"{doc_id}__chunk__{ci}"
+            to_upsert.append(meta)
 
-                # バッチサイズに達したら登録 (upsert: 上書き保存)
-                if len(batch_docs) >= batch_size:
-                    collection.upsert(
-                        documents=batch_docs,
-                        metadatas=batch_metas,
-                        ids=batch_ids
-                    )
-                    total_count += len(batch_docs)
-                    print(f"Indexed {total_count} documents...", end="\r")
-                    
-                    batch_docs = []
-                    batch_metas = []
-                    batch_ids = []
+    # perform upsert in batches to leverage chunked add
+    ids = []
+    batch_size = 1024
+    for i in range(0, len(to_upsert), batch_size):
+        batch = to_upsert[i:i+batch_size]
+        ids.extend(store.upsert(batch, batch_size=256))
+    return ids
 
-            except json.JSONDecodeError:
-                continue
 
-    # 残りのデータを登録
-    if batch_docs:
-        collection.upsert(
-            documents=batch_docs,
-            metadatas=batch_metas,
-            ids=batch_ids
-        )
-        total_count += len(batch_docs)
-
-    print(f"\nCompleted! Total {total_count} documents stored in '{COLLECTION_NAME}'.")
-    print(f"DB Location: {CHROMA_DB_DIR}")
-
-if __name__ == "__main__":
-    ingest()
+def ingest_file_path(path: str, store: Optional[FaissStore] = None):
+    from pathlib import Path
+    p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError(path)
+    text = p.read_text(encoding='utf-8')
+    return ingest_documents([{"id": p.name, "text": text}], store=store)

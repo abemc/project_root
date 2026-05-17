@@ -20,6 +20,7 @@ from src.reliability.retry_manager import RetryManager
 from src.reliability.sla_monitor import SLAMonitor
 from src.reliability.failover_strategy import FailoverStrategy
 from .web_search import search_web_tool
+from src.rag.date_utils import parse_relative_date
 import json
 import datetime
 import time
@@ -272,6 +273,17 @@ class RAGAgent:
 
     def _handle_search_web(self, query=None):
         q = query or self.question
+        # 相対日付の検出と正規化（例: '昨日' -> '2026-05-16'）
+        try:
+            normalized_q, interpreted_date = parse_relative_date(q)
+            if interpreted_date:
+                logger.info(f"Interpreted relative date for query: {interpreted_date}")
+                q = normalized_q
+                # 記録して UI/ログで表示できるようにする
+                self.state["interpreted_date"] = interpreted_date
+        except Exception:
+            # パーサ失敗は致命的ではないのでログに留める
+            logger.debug("Date parsing failed or not available for query")
         
         # キャッシュチェック
         cached_docs = self.cache_optimizer.get(q, namespace="search_web")
@@ -326,6 +338,27 @@ class RAGAgent:
         success = False
         action = "unknown"
         try:
+            # 前処理: 相対日付を検出したら自動で web 検索を実行して docs を注入する
+            try:
+                if os.getenv("RAG_ENABLE_DATE_PRESEARCH", "true").lower() == "true":
+                    norm_q, interpreted_date = parse_relative_date(self.question)
+                    if interpreted_date:
+                        logger.info(f"Auto-presearch due to interpreted date: {interpreted_date}")
+                        self.state["interpreted_date"] = interpreted_date
+                        # キャッシュ優先で検索実行
+                        cached = self.cache_optimizer.get(norm_q, namespace="search_web")
+                        if cached:
+                            self.state["current_docs"] = cached
+                        else:
+                            docs = search_web_tool(norm_q)
+                            reranked = self.reranker.rerank(norm_q, docs)
+                            self.state["current_docs"] = reranked
+                            self.cache_optimizer.set(norm_q, reranked, namespace="search_web")
+                        # ログに残す
+                        self._log_trace("preprocess", "auto_search_web", f"Auto searched web for date {interpreted_date}")
+            except Exception:
+                logger.debug("Date presearch disabled or failed")
+
             plan = self._plan_action()
             if not plan: return
             

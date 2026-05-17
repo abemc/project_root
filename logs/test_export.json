@@ -1,6 +1,6 @@
 [
   {
-    "timestamp": "2026-05-17T08:46:08.674494",
+    "timestamp": "2026-05-18T07:30:24.616140",
     "level": "INFO",
     "component": "OptimizationTest",
     "message": "ロギング永続化テスト開始",
@@ -8,7 +8,7 @@
     "duration_ms": null
   },
   {
-    "timestamp": "2026-05-17T08:46:08.674643",
+    "timestamp": "2026-05-18T07:30:24.616249",
     "level": "INFO",
     "component": "OptimizationTest",
     "message": "テストログエントリ 1",
@@ -16,7 +16,7 @@
     "duration_ms": null
   },
   {
-    "timestamp": "2026-05-17T08:46:08.674778",
+    "timestamp": "2026-05-18T07:30:24.616349",
     "level": "INFO",
     "component": "OptimizationTest",
     "message": "テストログエントリ 2",
@@ -24,7 +24,7 @@
     "duration_ms": null
   },
   {
-    "timestamp": "2026-05-17T08:46:08.674883",
+    "timestamp": "2026-05-18T07:30:24.616447",
     "level": "INFO",
     "component": "OptimizationTest",
     "message": "テストログエントリ 3",
@@ -32,7 +32,7 @@
     "duration_ms": null
   },
   {
-    "timestamp": "2026-05-17T08:46:08.675021",
+    "timestamp": "2026-05-18T07:30:24.616534",
     "level": "INFO",
     "component": "OptimizationTest",
     "message": "テストログエントリ 4",
@@ -40,7 +40,7 @@
     "duration_ms": null
   },
   {
-    "timestamp": "2026-05-17T08:46:08.675108",
+    "timestamp": "2026-05-18T07:30:24.616630",
     "level": "INFO",
     "component": "OptimizationTest",
     "message": "テストログエントリ 5",

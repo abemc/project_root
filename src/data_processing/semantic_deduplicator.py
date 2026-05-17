@@ -101,9 +101,17 @@ class SemanticDeduplicator:
         Returns:
             埋め込みベクトル
         """
-        # ハッシュベースの疑似ランダムベクトル生成
-        np.random.seed(hash(text) % (2**32))
-        return np.random.randn(dim).astype(np.float32)
+        # ハッシュベースの高速決定論的ベクトル生成（rng再初期化を避ける）
+        import hashlib
+
+        b = hashlib.sha256(text.encode('utf-8')).digest()
+        # 短いダイジェストを繰り返して必要長を満たす
+        repeat = (dim + len(b) - 1) // len(b)
+        data = (b * repeat)[:dim]
+        arr = np.frombuffer(data, dtype=np.uint8).astype(np.float32)
+        # 0-255 -> -1.0 .. 1.0 の範囲にスケーリング
+        vec = (arr / 127.5) - 1.0
+        return vec.astype(np.float32)
     
     def embed_texts(
         self,
@@ -146,26 +154,32 @@ class SemanticDeduplicator:
         """
         # 埋め込みを生成
         self.embed_texts(texts)
-        
+
         duplicates: Dict[str, List[Tuple[str, float]]] = defaultdict(list)
-        
-        # すべてのペア組み合わせを比較
+
         ids = list(self.embeddings.keys())
-        for i in range(len(ids)):
-            for j in range(i + 1, len(ids)):
-                id1, id2 = ids[i], ids[j]
-                vec1, vec2 = self.embeddings[id1], self.embeddings[id2]
-                
-                # コサイン類似度を計算
-                similarity = self.similarity_metric.cosine_similarity(vec1, vec2)
-                
+        if not ids:
+            return {}
+
+        # ベクトル行列を作成してコサイン類似度を高速計算
+        mat = np.stack([self.embeddings[i] for i in ids], axis=0)  # (n, d)
+        norms = np.linalg.norm(mat, axis=1, keepdims=True)
+        # avoid division by zero
+        norms[norms == 0] = 1.0
+        mat_norm = mat / norms
+        sim_matrix = np.dot(mat_norm, mat_norm.T)
+
+        n = sim_matrix.shape[0]
+        for i in range(n):
+            for j in range(i + 1, n):
+                similarity = float(sim_matrix[i, j])
+                # clamp to [0,1] to match legacy behavior and avoid numerical drift
+                similarity = max(0.0, min(1.0, similarity))
                 if similarity >= similarity_threshold:
-                    duplicates[id1].append((id2, similarity))
-                    duplicates[id2].append((id1, similarity))
-        
-        logger.info(
-            f"Detected {len(duplicates)} items with semantic duplicates"
-        )
+                    duplicates[ids[i]].append((ids[j], similarity))
+                    duplicates[ids[j]].append((ids[i], similarity))
+
+        logger.info(f"Detected {len(duplicates)} items with semantic duplicates (vectorized)")
         return dict(duplicates)
     
     def cluster_similar_items(
@@ -185,52 +199,50 @@ class SemanticDeduplicator:
         """
         # 埋め込みを生成
         self.embed_texts(texts)
-        
+
         self.clusters.clear()
         ids = list(self.embeddings.keys())
+        if not ids:
+            return []
+
+        mat = np.stack([self.embeddings[i] for i in ids], axis=0)  # (n, d)
+        norms = np.linalg.norm(mat, axis=1, keepdims=True)
+        norms[norms == 0] = 1.0
+        mat_norm = mat / norms
+
+        sim_matrix = np.dot(mat_norm, mat_norm.T)
+
         assigned = set()
         cluster_id_counter = 0
-        
-        for idx, seed_id in enumerate(ids):
-            if seed_id in assigned:
+        n = len(ids)
+
+        for i in range(n):
+            if ids[i] in assigned:
                 continue
-            
-            # 新しいクラスタを開始
+
+            # find all items similar to ids[i]
+            similar_idx = np.where(sim_matrix[i] >= similarity_threshold)[0]
+            similar_ids = [ids[k] for k in similar_idx if ids[k] not in assigned]
+
+            # create cluster
             cluster = SemanticDuplicateCluster(cluster_id=cluster_id_counter)
             cluster_id_counter += 1
-            
-            seed_vec = self.embeddings[seed_id]
-            cluster.items.append((seed_id, seed_vec))
-            assigned.add(seed_id)
-            
-            # 他のアイテムをクラスタに追加
-            for other_id in ids[idx + 1:]:
-                if other_id in assigned:
-                    continue
-                
-                other_vec = self.embeddings[other_id]
-                similarity = self.similarity_metric.cosine_similarity(
-                    seed_vec, other_vec
-                )
-                
-                if similarity >= similarity_threshold:
-                    cluster.items.append((other_id, other_vec))
-                    assigned.add(other_id)
-            
-            # クラスタ中心を計算
-            vectors = [vec for _, vec in cluster.items]
-            cluster.center = np.mean(vectors, axis=0).astype(np.float32)
-            
-            # 各アイテムの中心との類似度を計算
-            for item_id, item_vec in cluster.items:
-                similarity = self.similarity_metric.cosine_similarity(
-                    item_vec, cluster.center
-                )
-                cluster.similarity_scores[item_id] = similarity
-            
+
+            vectors = []
+            for sid in similar_ids:
+                vec = self.embeddings[sid]
+                cluster.items.append((sid, vec))
+                assigned.add(sid)
+                vectors.append(vec)
+
+            if vectors:
+                cluster.center = np.mean(vectors, axis=0).astype(np.float32)
+                for item_id, item_vec in cluster.items:
+                    cluster.similarity_scores[item_id] = self.similarity_metric.cosine_similarity(item_vec, cluster.center)
+
             self.clusters.append(cluster)
-        
-        logger.info(f"Formed {len(self.clusters)} semantic clusters")
+
+        logger.info(f"Formed {len(self.clusters)} semantic clusters (vectorized)")
         return self.clusters
     
     def detect_outliers_in_cluster(

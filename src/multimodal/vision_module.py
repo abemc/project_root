@@ -78,11 +78,17 @@ class VisionAnalyzer:
                 from transformers import CLIPProcessor, CLIPModel
                 self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
                 self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
-        
+
         except ImportError:
             logger.warning("Transformers not installed. Vision module will use basic image processing.")
             self.model = None
             self.processor = None
+        except Exception as e:
+            # Catch runtime issues like torch version restrictions; fall back to non-model mode
+            logger.warning(f"Vision model load failed ({e}). Falling back to basic mode.")
+            self.model = None
+            self.processor = None
+            self._load_failed = True
     
     def analyze_image(
         self,

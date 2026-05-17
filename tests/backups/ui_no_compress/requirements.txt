@@ -31,7 +31,13 @@ pydantic>=2.0.0
 pytest>=7.4.0
 pytest-asyncio>=0.21.0
 beautifulsoup4>=4.12.0
+ddgs
 plotly>=5.0.0
 redis>=4.6.0
 fastapi>=0.95.0
 uvicorn>=0.22.0
+
+# date parsing for relative dates in queries (日本語対応)
+dateparser>=1.1.1
+requests>=2.31.0
+beautifulsoup4>=4.12.0

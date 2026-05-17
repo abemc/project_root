@@ -1,8 +1,8 @@
 {
   "backup_id": "ui_no_compress",
-  "timestamp": "2026-05-17T08:50:05.847972",
+  "timestamp": "2026-05-18T07:34:44.537687",
   "version": "unknown",
-  "total_size": 32849,
+  "total_size": 34198,
   "items": [
     {
       "source_path": ".env",
@@ -15,8 +15,8 @@
     {
       "source_path": ".github",
       "relative_path": ".github",
-      "file_count": 5,
-      "total_size": 29355,
+      "file_count": 6,
+      "total_size": 30577,
       "excluded": 0,
       "item_type": "folder"
     },
@@ -32,7 +32,7 @@
       "source_path": "requirements.txt",
       "relative_path": "requirements.txt",
       "file_count": 1,
-      "total_size": 796,
+      "total_size": 923,
       "excluded": 0,
       "item_type": "file"
     },

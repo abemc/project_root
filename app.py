@@ -3,6 +3,7 @@ import sys
 import tempfile
 from pathlib import Path
 from datetime import datetime
+from src.rag.date_utils import parse_relative_date
 
 import streamlit as st
 import logging
@@ -141,6 +142,17 @@ def transcribe_audio_bytes(audio_bytes: bytes, model_size: str = "tiny") -> str:
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Streamlit 実行時の詳細ログ出力先（UIの問題解析用）
+RUN_LOG_PATH = Path(__file__).resolve().parent / "logs" / "streamlit_run.log"
+
+def _append_run_log(msg: str) -> None:
+    try:
+        RUN_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with open(RUN_LOG_PATH, "a", encoding="utf-8") as fh:
+            fh.write(f"{datetime.now().isoformat()} - {msg}\n")
+    except Exception:
+        logger.exception("failed to write run log")
+
 # Streamlitのページ構成を設定
 st.set_page_config(page_title="RAG Agent", layout="wide")
 
@@ -202,6 +214,73 @@ def _fetch_url_text(url: str, max_chars: int = 4000) -> str:
         return result[:max_chars] + ("…（以下省略）" if len(result) > max_chars else "")
     except Exception as e:
         return f"[URLの取得に失敗しました: {e}]"
+
+
+def _extract_game_score_from_url(url: str) -> dict | None:
+    """指定URLから試合の最終スコアを抽出する。成功時は辞書を返す。
+    返り値例: {'teams': [{'name':'北海道日本ハムファイターズ','score':5}, {'name':'埼玉西武','score':4}], 'url': url}
+    """
+    try:
+        if not _is_safe_url(url):
+            return None
+        import requests as _requests
+        from bs4 import BeautifulSoup as _BS
+        headers = {"User-Agent": "Mozilla/5.0"}
+        resp = _requests.get(url, headers=headers, timeout=15)
+        resp.raise_for_status()
+        soup = _BS(resp.text, "html.parser")
+
+        # Yahoo のスコアテーブル検出 (class 'bb-gameScoreTable') を優先
+        table = soup.find('table', class_='bb-gameScoreTable')
+        if table:
+            # ヘッダ行から「計」の列Indexを探す
+            header = None
+            for tr in table.find_all('tr'):
+                ths = [th.get_text(strip=True) for th in tr.find_all('th')]
+                if '計' in ths:
+                    header = ths
+                    break
+            if header:
+                idx = header.index('計')
+                teams = []
+                for tr in table.find_all('tr'):
+                    cells = [c.get_text(strip=True) for c in tr.find_all(['th','td'])]
+                    if len(cells) > idx:
+                        name = cells[0]
+                        try:
+                            score = int(cells[idx])
+                        except Exception:
+                            continue
+                        teams.append({'name': name, 'score': score})
+                if teams:
+                    return {'teams': teams, 'url': url}
+
+        # 汎用的なボックススコア検出: '計'と'安'が近くにある構造を探索
+        text = soup.get_text('\n')
+        if '計' in text and '安' in text:
+            # 簡易パース: 行単位で '計' を含む行を探し、その前後の行でチーム名と数値を探す
+            lines = [l.strip() for l in text.splitlines() if l.strip()]
+            for i,l in enumerate(lines):
+                if l.startswith('計') or l == '計':
+                    # 前後にチーム行があると仮定
+                    candidates = []
+                    for j in range(max(0,i-4), min(len(lines), i+6)):
+                        candidates.append(lines[j])
+                    # 数字を含む行を抽出
+                    import re
+                    parsed = []
+                    for c in candidates:
+                        m = re.findall(r"(\D{1,30}?)(\d+)\s*$", c)
+                        if m:
+                            name = m[0][0].strip()
+                            score = int(m[0][1])
+                            parsed.append({'name': name, 'score': score})
+                    if parsed:
+                        return {'teams': parsed, 'url': url}
+
+    except Exception:
+        return None
+    return None
 
 
 def _extract_urls(text: str) -> list[str]:
@@ -1389,6 +1468,44 @@ def _init_display_session_state() -> None:
             st.session_state[key] = value
 
 
+def _extract_conclusion_and_sources(text: str) -> dict:
+    """LLMの自由形式テキストから「結論」と「出典リスト」を切り出す。
+    戻り値: {"conclusion": str, "sources": [{"id":..., "text":...}, ...], "raw": text}
+    ロバスト性を重視し、最初の非空行を結論と見なす。出典は [web_n] を含む行を抽出。
+    """
+    lines = [l.strip() for l in text.splitlines()]
+    # 結論: 最初の連続する短い段落（最大3行）
+    conclusion_lines = []
+    idx = 0
+    while idx < len(lines) and (not lines[idx]):
+        idx += 1
+    # collect up to 3 lines or until blank
+    while idx < len(lines) and len(conclusion_lines) < 3 and lines[idx]:
+        conclusion_lines.append(lines[idx])
+        idx += 1
+    conclusion = "\n".join(conclusion_lines).strip()
+
+    # sources: find lines containing [web_ or web_\d or URL patterns
+    sources = []
+    import re
+    src_pattern = re.compile(r"\[?(web_\d+)\]?|https?://[^\s]+")
+    for l in lines:
+        for m in src_pattern.finditer(l):
+            src = m.group(0)
+            # extract surrounding short snippet
+            snippet = l
+            sources.append({"id": src, "text": snippet})
+
+    return {"conclusion": conclusion or text[:200], "sources": sources, "raw": text}
+
+
+def _store_assistant_message(content: str) -> None:
+    """Parse assistant content and append structured message to session_state.messages"""
+    parsed = _extract_conclusion_and_sources(content)
+    msg = {"role": "assistant", "content": content, "conclusion": parsed["conclusion"], "sources": parsed["sources"]}
+    st.session_state.messages.append(msg)
+
+
 def _render_voice_input_section() -> None:
     """音声入力UIを表示し、文字起こし結果をセッション状態へ反映する。"""
     if not faster_whisper_available:
@@ -1470,11 +1587,49 @@ def _build_query_with_context(query: str) -> str:
         )
 
     if url_context or weather_context:
-        return (
+        base_prompt = (
             f"{query}{url_context}{weather_context}\n\n"
             "【重要】上記の実際のページ内容のみに基づいて日本語で回答してください。"
-            "ページ内容や天気データに書かれていないことは推測・創作せず、「提供データには記載がありません」と答えてください。"
+            "ページ内容や天気データに書かれていないことは推測・創作せず、『提供データには記載がありません』と答えてください。"
         )
+    else:
+        base_prompt = query
+
+    # --- 相対日付の事前検索（自動検索が有効な場合） ---
+    try:
+        do_auto = os.getenv("RAG_ENABLE_DATE_PRESEARCH", "true").lower() == "true" or st.session_state.get("ui_auto_search")
+    except Exception:
+        do_auto = os.getenv("RAG_ENABLE_DATE_PRESEARCH", "true").lower() == "true"
+
+    try:
+        norm_q, interpreted_date = parse_relative_date(query)
+        if interpreted_date and do_auto:
+            # search_web_tool を安全にインポートして呼び出す
+            try:
+                from src.rag.web_search import search_web_tool as _search_web_tool
+                docs = _search_web_tool(norm_q)
+            except Exception:
+                docs = []
+
+            if docs:
+                # プロンプトに貼る要約ブロックを作成
+                preview_lines = [f"【自動検索結果 (解釈日: {interpreted_date})】"]
+                for d in docs[:3]:
+                    tid = d.get("id") or d.get("url") or "-"
+                    text = str(d.get("text", ""))
+                    text_snip = text.replace('\n', ' ')[:300]
+                    preview_lines.append(f"- [{tid}] {text_snip}")
+                preview_block = "\n".join(preview_lines) + "\n\n"
+                # セッションにも保存してUI表示可能にする
+                try:
+                    st.session_state.presearch_results = docs
+                except Exception:
+                    pass
+                return base_prompt + "\n\n" + preview_block
+    except Exception:
+        pass
+
+    return base_prompt
 
     return query
 
@@ -1482,10 +1637,7 @@ def _build_query_with_context(query: str) -> str:
 def _generate_assistant_response(query: str) -> None:
     """クエリに対する回答を生成し、会話履歴へ追加する。"""
     if not llm_available:
-        st.session_state.messages.append({
-            "role": "assistant",
-            "content": "LLMモジュールが利用できません。設定を確認してください。"
-        })
+        _store_assistant_message("LLMモジュールが利用できません。設定を確認してください。")
         return
 
     system_prompt = """あなたは日本語専用のAIアシスタントです。
@@ -1515,33 +1667,120 @@ def _generate_assistant_response(query: str) -> None:
     try:
         with st.spinner("🤔 回答を生成中..."):
             prompt = _build_query_with_context(query)
+            # 事前検索結果がある場合はLLMへ明示的に参照させる指示を追加
+            try:
+                pre = st.session_state.get("presearch_results")
+                # 先に自動抽出でスコアが取れれば直接応答させる（LLM 呼出しをスキップ）
+                if pre:
+                    for d in pre[:5]:
+                        src = d.get('meta', {}).get('source','')
+                        # meta.sourceにuddg経由のURLがあればデコード
+                        url = None
+                        try:
+                            if 'uddg=' in src:
+                                import urllib.parse
+                                part = src.split('uddg=')[-1]
+                                url = urllib.parse.unquote(part.split('&')[0])
+                            else:
+                                # meta.source そのものがURLかもしれない
+                                if src.startswith('http'):
+                                    url = src
+                        except Exception:
+                            url = None
+
+                        if url:
+                            score_info = _extract_game_score_from_url(url)
+                            if score_info and isinstance(score_info.get('teams'), list):
+                                # チーム名に日本ハムが含まれるか確認
+                                teams = score_info['teams']
+                                nh = None
+                                other = None
+                                for t in teams:
+                                    if '日本ハム' in t['name'] or 'ファイターズ' in t['name']:
+                                        nh = t
+                                    else:
+                                        other = t
+                                if nh and other:
+                                    # 勝敗判定
+                                    if nh['score'] > other['score']:
+                                        result_text = f"結論: 北海道日本ハムファイターズは{nh['score']}-{other['score']}で勝利しました。"
+                                    elif nh['score'] < other['score']:
+                                        result_text = f"結論: 北海道日本ハムファイターズは{nh['score']}-{other['score']}で敗れました。"
+                                    else:
+                                        result_text = f"結論: 試合は引き分け（{nh['score']}-{other['score']}）でした。"
+                                    # 出典を明記して応答を保存
+                                    src_id = d.get('id') or d.get('url') or url
+                                    message = result_text + f"\n出典: [{src_id}] {url}\n補足: 詳細は出典ページのbox scoreを参照してください。"
+                                    _store_assistant_message(message)
+                                    st.session_state.attached_file_contents = []
+                                    return
+                if pre:
+                    directive_lines = [
+                        "【注意：検索結果を参照して簡潔に答えること】以下は自動で取得した外部検索結果です。回答を作る際、必ずこれらを参照してください。出力形式に厳密に従ってください：",
+                        "1) 結論（Qに対する答え）を最初に1〜2行で簡潔に述べる。",
+                        "2) 根拠を箇条書きで最大3件示す。各項目は必ず出典IDを `[web_n]` の形式で明記し、そのURLか簡潔な説明を添える。",
+                        "3) 補足は1〜2文に留める。不要な背景説明は避ける。",
+                        "4) すべて日本語で答えること。",
+                    ]
+                    # Few-shot examples to guide the LLM output format
+                    directive_lines.append("\n【例（良い出力）】\n結論: 日本ハムは昨日の試合に勝利しました（スコア 4-3）。\n- [web_3] 西武 vs 日本ハ 試合記事（速報）: 8回にレイエスの本塁打で勝ち越し\n補足: 公式サイトの成績ページで詳細を確認してください。")
+                    directive_lines.append("\n【例（悪い出力）】\n昨日の試合について長い歴史や選手のプロフィールを詳述する（結論が不明瞭）。出典を示さない。")
+                    for d in pre[:5]:
+                        tid = d.get("id") or d.get("url") or "-"
+                        text_snip = (str(d.get("text","")) or "").replace("\n"," ")[:300]
+                        directive_lines.append(f"- [{tid}] {text_snip}")
+                    directive = "\n".join(directive_lines) + "\n\n"
+                    prompt = directive + prompt
+            except Exception:
+                pass
             chat_history = [
                 {"role": msg["role"], "content": msg["content"]}
                 for msg in st.session_state.messages[:-1]
             ]
-            response = call_llm(
-                prompt=prompt,
-                model=st.session_state.llm_model,
-                system_prompt=system_prompt,
-                chat_history=chat_history if chat_history else None,
-                temperature=st.session_state.temperature,
-                max_tokens=st.session_state.max_tokens,
-            )
+            try:
+                response = call_llm(
+                    prompt=prompt,
+                    model=st.session_state.llm_model,
+                    system_prompt=system_prompt,
+                    chat_history=chat_history if chat_history else None,
+                    temperature=st.session_state.temperature,
+                    max_tokens=st.session_state.max_tokens,
+                )
+                # 軽いサニティログを残す（プロンプト長とレスポンス先頭）
+                try:
+                    preview = (str(response)[:600]).replace('\n', ' ')
+                    _append_run_log(f"call_llm model={st.session_state.llm_model} prompt_len={len(prompt)} response_preview={preview}")
+                except Exception:
+                    _append_run_log(f"call_llm logged response of type {type(response)}")
+            except Exception as e:
+                # LLM呼び出し自体が例外を投げた場合の記録
+                logger.exception(f"LLM 呼び出し中に例外: {e}")
+                _append_run_log(f"LLM exception: {e}")
+                response = f"Error: LLM exception: {e}"
 
-        if isinstance(response, str) and not response.startswith("Error"):
-            st.session_state.messages.append({"role": "assistant", "content": response})
+            # フォールバック: LLM応答が正常に得られたらそれを使う。失敗時のみ簡易要約を返す。
+            auto_enabled = st.session_state.get("ui_auto_search", True)
+            pre = st.session_state.get("presearch_results")
+            if isinstance(response, str) and not str(response).startswith("Error") and response.strip():
+                _store_assistant_message(response)
+            else:
+                # LLM がエラーを返した/空文字列のときはランログに記録
+                _append_run_log(f"LLM returned error/empty response: {repr(response)[:400]}")
+                # LLMが失敗した場合、かつ自動検索結果があるなら簡易要約を返す
+                if pre and auto_enabled:
+                    lines = ["以下は自動で取得した外部検索結果の簡易要約です。最新情報の確認には必ず公式サイトをご確認ください。\n"]
+                    for d in pre[:3]:
+                        tid = d.get("id") or d.get("url") or "-"
+                        text = (d.get("text") or "").replace("\n", " ")[:400]
+                        lines.append(f"・出典 [{tid}]: {text}")
+                    summary_text = "\n".join(lines)
+                    _store_assistant_message(summary_text)
+                else:
+                    _store_assistant_message(f"申し訳ありません。回答の生成に失敗しました: {response}")
             st.session_state.attached_file_contents = []
-        else:
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": f"申し訳ありません。回答の生成に失敗しました: {response}",
-            })
     except Exception as e:
         logger.error(f"LLM呼び出しエラー: {e}")
-        st.session_state.messages.append({
-            "role": "assistant",
-            "content": f"エラーが発生しました: {str(e)}",
-        })
+        _store_assistant_message(f"エラーが発生しました: {str(e)}")
 
 def display_app():
     """アプリのメイン画面を表示する関数 - チャット形式で質問と回答を表示"""
@@ -1581,8 +1820,23 @@ def display_app():
                 st.markdown(message['content'])
             else:
                 st.markdown(f"**🤖 エージェント：**")
-                # マークダウン形式で表示（HTML利用許可）
-                st.markdown(message['content'], unsafe_allow_html=True)
+                # If structured conclusion available, show concise Q->A style
+                concl = message.get("conclusion")
+                sources = message.get("sources") or []
+                if concl:
+                    st.markdown(f"**回答（簡潔）:** {concl}")
+                # show sources as bullets
+                if sources:
+                    src_lines = []
+                    for s in sources:
+                        sid = s.get("id")
+                        txt = s.get("text")
+                        src_lines.append(f"- [{sid}]: {txt}")
+                    st.markdown("**出典:**\n" + "\n".join(src_lines))
+                # provide full raw content in an expander for context
+                if message.get("content"):
+                    with st.expander("詳細表示（元の応答）", expanded=False):
+                        st.markdown(message.get("content"), unsafe_allow_html=True)
             st.markdown("---")
     else:
         st.info("💬 クエリを入力して、会話を開始してください")
@@ -1728,6 +1982,20 @@ def display_app():
         if st.session_state.get("last_query_processed") == query:
             logger.info("Duplicate query detected; skipping generation")
         else:
+            # 相対日付の事前表示と自動検索トグル
+            try:
+                norm_q, interpreted_date = parse_relative_date(query)
+                if interpreted_date:
+                    col_a, col_b = st.columns([4,1])
+                    with col_a:
+                        st.info(f"解釈: ユーザーの入力中の相対日付を {interpreted_date} と解釈しました。")
+                    with col_b:
+                        auto_search = st.checkbox("自動検索", value=True, key="ui_auto_search")
+                    # UI選択で環境変数を制御し、エージェントの事前検索を有効/無効化する
+                    import os as _os
+                    _os.environ["RAG_ENABLE_DATE_PRESEARCH"] = "true" if auto_search else "false"
+            except Exception:
+                pass
             # ユーザーのクエリをメッセージに追加
             st.session_state.messages.append({
                 "role": "user",

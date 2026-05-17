@@ -57,11 +57,11 @@ def _call_ollama_chat(prompt: str, model: str, system_prompt: Optional[str] = No
     }
 
     try:
-        # タイムアウトを設定（接続に10秒、応答待ちに300秒 = 5分）
-        res = requests.post(url, json=payload, timeout=(10, 300))
+        # タイムアウトを設定（接続に5秒、応答待ちに60秒）
+        res = requests.post(url, json=payload, timeout=(5, 60))
     except requests.exceptions.RequestException as e:
         print(f"[Error] Request failed: {e}")
-        return {"error": str(e)}
+        return f"Error: {e}"
 
     try:
         res.raise_for_status()
@@ -111,8 +111,8 @@ def _call_openai_compatible(prompt: str, model: str, system_prompt: Optional[str
         payload["max_tokens"] = max_tokens
 
     try:
-        # タイムアウトを設定（接続に10秒、応答待ちに300秒 = 5分）
-        res = requests.post(url, headers=headers, json=payload, timeout=(10, 300))
+        # タイムアウトを設定（接続に5秒、応答待ちに60秒）
+        res = requests.post(url, headers=headers, json=payload, timeout=(5, 60))
         res.raise_for_status()
         data = res.json()
         return data["choices"][0]["message"]["content"].strip()
