@@ -19,3 +19,5 @@ models/
 
 # VS Code workspace settings
 .vscode/
+corpus/bench_bge.index
+corpus/bench.index
