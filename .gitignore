@@ -13,3 +13,9 @@ results/
 
 # Local model caches (downloaded artifacts)
 models/
+
+# Local virtual environment
+.venv/
+
+# VS Code workspace settings
+.vscode/

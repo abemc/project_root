@@ -1,0 +1,1321 @@
+[
+  {
+    "id": "6ea1bd96",
+    "text": "Pythonのデータ型について教えてください\nPythonには整数（int）、浮動小数点数（float）、文字列（str）などのデータ型があります...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T20:44:10.654497",
+      "rating": 0.9,
+      "tags": [
+        "正確性",
+        "わかりやすさ"
+      ]
+    },
+    "faiss_id": 1
+  },
+  {
+    "id": "fe235c22",
+    "text": "機械学習と整数プログラミングの違いは？\n機械学習は...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T20:44:10.654661",
+      "rating": 0.6,
+      "tags": [
+        "不完全",
+        "複雑すぎる"
+      ]
+    },
+    "faiss_id": 2
+  },
+  {
+    "id": "42675a95",
+    "text": "Web開発の最新トレンドを教えてください\n2024年のWeb開発では、AI統合、エッジコンピューティング、がトレンドです...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T20:44:10.654725",
+      "rating": 0.85,
+      "tags": [
+        "正確性",
+        "有用性"
+      ]
+    },
+    "faiss_id": 3
+  },
+  {
+    "id": "02aed73c",
+    "text": "質問テスト\n回答テスト",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T20:44:11.049635",
+      "rating": 0.8,
+      "tags": [
+        "テスト"
+      ]
+    },
+    "faiss_id": 4
+  },
+  {
+    "id": "3ed0dd9d",
+    "text": "Pythonのデータ型について教えてください\nPythonには整数（int）、浮動小数点数（float）、文字列（str）などのデータ型があります...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T20:44:45.193530",
+      "rating": 0.9,
+      "tags": [
+        "正確性",
+        "わかりやすさ"
+      ]
+    },
+    "faiss_id": 5
+  },
+  {
+    "id": "5d3162da",
+    "text": "機械学習と整数プログラミングの違いは？\n機械学習は...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T20:44:45.193616",
+      "rating": 0.6,
+      "tags": [
+        "不完全",
+        "複雑すぎる"
+      ]
+    },
+    "faiss_id": 6
+  },
+  {
+    "id": "826cd5b9",
+    "text": "Web開発の最新トレンドを教えてください\n2024年のWeb開発では、AI統合、エッジコンピューティング、がトレンドです...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T20:44:45.193667",
+      "rating": 0.85,
+      "tags": [
+        "正確性",
+        "有用性"
+      ]
+    },
+    "faiss_id": 7
+  },
+  {
+    "id": "7403a1a7",
+    "text": "質問テスト\n回答テスト",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T20:44:45.240869",
+      "rating": 0.8,
+      "tags": [
+        "テスト"
+      ]
+    },
+    "faiss_id": 8
+  },
+  {
+    "id": "89acb32e",
+    "text": "Pythonのデータ型について教えてください\nPythonには整数（int）、浮動小数点数（float）、文字列（str）などのデータ型があります...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T21:06:36.481960",
+      "rating": 0.9,
+      "tags": [
+        "正確性",
+        "わかりやすさ"
+      ]
+    },
+    "faiss_id": 9
+  },
+  {
+    "id": "dca94022",
+    "text": "機械学習と整数プログラミングの違いは？\n機械学習は...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T21:06:36.482139",
+      "rating": 0.6,
+      "tags": [
+        "不完全",
+        "複雑すぎる"
+      ]
+    },
+    "faiss_id": 10
+  },
+  {
+    "id": "3dd633a5",
+    "text": "Web開発の最新トレンドを教えてください\n2024年のWeb開発では、AI統合、エッジコンピューティング、がトレンドです...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T21:06:36.482226",
+      "rating": 0.85,
+      "tags": [
+        "正確性",
+        "有用性"
+      ]
+    },
+    "faiss_id": 11
+  },
+  {
+    "id": "125a6123",
+    "text": "質問テスト\n回答テスト",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T21:06:36.854173",
+      "rating": 0.8,
+      "tags": [
+        "テスト"
+      ]
+    },
+    "faiss_id": 12
+  },
+  {
+    "id": "3095dce0",
+    "text": "Pythonのデータ型について教えてください\nPythonには整数（int）、浮動小数点数（float）、文字列（str）などのデータ型があります...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T21:07:36.439958",
+      "rating": 0.9,
+      "tags": [
+        "正確性",
+        "わかりやすさ"
+      ]
+    },
+    "faiss_id": 13
+  },
+  {
+    "id": "367eee1c",
+    "text": "機械学習と整数プログラミングの違いは？\n機械学習は...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T21:07:36.440056",
+      "rating": 0.6,
+      "tags": [
+        "不完全",
+        "複雑すぎる"
+      ]
+    },
+    "faiss_id": 14
+  },
+  {
+    "id": "3357df93",
+    "text": "Web開発の最新トレンドを教えてください\n2024年のWeb開発では、AI統合、エッジコンピューティング、がトレンドです...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T21:07:36.440095",
+      "rating": 0.85,
+      "tags": [
+        "正確性",
+        "有用性"
+      ]
+    },
+    "faiss_id": 15
+  },
+  {
+    "id": "f3dff525",
+    "text": "質問テスト\n回答テスト",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T21:07:36.483447",
+      "rating": 0.8,
+      "tags": [
+        "テスト"
+      ]
+    },
+    "faiss_id": 16
+  },
+  {
+    "id": "3daff141",
+    "text": "Pythonのデータ型について教えてください\nPythonには整数（int）、浮動小数点数（float）、文字列（str）などのデータ型があります...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T21:30:30.064436",
+      "rating": 0.9,
+      "tags": [
+        "正確性",
+        "わかりやすさ"
+      ]
+    },
+    "faiss_id": 17
+  },
+  {
+    "id": "6ed70d2f",
+    "text": "機械学習と整数プログラミングの違いは？\n機械学習は...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T21:30:30.064567",
+      "rating": 0.6,
+      "tags": [
+        "不完全",
+        "複雑すぎる"
+      ]
+    },
+    "faiss_id": 18
+  },
+  {
+    "id": "bd07b242",
+    "text": "Web開発の最新トレンドを教えてください\n2024年のWeb開発では、AI統合、エッジコンピューティング、がトレンドです...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T21:30:30.064615",
+      "rating": 0.85,
+      "tags": [
+        "正確性",
+        "有用性"
+      ]
+    },
+    "faiss_id": 19
+  },
+  {
+    "id": "490574c3",
+    "text": "質問テスト\n回答テスト",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-10T21:30:30.304322",
+      "rating": 0.8,
+      "tags": [
+        "テスト"
+      ]
+    },
+    "faiss_id": 20
+  },
+  {
+    "id": "670ec4f4",
+    "text": "Query 0\nResponse 0",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.159471",
+      "rating": 0.4,
+      "tags": [
+        "低品質"
+      ]
+    },
+    "faiss_id": 21
+  },
+  {
+    "id": "1654f447",
+    "text": "Query 1\nResponse 1",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.159682",
+      "rating": 0.4,
+      "tags": [
+        "低品質"
+      ]
+    },
+    "faiss_id": 22
+  },
+  {
+    "id": "fafeca7f",
+    "text": "Query 2\nResponse 2",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.159784",
+      "rating": 0.4,
+      "tags": [
+        "低品質"
+      ]
+    },
+    "faiss_id": 23
+  },
+  {
+    "id": "f20b3492",
+    "text": "Query 3\nResponse 3",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.230061",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 24
+  },
+  {
+    "id": "3f43b414",
+    "text": "Query 4\nResponse 4",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.230229",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 25
+  },
+  {
+    "id": "8700c625",
+    "text": "Query 5\nResponse 5",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.230357",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 26
+  },
+  {
+    "id": "ef1c979c",
+    "text": "Query 6\nResponse 6",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.230469",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 27
+  },
+  {
+    "id": "d0d43242",
+    "text": "Query 7\nResponse 7",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.230568",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 28
+  },
+  {
+    "id": "8b74c874",
+    "text": "Query 8\nResponse 8",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.230672",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 29
+  },
+  {
+    "id": "8e889706",
+    "text": "Query 9\nResponse 9",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.230794",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 30
+  },
+  {
+    "id": "e42948fd",
+    "text": "Query 10\nResponse 10",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.230914",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 31
+  },
+  {
+    "id": "a5a3713c",
+    "text": "Query 11\nResponse 11",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.231036",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 32
+  },
+  {
+    "id": "a4b7c87e",
+    "text": "Query 12\nResponse 12",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.231127",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 33
+  },
+  {
+    "id": "7b1d3e4b",
+    "text": "Query 13\nResponse 13",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.231251",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 34
+  },
+  {
+    "id": "d48a5648",
+    "text": "Query 14\nResponse 14",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.231366",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 35
+  },
+  {
+    "id": "dd347bf8",
+    "text": "Query 15\nResponse 15",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.231481",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 36
+  },
+  {
+    "id": "b8d80ea8",
+    "text": "Query 16\nResponse 16",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.231582",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 37
+  },
+  {
+    "id": "4ff9c486",
+    "text": "Query 17\nResponse 17",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.231694",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 38
+  },
+  {
+    "id": "7c7c5ee4",
+    "text": "Query 18\nResponse 18",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.231805",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 39
+  },
+  {
+    "id": "cf1731a6",
+    "text": "Query 19\nResponse 19",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.231916",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 40
+  },
+  {
+    "id": "34d8d756",
+    "text": "Query 20\nResponse 20",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.232039",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 41
+  },
+  {
+    "id": "24a0d7e0",
+    "text": "Query 21\nResponse 21",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.232154",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 42
+  },
+  {
+    "id": "2f7f5a46",
+    "text": "Query 22\nResponse 22",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.232242",
+      "rating": 0.75,
+      "tags": [
+        "分析"
+      ]
+    },
+    "faiss_id": 43
+  },
+  {
+    "id": "86bb91e0",
+    "text": "Query 23\nResponse 23",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.232853",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 44
+  },
+  {
+    "id": "4c80f8e0",
+    "text": "Query 24\nResponse 24",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.232963",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 45
+  },
+  {
+    "id": "f9e2d2dc",
+    "text": "Query 25\nResponse 25",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.233061",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 46
+  },
+  {
+    "id": "31548c3c",
+    "text": "Query 26\nResponse 26",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.233150",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 47
+  },
+  {
+    "id": "87bd5513",
+    "text": "Query 27\nResponse 27",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.233237",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 48
+  },
+  {
+    "id": "7e5441a9",
+    "text": "Query 28\nResponse 28",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.233321",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 49
+  },
+  {
+    "id": "bd42ffdb",
+    "text": "Query 29\nResponse 29",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.233395",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 50
+  },
+  {
+    "id": "dda6e716",
+    "text": "Query 30\nResponse 30",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.233459",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 51
+  },
+  {
+    "id": "b9d2a0a3",
+    "text": "Query 31\nResponse 31",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.233511",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 52
+  },
+  {
+    "id": "d6c86bec",
+    "text": "Query 32\nResponse 32",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.233556",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 53
+  },
+  {
+    "id": "dd30d377",
+    "text": "Query 33\nResponse 33",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.233599",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 54
+  },
+  {
+    "id": "e56b63d3",
+    "text": "Query 34\nResponse 34",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.233672",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 55
+  },
+  {
+    "id": "558a35e3",
+    "text": "Query 35\nResponse 35",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.233757",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 56
+  },
+  {
+    "id": "57ff2b7c",
+    "text": "Query 36\nResponse 36",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.233829",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 57
+  },
+  {
+    "id": "101684f0",
+    "text": "Query 37\nResponse 37",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.233909",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 58
+  },
+  {
+    "id": "2126b0d6",
+    "text": "Query 38\nResponse 38",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.233988",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 59
+  },
+  {
+    "id": "168ce839",
+    "text": "Query 39\nResponse 39",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.234065",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 60
+  },
+  {
+    "id": "9657315d",
+    "text": "Query 40\nResponse 40",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.234155",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 61
+  },
+  {
+    "id": "fd5461ff",
+    "text": "Query 41\nResponse 41",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.234227",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 62
+  },
+  {
+    "id": "052a9a07",
+    "text": "Query 42\nResponse 42",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.234303",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 63
+  },
+  {
+    "id": "d08636ea",
+    "text": "Query 43\nResponse 43",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.234377",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 64
+  },
+  {
+    "id": "d159649f",
+    "text": "Query 44\nResponse 44",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.234463",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 65
+  },
+  {
+    "id": "9f8da395",
+    "text": "Query 45\nResponse 45",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.234547",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 66
+  },
+  {
+    "id": "a36f0286",
+    "text": "Query 46\nResponse 46",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.234631",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 67
+  },
+  {
+    "id": "e4b7d5ce",
+    "text": "Query 47\nResponse 47",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.234714",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 68
+  },
+  {
+    "id": "2a1d017a",
+    "text": "Query 48\nResponse 48",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.234797",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 69
+  },
+  {
+    "id": "84ba88d2",
+    "text": "Query 49\nResponse 49",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.234884",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 70
+  },
+  {
+    "id": "dc83de3a",
+    "text": "Query 50\nResponse 50",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.234968",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 71
+  },
+  {
+    "id": "e5c41fc4",
+    "text": "Query 51\nResponse 51",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.235052",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 72
+  },
+  {
+    "id": "5e771925",
+    "text": "Query 52\nResponse 52",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.235138",
+      "rating": 0.8,
+      "tags": [
+        "高品質"
+      ]
+    },
+    "faiss_id": 73
+  },
+  {
+    "id": "c903ee50",
+    "text": "Test query 0\nTest response 0",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.239477",
+      "rating": 0.75,
+      "tags": [
+        "test"
+      ]
+    },
+    "faiss_id": 74
+  },
+  {
+    "id": "c8b51fe6",
+    "text": "Test query 1\nTest response 1",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.239638",
+      "rating": 0.8,
+      "tags": [
+        "test"
+      ]
+    },
+    "faiss_id": 75
+  },
+  {
+    "id": "ad590ba8",
+    "text": "Test query 2\nTest response 2",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.239737",
+      "rating": 0.85,
+      "tags": [
+        "test"
+      ]
+    },
+    "faiss_id": 76
+  },
+  {
+    "id": "fc0be598",
+    "text": "Test query 3\nTest response 3",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.239835",
+      "rating": 0.75,
+      "tags": [
+        "test"
+      ]
+    },
+    "faiss_id": 77
+  },
+  {
+    "id": "a0ac8a4a",
+    "text": "Test query 4\nTest response 4",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.239926",
+      "rating": 0.8,
+      "tags": [
+        "test"
+      ]
+    },
+    "faiss_id": 78
+  },
+  {
+    "id": "b7cac57e",
+    "text": "Test query 5\nTest response 5",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.240014",
+      "rating": 0.85,
+      "tags": [
+        "test"
+      ]
+    },
+    "faiss_id": 79
+  },
+  {
+    "id": "cfb09dc0",
+    "text": "Test query 6\nTest response 6",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.240102",
+      "rating": 0.75,
+      "tags": [
+        "test"
+      ]
+    },
+    "faiss_id": 80
+  },
+  {
+    "id": "6b58e153",
+    "text": "Test query 7\nTest response 7",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.240190",
+      "rating": 0.8,
+      "tags": [
+        "test"
+      ]
+    },
+    "faiss_id": 81
+  },
+  {
+    "id": "c2ac0f53",
+    "text": "Test query 8\nTest response 8",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.240269",
+      "rating": 0.85,
+      "tags": [
+        "test"
+      ]
+    },
+    "faiss_id": 82
+  },
+  {
+    "id": "c491af52",
+    "text": "Test query 9\nTest response 9",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T09:15:18.240452",
+      "rating": 0.75,
+      "tags": [
+        "test"
+      ]
+    },
+    "faiss_id": 83
+  },
+  {
+    "id": "3050a123",
+    "text": "Pythonは何ですか？\nPythonはプログラミング言語です",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T16:26:51.299403",
+      "rating": 0.95,
+      "tags": [
+        "正確"
+      ]
+    },
+    "faiss_id": 84
+  },
+  {
+    "id": "af0b13f2",
+    "text": "機械学習とは？\n機械学習は...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T16:26:51.322414",
+      "rating": 0.8,
+      "tags": [
+        "正確"
+      ]
+    },
+    "faiss_id": 85
+  },
+  {
+    "id": "7842c64d",
+    "text": "複雑な数学問題\n...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T16:26:51.322615",
+      "rating": 0.45,
+      "tags": [
+        "困難"
+      ]
+    },
+    "faiss_id": 86
+  },
+  {
+    "id": "d4088de0",
+    "text": "Pythonは何ですか？\nPythonはプログラミング言語です",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T16:28:15.315134",
+      "rating": 0.95,
+      "tags": [
+        "正確"
+      ]
+    },
+    "faiss_id": 87
+  },
+  {
+    "id": "cdb1344b",
+    "text": "機械学習とは？\n機械学習は...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T16:28:15.315422",
+      "rating": 0.8,
+      "tags": [
+        "正確"
+      ]
+    },
+    "faiss_id": 88
+  },
+  {
+    "id": "e91a8d3a",
+    "text": "複雑な数学問題\n...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T16:28:15.315517",
+      "rating": 0.45,
+      "tags": [
+        "困難"
+      ]
+    },
+    "faiss_id": 89
+  },
+  {
+    "id": "98a2dd56",
+    "text": "Pythonは何ですか？\nPythonはプログラミング言語です",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T16:28:34.298079",
+      "rating": 0.95,
+      "tags": [
+        "正確"
+      ]
+    },
+    "faiss_id": 90
+  },
+  {
+    "id": "dc00ee0d",
+    "text": "機械学習とは？\n機械学習は...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T16:28:34.298188",
+      "rating": 0.8,
+      "tags": [
+        "正確"
+      ]
+    },
+    "faiss_id": 91
+  },
+  {
+    "id": "261eec46",
+    "text": "複雑な数学問題\n...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-11T16:28:34.298235",
+      "rating": 0.45,
+      "tags": [
+        "困難"
+      ]
+    },
+    "faiss_id": 92
+  },
+  {
+    "id": "622ee688",
+    "text": "Pythonは何ですか？\nPythonはプログラミング言語です",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-12T14:54:39.110388",
+      "rating": 0.95,
+      "tags": [
+        "正確"
+      ]
+    },
+    "faiss_id": 93
+  },
+  {
+    "id": "9bb63463",
+    "text": "機械学習とは？\n機械学習は...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-12T14:54:39.132972",
+      "rating": 0.8,
+      "tags": [
+        "正確"
+      ]
+    },
+    "faiss_id": 94
+  },
+  {
+    "id": "9f0ad2be",
+    "text": "複雑な数学問題\n...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-12T14:54:39.133196",
+      "rating": 0.45,
+      "tags": [
+        "困難"
+      ]
+    },
+    "faiss_id": 95
+  },
+  {
+    "id": "699fe047",
+    "text": "Pythonのデータ型について教えてください\nPythonには整数（int）、浮動小数点数（float）、文字列（str）などのデータ型があります...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-13T09:17:38.659894",
+      "rating": 0.9,
+      "tags": [
+        "正確性",
+        "わかりやすさ"
+      ]
+    },
+    "faiss_id": 96
+  },
+  {
+    "id": "85287f3f",
+    "text": "機械学習と整数プログラミングの違いは？\n機械学習は...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-13T09:17:38.660280",
+      "rating": 0.6,
+      "tags": [
+        "不完全",
+        "複雑すぎる"
+      ]
+    },
+    "faiss_id": 97
+  },
+  {
+    "id": "29ce13ba",
+    "text": "Web開発の最新トレンドを教えてください\n2024年のWeb開発では、AI統合、エッジコンピューティング、がトレンドです...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-13T09:17:38.660411",
+      "rating": 0.85,
+      "tags": [
+        "正確性",
+        "有用性"
+      ]
+    },
+    "faiss_id": 98
+  },
+  {
+    "id": "9c8513a3",
+    "text": "質問テスト\n回答テスト",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-04-13T09:17:39.041376",
+      "rating": 0.8,
+      "tags": [
+        "テスト"
+      ]
+    },
+    "faiss_id": 99
+  },
+  {
+    "id": "8c95bbf3",
+    "text": "Pythonのデータ型について教えてください\nPythonには整数（int）、浮動小数点数（float）、文字列（str）などのデータ型があります...",
+    "meta": {
+      "source": "logs/feedback",
+      "timestamp": "2026-05-06T09:09:24.726500",
+      "rating": 0.9,
+      "tags": [
+        "正確性",
+        "わかりやすさ"
+      ]
+    },
+    "faiss_id": 100
+  }
+]

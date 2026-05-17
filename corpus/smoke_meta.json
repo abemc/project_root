@@ -1,0 +1,14 @@
+[
+  {
+    "id": "doc1__chunk__0",
+    "text": "Apple banana orange. Fruits and healthy food.",
+    "chunk_index": 0,
+    "ingested_at": "2026-05-17T13:22:36.537453"
+  },
+  {
+    "id": "doc2__chunk__0",
+    "text": "Car truck vehicle. Road and transport.",
+    "chunk_index": 0,
+    "ingested_at": "2026-05-17T13:22:36.537470"
+  }
+]

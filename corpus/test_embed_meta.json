@@ -1,0 +1,17 @@
+[
+  {
+    "id": "a",
+    "text": "apple",
+    "tag": "fruit"
+  },
+  {
+    "id": "b",
+    "text": "banana",
+    "tag": "fruit"
+  },
+  {
+    "id": "c",
+    "text": "car",
+    "tag": "vehicle"
+  }
+]

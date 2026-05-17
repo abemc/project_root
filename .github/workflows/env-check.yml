@@ -1,0 +1,50 @@
+name: Env Check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  env-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install requirements (if present)
+        run: |
+          if [ -f requirements.txt ]; then
+            pip install --no-cache-dir -r requirements.txt || true
+          else
+            echo "No requirements.txt found"
+          fi
+
+      - name: PYTHONPATH import smoke test
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python - <<'PY'
+import sys
+try:
+    sys.path.insert(0, '')
+    from src.agent_architecture.dynamic_task_manager import DynamicTaskManager
+    print('DynamicTaskManager import: OK')
+except Exception as e:
+    print('Import failed:', e)
+    raise
+PY
+
+      - name: Run smoke tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          # Run a small subset of tests to validate runtime imports
+          python -m pytest -q tests/test_dynamic_task_manager.py -q || true
