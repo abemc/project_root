@@ -1,0 +1,111 @@
+services:
+  # Nginx Load Balancer - 25% staging traffic
+  nginx-phase3:
+    image: nginx:alpine
+    container_name: rag-agent-lb-phase3
+    ports:
+      - "8510:80"
+    volumes:
+      - ./nginx-phase3.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app-prod-stable
+      - app-staging
+    networks:
+      - rag-network-phase3
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Production Instance (75% traffic - increased stability)
+  app-prod-stable:
+    image: mcr.microsoft.com/devcontainers/python:3.10
+    container_name: rag-agent-app-prod-stable
+    ports:
+      - "8515:8501"
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - APP_ENV=production
+      - DEPLOYMENT_STAGE=prod-stable
+      - PHASE=3
+      - PYTHONUNBUFFERED=1
+    command: bash -c "pip install -q -r requirements.txt && streamlit run app.py --server.port=8501 --server.headless=true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rag-network-phase3
+    restart: unless-stopped
+
+  # Staging Instance (25% traffic - UAT)
+  app-staging:
+    image: mcr.microsoft.com/devcontainers/python:3.10
+    container_name: rag-agent-app-staging
+    ports:
+      - "8516:8501"
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - APP_ENV=staging
+      - DEPLOYMENT_STAGE=staging
+      - PHASE=3
+      - PYTHONUNBUFFERED=1
+    command: bash -c "pip install -q -r requirements.txt && streamlit run app.py --server.port=8501 --server.headless=true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rag-network-phase3
+    restart: unless-stopped
+
+  # Prometheus Phase 3 - Enhanced metrics
+  prometheus-phase3:
+    image: prom/prometheus:latest
+    container_name: rag-agent-prometheus-phase3
+    ports:
+      - "9092:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus-phase3-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    networks:
+      - rag-network-phase3
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Redis Phase 3 - Higher capacity
+  redis-phase3:
+    image: redis:7.2-alpine
+    container_name: rag-agent-redis-phase3
+    ports:
+      - "6380:6379"
+    volumes:
+      - ./redis-phase3-data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    networks:
+      - rag-network-phase3
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  rag-network-phase3:
+    driver: bridge

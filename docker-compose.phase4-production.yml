@@ -1,0 +1,107 @@
+services:
+  # Nginx Load Balancer - 100% Production
+  nginx-phase4:
+    image: nginx:alpine
+    container_name: rag-agent-lb-phase4
+    ports:
+      - "8520:80"
+    volumes:
+      - ./nginx-phase4.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app-production
+    networks:
+      - rag-network-phase4
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
+
+  # Production Instance (100% traffic)
+  app-production:
+    image: mcr.microsoft.com/devcontainers/python:3.10
+    container_name: rag-agent-app-production
+    ports:
+      - "8525:8501"
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - APP_ENV=production
+      - DEPLOYMENT_STAGE=production
+      - PHASE=4
+      - PYTHONUNBUFFERED=1
+    command: bash -c "pip install -q -r requirements.txt && streamlit run app.py --server.port=8501 --server.headless=true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rag-network-phase4
+    restart: always
+
+  # Prometheus Phase 4 - Production metrics
+  prometheus-phase4:
+    image: prom/prometheus:latest
+    container_name: rag-agent-prometheus-phase4
+    ports:
+      - "9093:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus-phase4-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=90d'
+    networks:
+      - rag-network-phase4
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
+
+  # Redis Phase 4 - Production cache (high capacity)
+  redis-phase4:
+    image: redis:7.2-alpine
+    container_name: rag-agent-redis-phase4
+    ports:
+      - "6381:6379"
+    volumes:
+      - ./redis-phase4-data:/data
+    command: redis-server --appendonly yes --maxmemory 1gb --maxmemory-policy allkeys-lru
+    networks:
+      - rag-network-phase4
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
+
+  # Ollama LLM Server - Production (if needed)
+  ollama-phase4:
+    image: ollama/ollama:latest
+    container_name: rag-agent-ollama-phase4
+    ports:
+      - "11435:11434"
+    volumes:
+      - ./ollama-phase4-models:/root/.ollama
+    environment:
+      - OLLAMA_NUM_PARALLEL=4
+      - OLLAMA_NUM_THREAD=8
+    networks:
+      - rag-network-phase4
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    restart: always
+
+networks:
+  rag-network-phase4:
+    driver: bridge
