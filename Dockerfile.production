@@ -1,0 +1,70 @@
+# 本番環境用 Dockerfile - 最適化版
+
+FROM mcr.microsoft.com/devcontainers/python:3.10 as builder
+
+# システム依存関係のインストール (FAISSやPDF処理用)
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libopenblas-dev \
+    libomp-dev \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# 依存パッケージのインストール
+COPY requirements.txt /tmp/pip-tmp/
+RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt \
+    && rm -rf /tmp/pip-tmp
+
+# 本番イメージ
+FROM mcr.microsoft.com/devcontainers/python:3.10
+
+# メタデータ
+LABEL maintainer="RAG Agent Team"
+LABEL version="1.0.0"
+LABEL description="RAG Agent with Phase 5 Learning Systems"
+
+# セキュリティ: 非ルートユーザー作成
+RUN useradd -m -u 1000 appuser
+
+# ランタイム依存関係のみインストール
+RUN apt-get update && apt-get install -y \
+    libopenblas0 \
+    libomp-dev \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+    curl \
+    tini \
+    && rm -rf /var/lib/apt/lists/*
+
+# ビルダーステージから依存関係をコピー
+COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# アプリケーションを配置
+WORKDIR /app
+COPY --chown=appuser:appuser . /app
+
+# ディレクトリ権限設定
+RUN chown -R appuser:appuser /app && \
+    mkdir -p /app/logs /app/checkpoints /app/corpus && \
+    chown -R appuser:appuser /app/logs /app/checkpoints /app/corpus
+
+# 非ルートユーザーに切り替え
+USER appuser
+
+# Streamlit が利用するポート
+EXPOSE 8501
+
+# ヘルスチェック
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8501/healthz || exit 1
+
+# Entrypoint スクリプト使用
+ENTRYPOINT ["/usr/bin/tini", "--"]
+
+# デフォルト実行コマンド
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.headless=true", "--logger.level=info"]

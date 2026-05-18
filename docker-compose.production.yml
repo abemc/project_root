@@ -1,0 +1,180 @@
+version: '3.9'
+
+services:
+  # RAG Agent アプリケーション
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: rag-agent-app
+    ports:
+      - "8501:8501"  # Streamlit
+    environment:
+      # Python 環境
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      
+      # Streamlit 設定
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_LOGGER_LEVEL=info
+      - STREAMLIT_CLIENT_SHOW_ERROR_DETAILS=false
+      
+      # アプリケーション設定
+      - APP_ENV=production
+      - DEBUG=false
+      - LOG_LEVEL=INFO
+      
+      # RAG Agent 設定
+      - RAG_CONFIG_PATH=/app/config/config.json
+      - RAG_CACHE_MAX_SIZE=1000
+      - RAG_BATCH_SIZE=50
+      - RAG_CHECKPOINT_DIR=/app/checkpoints
+      
+      # LLM 設定
+      - OLLAMA_HOST=http://ollama:11434
+      - LLM_MODEL=qwen2.5
+      - LLM_TEMPERATURE=0.7
+      
+      # ベクトルストア設定
+      - FAISS_INDEX_PATH=/app/corpus
+      - EMBEDDING_MODEL=BAAI/bge-m3
+      - EMBEDDING_DEVICE=cuda
+    
+    volumes:
+      # データ永続化
+      - ./corpus:/app/corpus
+      - ./checkpoints:/app/checkpoints
+      - ./logs:/app/logs
+      - ./config:/app/config
+    
+    depends_on:
+      ollama:
+        condition: service_healthy
+      prometheus:
+        condition: service_started
+    
+    restart: unless-stopped
+    
+    # リソース制限
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 512M
+    
+    # ヘルスチェック
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    networks:
+      - rag-network
+    
+    # ロギング設定
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+        labels: "service=rag-agent"
+
+  # Ollama LLM サーバー
+  ollama:
+    image: ollama/ollama:latest
+    container_name: rag-ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - rag-network
+    # GPU サポート (オプション)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  # Prometheus 監視
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: rag-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+  # Grafana ダッシュボード
+  grafana:
+    image: grafana/grafana:latest
+    container_name: rag-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+  # Redis キャッシュ (オプション)
+  redis:
+    image: redis:7-alpine
+    container_name: rag-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - rag-network
+
+volumes:
+  ollama_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  rag-network:
+    driver: bridge
