@@ -323,55 +323,57 @@ def show_search(manager):
                 st.markdown(f"**フィルタ後: {len(filtered)} 件**")
                 st.divider()
                 
-                # 結果表示
-                for idx, doc in enumerate(filtered[:50], 1):
-                    with st.container(border=True):
-                        col1, col2 = st.columns([3, 1])
-                        
-                        with col1:
-                            st.markdown(f"**{idx}. {doc['name']}**")
-                            st.markdown(
-                                f"📁 `{doc['category']}` | 📅 {doc['modified']} | "
-                                f"{''.join([f'`{tag}`' for tag in doc['tags'][:3]])}"
-                            )
-                        
-                        with col2:
-                            st.caption(f"📄 {doc['size']} bytes")
-                        
-                        # 詳細表示ボタン
-                        if st.button(f"📖 詳細表示", key=f"search_detail_{idx}_{doc['path']}", use_container_width=True):
-                            st.session_state.selected_search_doc = doc
+                # 選択用selectbox
+                doc_options = {f"{idx}. {doc['name']}": idx-1 for idx, doc in enumerate(filtered[:50], 1)}
                 
-                if len(filtered) > 50:
-                    st.info(f"💡 最初の50件を表示しています。全{len(filtered)}件があります。")
-                
-                # 選択されたドキュメントの詳細表示
-                if 'selected_search_doc' in st.session_state:
-                    st.divider()
-                    st.markdown("### 📄 選択ドキュメント詳細")
+                if doc_options:
+                    selected_label = st.selectbox(
+                        "ドキュメントを選択して詳細表示",
+                        list(doc_options.keys()),
+                        key="search_doc_select"
+                    )
                     
-                    doc = st.session_state.selected_search_doc
+                    selected_idx = doc_options[selected_label]
+                    selected_doc = filtered[selected_idx]
+                    
+                    # 結果リスト表示
+                    st.markdown("**📋 検索結果一覧:**")
+                    for idx, doc in enumerate(filtered[:50], 1):
+                        marker = "👉 " if idx == selected_idx + 1 else "  "
+                        st.markdown(
+                            f"{marker} **{idx}. {doc['name']}**  "
+                            f"📁 `{doc['category']}` | 📅 {doc['modified']} | "
+                            f"📄 {doc['size']} bytes"
+                        )
+                    
+                    if len(filtered) > 50:
+                        st.info(f"💡 最初の50件を表示しています。全{len(filtered)}件があります。")
+                    
+                    # 選択ドキュメント詳細表示
+                    st.divider()
+                    st.markdown(f"### 📄 選択ドキュメント詳細 - {selected_label}")
                     
                     col1, col2 = st.columns(2)
                     with col1:
-                        st.markdown(f"**ファイル名:** `{doc['name']}`")
-                        st.markdown(f"**パス:** `{doc['path']}`")
-                        st.markdown(f"**カテゴリ:** `{doc['category']}`")
+                        st.markdown(f"**ファイル名:** `{selected_doc['name']}`")
+                        st.markdown(f"**パス:** `{selected_doc['path']}`")
+                        st.markdown(f"**カテゴリ:** `{selected_doc['category']}`")
                     
                     with col2:
-                        st.markdown(f"**サイズ:** `{doc['size']} bytes`")
-                        st.markdown(f"**更新日:** `{doc['modified']}`")
-                        st.markdown(f"**フェーズ:** `{doc['phase'] if doc['phase'] else 'なし'}`")
+                        st.markdown(f"**サイズ:** `{selected_doc['size']} bytes`")
+                        st.markdown(f"**更新日:** `{selected_doc['modified']}`")
+                        st.markdown(f"**フェーズ:** `{selected_doc['phase'] if selected_doc['phase'] else 'なし'}`")
                     
-                    st.markdown("**🏷️ タグ:**")
-                    for tag in doc['tags']:
-                        st.write(f"- `{tag}`")
+                    if selected_doc['tags']:
+                        st.markdown("**🏷️ タグ:**")
+                        tag_str = " ".join([f"`{tag}`" for tag in selected_doc['tags']])
+                        st.markdown(tag_str)
                     
                     st.divider()
                     
-                    # ファイルの内容を表示
+                    # ファイル内容表示
                     try:
-                        file_path = Path(doc['full_path'])
+                        file_path = Path(selected_doc['full_path'])
                         if file_path.exists():
                             st.markdown("### 📖 ドキュメント内容")
                             
@@ -403,7 +405,7 @@ def show_search(manager):
                             st.download_button(
                                 label="📥 ファイルをダウンロード",
                                 data=file_content,
-                                file_name=doc['name'],
+                                file_name=selected_doc['name'],
                                 mime="text/plain"
                             )
                         else:
@@ -411,6 +413,8 @@ def show_search(manager):
                     
                     except Exception as e:
                         st.error(f"❌ ファイルの読み込みに失敗しました: {str(e)}")
+                else:
+                    st.info("検索結果がありません")
             else:
                 st.warning("❌ 検索条件に合致するドキュメントが見つかりません。")
         else:
