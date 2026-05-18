@@ -105,7 +105,9 @@ def main():
     with st.sidebar.expander("📊 表示オプション", expanded=True):
         view_mode = st.sidebar.radio(
             "表示モード",
-            ["📊 ダッシュボード", "🔍 検索", "📂 カテゴリ", "🏷️ タグ", "📋 フェーズ", "📅 最新更新", "📄 ドキュメント表示"],
+            ["📊 ダッシュボード", "🔍 検索", "📂 カテゴリ", "🏷️ タグ", 
+             "📋 フェーズ", "📅 最新更新", "📄 ドキュメント表示",
+             "📝 メタデータ編集", "✅ 品質チェック", "🔗 相互参照"],
             key="view_mode"
         )
     
@@ -153,6 +155,24 @@ def main():
     # ============================================
     elif view_mode == "📄 ドキュメント表示":
         show_document_viewer(manager)
+    
+    # ============================================
+    # メタデータ編集モード
+    # ============================================
+    elif view_mode == "📝 メタデータ編集":
+        show_metadata_editor(manager)
+    
+    # ============================================
+    # 品質チェックモード
+    # ============================================
+    elif view_mode == "✅ 品質チェック":
+        show_quality_check(manager)
+    
+    # ============================================
+    # 相互参照表示モード
+    # ============================================
+    elif view_mode == "🔗 相互参照":
+        show_reference_graph(manager)
 
 
 def show_dashboard(manager):
@@ -727,6 +747,256 @@ def display_document(doc):
         file_name=doc['name'],
         mime="text/plain"
     )
+
+
+def show_metadata_editor(manager):
+    """メタデータ編集UI"""
+    st.header("📝 メタデータ編集")
+    st.markdown("ドキュメントのタグ、フェーズ、カテゴリを編集します")
+    
+    st.divider()
+    
+    # ドキュメント選択
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        selected_doc = st.selectbox(
+            "編集するドキュメントを選択",
+            options=[f"{doc['name']} ({doc['path']})" for doc in manager.documents],
+            key="metadata_doc_select"
+        )
+    
+    if not selected_doc:
+        st.info("ℹ️ ドキュメントを選択してください")
+        return
+    
+    # 選択されたドキュメント情報を取得
+    selected_path = selected_doc.split(' (')[1].rstrip(')')
+    selected_doc_info = next((d for d in manager.documents if d['path'] == selected_path), None)
+    
+    if not selected_doc_info:
+        st.error("❌ ドキュメントが見つかりません")
+        return
+    
+    st.markdown(f"**選択中:** `{selected_path}`")
+    
+    st.divider()
+    
+    # メタデータ編集フォーム
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("### 🏷️ タグ")
+        available_tags = ['guide', 'report', 'plan', 'test', 'deploy', 'api', 
+                         'security', 'benchmark', 'rag', 'llm', 'backup', 'other']
+        selected_tags = st.multiselect(
+            "タグを選択（複数選択可能）",
+            options=available_tags,
+            default=selected_doc_info['tags'],
+            key="metadata_tags"
+        )
+    
+    with col2:
+        st.markdown("### 📋 フェーズ")
+        phases = ['', '1', '2', '3', '4', '5', 'Week1', 'Week2', 'Week3', 'Week4']
+        selected_phase = st.selectbox(
+            "フェーズを選択",
+            options=phases,
+            index=phases.index(selected_doc_info['phase'] if selected_doc_info['phase'] else ''),
+            key="metadata_phase"
+        )
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("### 📁 カテゴリ")
+        categories = ['root', 'guides', 'reports', 'implementation', '00_プロジェクト概要', 
+                     '01_クイックスタート', '02_ユーザーガイド', '03_運用ガイド', '04_完了レポート']
+        selected_category = st.selectbox(
+            "カテゴリを選択",
+            options=categories,
+            index=categories.index(selected_doc_info['category']) if selected_doc_info['category'] in categories else 0,
+            key="metadata_category"
+        )
+    
+    with col2:
+        st.markdown("### 📌 メモ")
+        memo = st.text_area(
+            "メモ（任意）",
+            value="",
+            height=100,
+            key="metadata_memo"
+        )
+    
+    st.divider()
+    
+    # 保存ボタン
+    col1, col2, col3 = st.columns([1, 1, 2])
+    
+    with col1:
+        if st.button("💾 保存", use_container_width=True):
+            # メタデータを更新
+            manager.update_metadata(
+                doc_path=selected_path,
+                tags=selected_tags if selected_tags else selected_doc_info['tags'],
+                phase=selected_phase if selected_phase else None,
+                category=selected_category
+            )
+            st.success("✅ メタデータを更新しました")
+            st.balloons()
+    
+    with col2:
+        if st.button("🔄 リセット", use_container_width=True):
+            st.rerun()
+    
+    with col3:
+        st.info("💡 メタデータの変更はメモリに保存されます（ファイルの再スキャンで反映）")
+
+
+def show_quality_check(manager):
+    """ドキュメント品質チェックUI"""
+    st.header("✅ ドキュメント品質チェック")
+    st.markdown("プロジェクト内のドキュメントの品質を自動チェックします")
+    
+    st.divider()
+    
+    # 品質チェック実行
+    if st.button("🔍 品質チェック実行", use_container_width=True):
+        with st.spinner("チェック中..."):
+            quality_issues = manager.check_document_quality()
+        
+        # 統計情報
+        col1, col2, col3, col4 = st.columns(4)
+        
+        total = len(manager.documents)
+        errors = len([x for x in quality_issues if x['level'] == 'ERROR'])
+        warnings = len([x for x in quality_issues if x['level'] == 'WARNING'])
+        ok = total - errors - warnings
+        
+        with col1:
+            st.metric("✅ OK", ok)
+        with col2:
+            st.metric("⚠️ 警告", warnings)
+        with col3:
+            st.metric("❌ エラー", errors)
+        with col4:
+            st.metric("📊 合計", total)
+        
+        st.divider()
+        
+        # タブごとに表示
+        tab1, tab2, tab3 = st.tabs(["❌ エラー", "⚠️ 警告", "✅ OK"])
+        
+        with tab1:
+            errors_list = [x for x in quality_issues if x['level'] == 'ERROR']
+            if errors_list:
+                for issue in errors_list:
+                    with st.container(border=True):
+                        st.markdown(f"**{issue['name']}**")
+                        st.caption(f"📁 {issue['path']}")
+                        for problem in issue['issues']:
+                            st.write(problem)
+            else:
+                st.success("エラーはありません ✅")
+        
+        with tab2:
+            warnings_list = [x for x in quality_issues if x['level'] == 'WARNING']
+            if warnings_list:
+                for issue in warnings_list:
+                    with st.container(border=True):
+                        st.markdown(f"**{issue['name']}**")
+                        st.caption(f"📁 {issue['path']}")
+                        for problem in issue['issues']:
+                            st.write(problem)
+            else:
+                st.info("警告はありません ℹ️")
+        
+        with tab3:
+            ok_list = [x for x in quality_issues if x['level'] == 'OK' and x['issues']]
+            if ok_list:
+                for issue in ok_list:
+                    with st.container(border=True):
+                        st.markdown(f"**{issue['name']}**")
+                        st.caption(f"📁 {issue['path']}")
+            else:
+                st.success("すべてのドキュメントは良好な状態です ✅")
+    else:
+        st.info("💡 「品質チェック実行」ボタンをクリックしてチェックを開始します")
+
+
+def show_reference_graph(manager):
+    """相互参照表示UI"""
+    st.header("🔗 ドキュメント相互参照")
+    st.markdown("ドキュメント間の相互参照関係を表示します")
+    
+    st.divider()
+    
+    # 相互参照グラフ構築
+    with st.spinner("相互参照を分析中..."):
+        graph = manager.build_reference_graph()
+        references = graph['references']
+        reverse_refs = graph['reverse_references']
+    
+    # 統計情報
+    total_refs = sum(len(refs) for refs in references.values())
+    docs_with_refs = len([r for r in references.values() if r])
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("🔗 参照関係数", total_refs)
+    with col2:
+        st.metric("📄 参照元ドキュメント", docs_with_refs)
+    with col3:
+        st.metric("📚 対象ドキュメント", len(manager.documents))
+    
+    st.divider()
+    
+    # ドキュメント選択
+    selected_doc = st.selectbox(
+        "ドキュメントを選択して相互参照を表示",
+        options=[doc['path'] for doc in manager.documents],
+        key="ref_doc_select"
+    )
+    
+    if selected_doc:
+        col1, col2 = st.columns(2)
+        
+        # 参照先（このドキュメントから参照されている）
+        with col1:
+            st.markdown("### 📤 このドキュメントが参照している先:")
+            if selected_doc in references and references[selected_doc]:
+                for ref_doc in references[selected_doc]:
+                    st.write(f"- {ref_doc}")
+            else:
+                st.info("参照先がありません")
+        
+        # 参照元（このドキュメントを参照している）
+        with col2:
+            st.markdown("### 📥 このドキュメントを参照している元:")
+            if selected_doc in reverse_refs and reverse_refs[selected_doc]:
+                for ref_from in reverse_refs[selected_doc]:
+                    st.write(f"- {ref_from}")
+            else:
+                st.info("参照元がありません")
+    
+    st.divider()
+    
+    # 相互参照マトリックス表示
+    st.markdown("### 📊 相互参照一覧（参照 → 被参照）")
+    
+    ref_data = []
+    for doc_path, refs in references.items():
+        for ref in refs:
+            ref_data.append({
+                '参照元': doc_path,
+                '参照先': ref
+            })
+    
+    if ref_data:
+        df_refs = pd.DataFrame(ref_data)
+        st.dataframe(df_refs, use_container_width=True)
+    else:
+        st.info("ドキュメント間の相互参照がありません")
+
 
 
 if __name__ == "__main__":

@@ -239,6 +239,140 @@ class DocumentManager:
         
         print("\n" + "=" * 80 + "\n")
     
+    def update_metadata(self, doc_path: str, tags: List[str] = None, 
+                       phase: str = None, category: str = None) -> bool:
+        """ドキュメントのメタデータを更新"""
+        for doc in self.documents:
+            if doc['path'] == doc_path:
+                if tags is not None:
+                    doc['tags'] = tags
+                if phase is not None:
+                    doc['phase'] = phase
+                if category is not None:
+                    doc['category'] = category
+                return True
+        return False
+    
+    def check_document_quality(self) -> List[Dict]:
+        """ドキュメント品質をチェック"""
+        quality_issues = []
+        
+        for doc in self.documents:
+            issues = {
+                'path': doc['path'],
+                'name': doc['name'],
+                'issues': [],
+                'level': 'OK'
+            }
+            
+            try:
+                file_path = Path(doc['full_path'])
+                
+                # 1. ファイルサイズチェック
+                if file_path.stat().st_size < 100:
+                    issues['issues'].append('⚠️ ドキュメントが非常に短い（<100 bytes）')
+                
+                # 2. 最終更新日チェック
+                mtime = file_path.stat().st_mtime
+                days_ago = (datetime.now().timestamp() - mtime) / 86400
+                if days_ago > 90:
+                    issues['issues'].append(f'⚠️ 90日以上更新されていない（{int(days_ago)}日前）')
+                elif days_ago > 30:
+                    issues['issues'].append(f'ℹ️ 30日以上更新されていない（{int(days_ago)}日前）')
+                
+                # 3. コンテンツ解析（マークダウンファイルのみ）
+                if file_path.suffix == '.md':
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        content = f.read()
+                    
+                    # TODO/FIXME検出
+                    todos = len(re.findall(r'TODO|FIXME|XXX|HACK', content))
+                    if todos > 0:
+                        issues['issues'].append(f'⚠️ TODO/FIXMEが{todos}個ある')
+                    
+                    # リンク切れ検出
+                    broken_links = []
+                    # ファイルリンク
+                    for link in re.findall(r'\]\(([^)]+)\)', content):
+                        if link.startswith('http'):
+                            continue
+                        linked_file = file_path.parent / link.split('#')[0]
+                        if not linked_file.exists() and '..' not in link:
+                            broken_links.append(link)
+                    
+                    if broken_links:
+                        issues['issues'].append(f'🔗 {len(broken_links)}個のリンク切れ: {", ".join(broken_links[:3])}...')
+                    
+                    # 見出しチェック
+                    if not re.search(r'^#\s+', content, re.MULTILINE):
+                        issues['issues'].append('📏 H1見出しがない')
+                
+            except Exception as e:
+                issues['issues'].append(f'❌ エラー: {str(e)}')
+            
+            # レベルを判定
+            if any('🔗' in i or '❌' in i for i in issues['issues']):
+                issues['level'] = 'ERROR'
+            elif any('⚠️' in i for i in issues['issues']):
+                issues['level'] = 'WARNING'
+            
+            if issues['issues']:
+                quality_issues.append(issues)
+        
+        return quality_issues
+    
+    def extract_references(self) -> Dict[str, List[str]]:
+        """ドキュメント間の相互参照を抽出"""
+        references = {}
+        
+        for doc in self.documents:
+            if doc['full_path'].endswith('.md'):
+                references[doc['path']] = []
+                
+                try:
+                    with open(doc['full_path'], 'r', encoding='utf-8', errors='ignore') as f:
+                        content = f.read()
+                    
+                    # マークダウンリンクを抽出
+                    for link in re.findall(r'\]\(([^)]+)\)', content):
+                        # URLは除外
+                        if link.startswith('http'):
+                            continue
+                        
+                        # アンカーを除外
+                        link_path = link.split('#')[0]
+                        
+                        # 相対パスを解決
+                        full_link_path = (Path(doc['full_path']).parent / link_path).resolve()
+                        
+                        # ドキュメント内のファイルを検索
+                        for other_doc in self.documents:
+                            if Path(other_doc['full_path']).resolve() == full_link_path:
+                                if other_doc['path'] not in references[doc['path']]:
+                                    references[doc['path']].append(other_doc['path'])
+                
+                except Exception:
+                    pass
+        
+        return references
+    
+    def build_reference_graph(self) -> Dict:
+        """相互参照グラフを構築"""
+        refs = self.extract_references()
+        
+        # 逆参照（被参照）を計算
+        reverse_refs = defaultdict(list)
+        for doc_path, referenced_docs in refs.items():
+            for ref_doc in referenced_docs:
+                if ref_doc not in reverse_refs:
+                    reverse_refs[ref_doc] = []
+                reverse_refs[ref_doc].append(doc_path)
+        
+        return {
+            'references': refs,      # 参照先
+            'reverse_references': dict(reverse_refs),  # 参照元
+        }
+    
     def export_index_json(self, output_file: str = None):
         """ドキュメント索引をJSON形式でエクスポート"""
         if output_file is None:
