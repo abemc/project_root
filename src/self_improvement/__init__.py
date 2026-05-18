@@ -15,6 +15,7 @@ from .feedback_manager import FeedbackManager
 from .prompt_optimizer import PromptOptimizer
 from .continuous_training import ContinuousTrainer
 from .metric_tracker import MetricTracker
+from .error_learning import ErrorLearner, ErrorCategory, ErrorRecord, ErrorPattern
 
 # APScheduler はオプショナル
 try:
