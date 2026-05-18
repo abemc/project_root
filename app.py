@@ -679,11 +679,18 @@ def setup_sidebar():
             st.session_state.app_page = "RAGエージェント"
         st.sidebar.radio(
             "ページ",
-            ["RAGエージェント", "📔 OneNote日記", "🛡️ エンタープライズ統合"],
+            ["RAGエージェント", "📔 OneNote日記", "🛡️ エンタープライズ統合", "🧠 Learning Dashboard"],
             key="app_page",
             horizontal=True,
         )
         st.sidebar.markdown("---")
+
+        # Phase 5: Learning Systems Panel
+        try:
+            from src.rag.learning_dashboard import add_learning_panel_to_sidebar
+            add_learning_panel_to_sidebar()
+        except Exception:
+            pass
 
         # 開発者向けの簡易コントロール
         with st.sidebar.expander("👷 開発者ツール", expanded=False):
@@ -2496,6 +2503,9 @@ else:
             display_onenote_diary()
         elif st.session_state.get("app_page") == "🛡️ エンタープライズ統合":
             display_enterprise_dashboard()
+        elif st.session_state.get("app_page") == "🧠 Learning Dashboard":
+            from src.rag.learning_dashboard import render_learning_dashboard
+            render_learning_dashboard()
         else:
             display_app()
     except Exception as e:
