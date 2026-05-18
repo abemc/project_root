@@ -27,7 +27,7 @@ LABEL version="1.0.0"
 LABEL description="RAG Agent with Phase 5 Learning Systems"
 
 # セキュリティ: 非ルートユーザー作成
-RUN useradd -m -u 1000 appuser
+RUN useradd -m -u 9999 appuser || true
 
 # ランタイム依存関係のみインストール
 RUN apt-get update && apt-get install -y \

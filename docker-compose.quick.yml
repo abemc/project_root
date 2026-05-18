@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/python:3.10
+    container_name: rag-agent-app
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+      - /app/.venv
+    working_dir: /app
+    environment:
+      - APP_ENV=production
+      - DEBUG=false
+      - PYTHONUNBUFFERED=1
+    command: >
+      bash -c "
+        pip install -q streamlit pandas plotly torch torchvision torchaudio 
+          --index-url https://download.pytorch.org/whl/cu121 &&
+        pip install -q -r requirements.txt &&
+        streamlit run app.py --server.port=8501 --server.headless=true
+      "
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - rag-network
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: rag-agent-ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_NUM_GPU=1
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - rag-network
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: rag-agent-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - rag-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: rag-agent-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    networks:
+      - rag-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: rag-agent-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - rag-network
+
+networks:
+  rag-network:
+    driver: bridge
+
+volumes:
+  ollama_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:

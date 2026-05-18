@@ -1,0 +1,23 @@
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/python:3.10
+    container_name: rag-agent-app-prod
+    ports:
+      - "8502:8501"
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - APP_ENV=production
+      - DEBUG=false
+      - PYTHONUNBUFFERED=1
+    command: bash -c "pip install -q -r requirements.txt && streamlit run app.py --server.port=8501 --server.headless=true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  default:
+    name: rag-network-prod

@@ -5,3 +5,5 @@
   Network URL: http://172.23.182.224:8501
 
 2026-05-17T21:15:07.323765 - call_llm model=qwen2.5:7b prompt_len=2254 response_preview=結論: 北海道日本ハムファイターズは2026年5月16日の試合で勝利しました。  - [web_3] 2026年5月16日 北海道日本ハムファイターズvs.埼玉西武 ... URL: //duckduckgo.com/l/?uddg=https%3A%2F%2Fbaseball.yahoo.co.jp%2Fnpb%2Fgame%2F2021038869%2Fstats&rut=e78e8eedd99ac287e8b6ca0dc4566bdd3616ad5e9bc9c11b26f046efedbce8df トップ 一球速報 テキスト速報 出場成績 動画 応援 パ・リーグ 8回戦 5月16日（土） 14:00 エスコンF 1 2 3 4 5 6 7 8 9 計 安 失 西  補足: 本塁打や得点の詳細は公式サイトや専門的な野球ニュースサイトを参照してください。
+2026-05-18T11:49:18.533527 - call_llm model=qwen2.5:7b prompt_len=2280 response_preview=Error: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=60)
+2026-05-18T11:49:18.873756 - LLM returned error/empty response: "Error: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=60)"
