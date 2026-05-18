@@ -90,6 +90,11 @@ def load_document_manager():
 
 # メイン
 def main():
+    # キャッシュクリア（開発時）
+    if 'initialized' not in st.session_state:
+        st.cache_resource.clear()
+        st.session_state.initialized = True
+    
     # タイトル
     st.title("📚 ドキュメント管理ダッシュボード")
     st.markdown("プロジェクト全体のドキュメントを一元管理・検索できるシステムです")
