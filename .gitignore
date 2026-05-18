@@ -21,3 +21,13 @@ models/
 .vscode/
 corpus/bench_bge.index
 corpus/bench.index
+
+# Docker data directories (permissions issues)
+redis-phase*-data/
+ollama-phase*-models/
+prometheus-lite-data/
+
+# Deployment artifacts
+checkpoints/
+rag_corpus/
+backups/
