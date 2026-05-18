@@ -15,7 +15,7 @@ import sys
 # docs_managerをインポート
 sys.path.insert(0, '/home/abemc/project_root')
 from docs_manager import DocumentManager
-from rag_agent_sidebar import render_rag_sidebar, render_backup_sidebar
+from rag_agent_sidebar import render_backup_sidebar
 
 # ページ設定
 st.set_page_config(
@@ -97,15 +97,17 @@ def main():
     # ドキュメント管理システムの読み込み
     manager = load_document_manager()
     
-    # サイドバー
-    st.sidebar.title("🔧 操作パネル")
-    view_mode = st.sidebar.radio(
-        "表示モード",
-        ["📊 ダッシュボード", "🔍 検索", "📂 カテゴリ", "🏷️ タグ", "📋 フェーズ", "📅 最新更新", "📄 ドキュメント表示"]
-    )
+    # ============================================
+    # サイドバー - ドキュメント管理パネル
+    # ============================================
+    st.sidebar.title("📚 ドキュメント管理")
     
-    # RAG Agent サイドバー
-    rag_config = render_rag_sidebar()
+    with st.sidebar.expander("📊 表示オプション", expanded=True):
+        view_mode = st.sidebar.radio(
+            "表示モード",
+            ["📊 ダッシュボード", "🔍 検索", "📂 カテゴリ", "🏷️ タグ", "📋 フェーズ", "📅 最新更新", "📄 ドキュメント表示"],
+            key="view_mode"
+        )
     
     # バックアップ・リストア サイドバー
     backup_path = render_backup_sidebar()
