@@ -26,6 +26,15 @@ from src.self_improvement.reinforcement_learning import ReinforcementLearningMan
 from src.self_improvement.meta_learning import MetaLearningManager
 from src.self_improvement.adaptive_forgetting import AdaptiveForgetfulnessManager, ForgetfulnessLevel
 
+# Performance optimization
+from src.rag.phase5_optimizer import (
+    LRUMemoryCache,
+    BatchProcessor,
+    IndexOptimizer,
+    PerformanceMonitor,
+    get_performance_monitor,
+)
+
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +88,15 @@ class Phase5IntegrationManager:
         self.execution_traces: List[TaskExecutionTrace] = []
         self.decisions: Dict[str, Any] = {}
         
+        # Performance optimization components
+        self.memory_cache = LRUMemoryCache(max_size=1000)
+        self.batch_processor = BatchProcessor(batch_size=50, timeout_seconds=5)
+        self.index_optimizer = IndexOptimizer()
+        self.perf_monitor = get_performance_monitor()
+        
         logger.info(f"Phase 5 Integration Manager initialized for agent: {agent_id}")
+        logger.info(f"  Memory cache: {self.memory_cache.stats.max_size} items")
+        logger.info(f"  Batch processor: {self.batch_processor.batch_size} items per batch")
 
     # ========================================================================
     # Memory Management Methods
@@ -297,7 +314,9 @@ class Phase5IntegrationManager:
         self.execution_traces.append(trace)
         
         # Record decision for RL
+        decision_id = f"decision_{task_id}_{int(datetime.now().timestamp() * 1000)}"
         decision = self.rl_manager.record_decision(
+            decision_id=decision_id,
             context={
                 "task_family": task_family,
                 "query_length": len(query),
@@ -305,6 +324,7 @@ class Phase5IntegrationManager:
             },
             action_chosen=f"approach_{task_family}",
             alternatives=[f"approach_alternative_{i}" for i in range(2)],
+            confidence=output_quality,
         )
         
         self.decisions[task_id] = decision
@@ -312,23 +332,23 @@ class Phase5IntegrationManager:
         # Add rewards
         if success:
             self.rl_manager.add_reward(
-                decision_id=decision.decision_id,
-                reward_signal=RewardSignal.TASK_SUCCESS,
+                decision_id=decision_id,
+                signal_type=RewardSignal.TASK_SUCCESS,
                 value=1.0,
             )
         
         # Time-based reward
         time_reward = min(1.0, 1000.0 / max(execution_time_ms, 1.0))
         self.rl_manager.add_reward(
-            decision_id=decision.decision_id,
-            reward_signal=RewardSignal.EXECUTION_TIME,
+            decision_id=decision_id,
+            signal_type=RewardSignal.EXECUTION_TIME,
             value=time_reward,
         )
         
         # Quality reward
         self.rl_manager.add_reward(
-            decision_id=decision.decision_id,
-            reward_signal=RewardSignal.QUALITY,
+            decision_id=decision_id,
+            signal_type=RewardSignal.QUALITY,
             value=output_quality,
         )
         
@@ -413,6 +433,9 @@ class Phase5IntegrationManager:
             if self.execution_traces else 0.0
         )
         
+        # Get cache performance
+        cache_stats = self.memory_cache.get_stats()
+        
         return {
             "total_executions": len(self.execution_traces),
             "successful": len(successful_traces),
@@ -420,9 +443,13 @@ class Phase5IntegrationManager:
             "success_rate": len(successful_traces) / len(self.execution_traces) if self.execution_traces else 0.0,
             "average_quality": avg_quality,
             "average_execution_time_ms": avg_time,
-            "systems_active": 7,  # All Phase 5 systems
+            "systems_active": 7,
             "rl_decisions_recorded": len(self.rl_manager.decisions),
             "memories_recorded": len(self.execution_traces),
+            # Performance metrics
+            "cache_hit_rate": cache_stats.hit_rate,
+            "cache_size": cache_stats.size,
+            "batch_size": len(self.batch_processor.batch),
         }
 
     def log_statistics(self):
