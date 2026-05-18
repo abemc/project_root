@@ -9,6 +9,7 @@ from .memory import MemoryManager
 from .query_preprocessor import Phase7QueryPreprocessor
 from .knowledge_integration_engine import Phase7KnowledgeIntegrationEngine
 from .multi_domain_retriever import MultiDomainRetriever
+from .phase5_integration import initialize_phase5, get_phase5_manager
 from collections import OrderedDict, Counter
 from src.rag.sandbox import Sandbox
 from src.phase19.security_manager import SecurityManager
@@ -140,6 +141,9 @@ class RAGAgent:
         # 自己改善エンジン統合
         from src.agent_architecture.agent_engine import SelfImprovement
         self._self_improvement = SelfImprovement()
+
+        # Phase 5: Learning and Memory Systems Integration
+        self.phase5_manager = initialize_phase5(agent_id=f"agent_{int(time.time())}")
 
         from .utils import format_tools_for_prompt
         self.tools_description, self.tool_names = format_tools_for_prompt(TOOLS)
@@ -408,6 +412,23 @@ class RAGAgent:
                 )
             except Exception:
                 pass
+            
+            # Phase 5: Record execution trace for learning
+            try:
+                quality_score = 1.0 if success else 0.0
+                if hasattr(self, 'phase5_manager'):
+                    self.phase5_manager.record_execution_trace(
+                        task_id=f"step_{self.step_count}",
+                        task_family="rag_reasoning",
+                        query=self.question[:200],
+                        execution_time_ms=duration * 1000,
+                        success=success,
+                        output_quality=quality_score,
+                        tools_used=[action] if action != "unknown" else [],
+                        error_message=None if success else f"Failed action: {action}",
+                    )
+            except Exception as e:
+                logger.debug(f"Phase 5 tracing failed: {e}")
 
     def _log_trace(self, thought, action, result, debug_info=None):
         self.log_data["trace"].append({
@@ -420,4 +441,13 @@ def run_agent(question):
     agent = RAGAgent(question, retriever, reranker)
     while not agent.finished:
         agent.run_step()
+    
+    # Phase 5: Trigger learning after execution
+    try:
+        agent.phase5_manager.learn_from_experience()
+        # Log statistics
+        agent.phase5_manager.log_statistics()
+    except Exception as e:
+        logger.debug(f"Phase 5 learning failed: {e}")
+    
     return agent.log_data.get("final_answer")
