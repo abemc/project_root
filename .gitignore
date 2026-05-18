@@ -31,3 +31,4 @@ prometheus-lite-data/
 checkpoints/
 rag_corpus/
 backups/
+docs.backup_local/
