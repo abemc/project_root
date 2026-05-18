@@ -325,7 +325,7 @@ def show_search(manager):
                 
                 # 結果表示
                 for idx, doc in enumerate(filtered[:50], 1):
-                    with st.container():
+                    with st.container(border=True):
                         col1, col2 = st.columns([3, 1])
                         
                         with col1:
@@ -338,10 +338,79 @@ def show_search(manager):
                         with col2:
                             st.caption(f"📄 {doc['size']} bytes")
                         
-                        st.markdown("---")
+                        # 詳細表示ボタン
+                        if st.button(f"📖 詳細表示", key=f"search_detail_{idx}_{doc['path']}", use_container_width=True):
+                            st.session_state.selected_search_doc = doc
                 
                 if len(filtered) > 50:
                     st.info(f"💡 最初の50件を表示しています。全{len(filtered)}件があります。")
+                
+                # 選択されたドキュメントの詳細表示
+                if 'selected_search_doc' in st.session_state:
+                    st.divider()
+                    st.markdown("### 📄 選択ドキュメント詳細")
+                    
+                    doc = st.session_state.selected_search_doc
+                    
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.markdown(f"**ファイル名:** `{doc['name']}`")
+                        st.markdown(f"**パス:** `{doc['path']}`")
+                        st.markdown(f"**カテゴリ:** `{doc['category']}`")
+                    
+                    with col2:
+                        st.markdown(f"**サイズ:** `{doc['size']} bytes`")
+                        st.markdown(f"**更新日:** `{doc['modified']}`")
+                        st.markdown(f"**フェーズ:** `{doc['phase'] if doc['phase'] else 'なし'}`")
+                    
+                    st.markdown("**🏷️ タグ:**")
+                    for tag in doc['tags']:
+                        st.write(f"- `{tag}`")
+                    
+                    st.divider()
+                    
+                    # ファイルの内容を表示
+                    try:
+                        file_path = Path(doc['full_path'])
+                        if file_path.exists():
+                            st.markdown("### 📖 ドキュメント内容")
+                            
+                            if file_path.suffix == '.md':
+                                with open(file_path, 'r', encoding='utf-8') as f:
+                                    content = f.read()
+                                st.markdown(content)
+                            
+                            elif file_path.suffix == '.json':
+                                import json
+                                with open(file_path, 'r', encoding='utf-8') as f:
+                                    json_data = json.load(f)
+                                st.json(json_data)
+                            
+                            else:
+                                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                                    content = f.read()
+                                
+                                if len(content) > 50000:
+                                    st.warning("⚠️ ファイルサイズが大きいため、最初の50,000文字のみ表示します。")
+                                    content = content[:50000]
+                                
+                                st.code(content, language='text')
+                            
+                            # ダウンロードボタン
+                            with open(file_path, 'rb') as f:
+                                file_content = f.read()
+                            
+                            st.download_button(
+                                label="📥 ファイルをダウンロード",
+                                data=file_content,
+                                file_name=doc['name'],
+                                mime="text/plain"
+                            )
+                        else:
+                            st.error(f"❌ ファイルが見つかりません: {file_path}")
+                    
+                    except Exception as e:
+                        st.error(f"❌ ファイルの読み込みに失敗しました: {str(e)}")
             else:
                 st.warning("❌ 検索条件に合致するドキュメントが見つかりません。")
         else:
