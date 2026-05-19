@@ -1,0 +1,1297 @@
+{
+  "generated": "2026-04-20T13:21:40.035976",
+  "total_documents": 136,
+  "categories": {
+    "root": [
+      {
+        "name": "CANARY_DEPLOYMENT_GUIDE.md",
+        "path": "CANARY_DEPLOYMENT_GUIDE.md",
+        "modified": "2026-04-14",
+        "tags": [
+          "guide",
+          "deploy",
+          "learning"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE15_TASK2_COMPLETION_REPORT.md",
+        "path": "PHASE15_TASK2_COMPLETION_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report"
+        ],
+        "phase": "15"
+      },
+      {
+        "name": "LEARNING_RESOURCES_ANNOUNCEMENT.md",
+        "path": "LEARNING_RESOURCES_ANNOUNCEMENT.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "learning"
+        ],
+        "phase": null
+      },
+      {
+        "name": "LEARNING_IMPLEMENTATION_REPORT.md",
+        "path": "LEARNING_IMPLEMENTATION_REPORT.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "report",
+          "learning"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE15_COMPLETE_REPORT.md",
+        "path": "PHASE15_COMPLETE_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report"
+        ],
+        "phase": "15"
+      },
+      {
+        "name": "PHASE7_RAG_INTEGRATION_COMPLETE.md",
+        "path": "PHASE7_RAG_INTEGRATION_COMPLETE.md",
+        "modified": "2026-04-11",
+        "tags": [
+          "api",
+          "rag"
+        ],
+        "phase": "7"
+      },
+      {
+        "name": "PHASE7_STEP8_SECURITY_HARDENING_REPORT.md",
+        "path": "PHASE7_STEP8_SECURITY_HARDENING_REPORT.md",
+        "modified": "2026-04-14",
+        "tags": [
+          "report",
+          "security",
+          "security"
+        ],
+        "phase": "7"
+      },
+      {
+        "name": "PHASE12_TASK5_AUTONOMY_METRICS_REPORT.md",
+        "path": "PHASE12_TASK5_AUTONOMY_METRICS_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report"
+        ],
+        "phase": "12"
+      },
+      {
+        "name": "PHASE13_FINAL_COMPLETION_REPORT.md",
+        "path": "PHASE13_FINAL_COMPLETION_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report"
+        ],
+        "phase": "13"
+      },
+      {
+        "name": "PHASE14_TASK1_COMPLETION_REPORT.md",
+        "path": "PHASE14_TASK1_COMPLETION_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report"
+        ],
+        "phase": "14"
+      },
+      {
+        "name": "QUALITY_MANAGEMENT_PIPELINE_VERIFICATION.md",
+        "path": "QUALITY_MANAGEMENT_PIPELINE_VERIFICATION.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "QUALITY_MANAGEMENT_IMPLEMENTATION_GUIDE.md",
+        "path": "QUALITY_MANAGEMENT_IMPLEMENTATION_GUIDE.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "guide",
+          "learning"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE12_IDEAL_LLM_COMPLIANCE_REPORT.md",
+        "path": "PHASE12_IDEAL_LLM_COMPLIANCE_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report",
+          "llm"
+        ],
+        "phase": "12"
+      },
+      {
+        "name": "PHASE7_INTEGRATION_COMPLETE_REPORT.md",
+        "path": "PHASE7_INTEGRATION_COMPLETE_REPORT.md",
+        "modified": "2026-04-14",
+        "tags": [
+          "report",
+          "api"
+        ],
+        "phase": "7"
+      },
+      {
+        "name": "DOCUMENTATION_DASHBOARD.md",
+        "path": "DOCUMENTATION_DASHBOARD.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE7_COMPLETE_FINAL_REPORT.md",
+        "path": "PHASE7_COMPLETE_FINAL_REPORT.md",
+        "modified": "2026-04-14",
+        "tags": [
+          "report"
+        ],
+        "phase": "7"
+      },
+      {
+        "name": "GAP1_TEMPORAL_VERIFICATION_REPORT.md",
+        "path": "GAP1_TEMPORAL_VERIFICATION_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report",
+          "security"
+        ],
+        "phase": null
+      },
+      {
+        "name": "MARKDOWN_FIX_REPORT.md",
+        "path": "MARKDOWN_FIX_REPORT.md",
+        "modified": "2026-04-11",
+        "tags": [
+          "report"
+        ],
+        "phase": null
+      },
+      {
+        "name": "DEPLOYMENT_READINESS_REPORT.md",
+        "path": "DEPLOYMENT_READINESS_REPORT.md",
+        "modified": "2026-04-14",
+        "tags": [
+          "report",
+          "deploy"
+        ],
+        "phase": null
+      },
+      {
+        "name": "GAP3_ADVERSARIAL_DETECTION_REPORT.md",
+        "path": "GAP3_ADVERSARIAL_DETECTION_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report",
+          "security"
+        ],
+        "phase": null
+      },
+      {
+        "name": "00_ドキュメント索引.md",
+        "path": "00_ドキュメント索引.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE14_IMPLEMENTATION_PLAN.md",
+        "path": "PHASE14_IMPLEMENTATION_PLAN.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "plan"
+        ],
+        "phase": "14"
+      },
+      {
+        "name": "ベクトル化完全ガイド.md",
+        "path": "ベクトル化完全ガイド.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE12_COMPLETE_FINAL_REPORT.md",
+        "path": "PHASE12_COMPLETE_FINAL_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report"
+        ],
+        "phase": "12"
+      },
+      {
+        "name": "PHASE15_TASK1_COMPLETION_REPORT.md",
+        "path": "PHASE15_TASK1_COMPLETION_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report"
+        ],
+        "phase": "15"
+      },
+      {
+        "name": "PHASE12_GAPS_COMPLETE_FINAL_REPORT.md",
+        "path": "PHASE12_GAPS_COMPLETE_FINAL_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report",
+          "security"
+        ],
+        "phase": "12"
+      },
+      {
+        "name": "GAP2_ETHICS_MONITORING_REPORT.md",
+        "path": "GAP2_ETHICS_MONITORING_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report",
+          "security"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE13_IMPLEMENTATION_PLAN.md",
+        "path": "PHASE13_IMPLEMENTATION_PLAN.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "plan"
+        ],
+        "phase": "13"
+      },
+      {
+        "name": "README.md",
+        "path": "README.md",
+        "modified": "2026-04-11",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "DOCUMENTATION_MASTER_INDEX.md",
+        "path": "DOCUMENTATION_MASTER_INDEX.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE7_RAG_AGENT_INTEGRATION_REPORT.md",
+        "path": "PHASE7_RAG_AGENT_INTEGRATION_REPORT.md",
+        "modified": "2026-04-12",
+        "tags": [
+          "report",
+          "api",
+          "rag"
+        ],
+        "phase": "7"
+      },
+      {
+        "name": "PHASE12_IMPLEMENTATION_REPORT.md",
+        "path": "PHASE12_IMPLEMENTATION_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report"
+        ],
+        "phase": "12"
+      },
+      {
+        "name": "PHASE7_DEPLOYMENT_COMPLETION_REPORT.md",
+        "path": "PHASE7_DEPLOYMENT_COMPLETION_REPORT.md",
+        "modified": "2026-04-14",
+        "tags": [
+          "report",
+          "deploy"
+        ],
+        "phase": "7"
+      },
+      {
+        "name": "PHASE10_COMPLETION_REPORT.json",
+        "path": "PHASE10_COMPLETION_REPORT.json",
+        "modified": "2026-04-18",
+        "tags": [
+          "report"
+        ],
+        "phase": "10"
+      }
+    ],
+    "01_クイックスタート": [
+      {
+        "name": "AIベギナーガイド.md",
+        "path": "01_クイックスタート/AIベギナーガイド.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "クイックスタート_初心者向け.md",
+        "path": "01_クイックスタート/クイックスタート_初心者向け.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      }
+    ],
+    "03_運用ガイド": [
+      {
+        "name": "運用開始ガイド.md",
+        "path": "03_運用ガイド/運用開始ガイド.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "バックアップガイド.md",
+        "path": "03_運用ガイド/バックアップガイド.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "デプロイメントガイド.md",
+        "path": "03_運用ガイド/デプロイメントガイド.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      }
+    ],
+    "guides": [
+      {
+        "name": "AUTONOMOUS_LLM_BLUEPRINT.md",
+        "path": "guides/AUTONOMOUS_LLM_BLUEPRINT.md",
+        "modified": "2026-04-11",
+        "tags": [
+          "llm",
+          "learning"
+        ],
+        "phase": null
+      },
+      {
+        "name": "BACKUP_GUIDE.md",
+        "path": "guides/BACKUP_GUIDE.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "guide",
+          "backup",
+          "learning"
+        ],
+        "phase": null
+      },
+      {
+        "name": "SYSTEM_INTEGRATION_GUIDE.md",
+        "path": "guides/SYSTEM_INTEGRATION_GUIDE.md",
+        "modified": "2026-04-10",
+        "tags": [
+          "guide",
+          "api",
+          "learning"
+        ],
+        "phase": null
+      },
+      {
+        "name": "WEEK2_IMPLEMENTATION_GUIDE.md",
+        "path": "guides/WEEK2_IMPLEMENTATION_GUIDE.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "guide",
+          "learning"
+        ],
+        "phase": null
+      }
+    ],
+    "00_プロジェクト概要": [
+      {
+        "name": "プロジェクト構成.md",
+        "path": "00_プロジェクト概要/プロジェクト構成.md",
+        "modified": "2026-04-14",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "プロジェクト整理完了報告書.md",
+        "path": "00_プロジェクト概要/プロジェクト整理完了報告書.md",
+        "modified": "2026-04-15",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "統合最終レポート.md",
+        "path": "00_プロジェクト概要/統合最終レポート.md",
+        "modified": "2026-04-14",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "プロジェクト構成ガイド.md",
+        "path": "00_プロジェクト概要/プロジェクト構成ガイド.md",
+        "modified": "2026-04-15",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "マークダウンファイル整理ガイド.md",
+        "path": "00_プロジェクト概要/マークダウンファイル整理ガイド.md",
+        "modified": "2026-04-15",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      }
+    ],
+    "02_実装計画": [
+      {
+        "name": "Phase10_実装計画.md",
+        "path": "02_実装計画/Phase10_実装計画.md",
+        "modified": "2026-04-14",
+        "tags": [
+          "other"
+        ],
+        "phase": "10"
+      },
+      {
+        "name": "Phase9_実装計画.md",
+        "path": "02_実装計画/Phase9_実装計画.md",
+        "modified": "2026-04-14",
+        "tags": [
+          "other"
+        ],
+        "phase": "9"
+      },
+      {
+        "name": "Phase8_実装計画.md",
+        "path": "02_実装計画/Phase8_実装計画.md",
+        "modified": "2026-04-14",
+        "tags": [
+          "other"
+        ],
+        "phase": "8"
+      },
+      {
+        "name": "Phase10_設計書.md",
+        "path": "02_実装計画/Phase10_設計書.md",
+        "modified": "2026-04-15",
+        "tags": [
+          "other"
+        ],
+        "phase": "10"
+      }
+    ],
+    "05_本番環境": [
+      {
+        "name": "デプロイメント完了報告.md",
+        "path": "05_本番環境/デプロイメント完了報告.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "本番テスト完了.md",
+        "path": "05_本番環境/本番テスト完了.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      }
+    ],
+    "02_ユーザーガイド": [
+      {
+        "name": "ユーザー操作ガイド.md",
+        "path": "02_ユーザーガイド/ユーザー操作ガイド.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "利用事例とFAQ.md",
+        "path": "02_ユーザーガイド/利用事例とFAQ.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      }
+    ],
+    "06_テスト・検証": [
+      {
+        "name": "本番テスト実行結果.md",
+        "path": "06_テスト・検証/本番テスト実行結果.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "本番テスト計画.md",
+        "path": "06_テスト・検証/本番テスト計画.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "Phase10_テスト監査報告書.md",
+        "path": "06_テスト・検証/Phase10_テスト監査報告書.md",
+        "modified": "2026-04-15",
+        "tags": [
+          "other"
+        ],
+        "phase": "10"
+      },
+      {
+        "name": "検証レポート.md",
+        "path": "06_テスト・検証/検証レポート.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "Phase10_テスト計画.md",
+        "path": "06_テスト・検証/Phase10_テスト計画.md",
+        "modified": "2026-04-15",
+        "tags": [
+          "other"
+        ],
+        "phase": "10"
+      },
+      {
+        "name": "テストガイド.md",
+        "path": "06_テスト・検証/テストガイド.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "Phase10_テスト検証状態.md",
+        "path": "06_テスト・検証/Phase10_テスト検証状態.md",
+        "modified": "2026-04-15",
+        "tags": [
+          "other"
+        ],
+        "phase": "10"
+      }
+    ],
+    "04_完了レポート": [
+      {
+        "name": "統合最終レポート.md",
+        "path": "04_完了レポート/統合最終レポート.md",
+        "modified": "2026-04-15",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE10_COMPLETION_REPORT.json",
+        "path": "04_完了レポート/PHASE10_COMPLETION_REPORT.json",
+        "modified": "2026-04-15",
+        "tags": [
+          "report"
+        ],
+        "phase": "10"
+      }
+    ],
+    "07_学習資料": [
+      {
+        "name": "テキスト埋め込み完全実装ガイド.md",
+        "path": "07_学習資料/テキスト埋め込み完全実装ガイド.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "ニューラルネットワーク完全ガイド.md",
+        "path": "07_学習資料/ニューラルネットワーク完全ガイド.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "バッチ処理とパディング詳細ガイド.md",
+        "path": "07_学習資料/バッチ処理とパディング詳細ガイド.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "プロジェクトに必要な数学基礎.md",
+        "path": "07_学習資料/プロジェクトに必要な数学基礎.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "学習リソース一覧.md",
+        "path": "07_学習資料/学習リソース一覧.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "LLM学習ロードマップ.md",
+        "path": "07_学習資料/LLM学習ロードマップ.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "llm"
+        ],
+        "phase": null
+      }
+    ],
+    "08_チェンジログ・レポート": [
+      {
+        "name": "フェーズ4実装報告書.md",
+        "path": "08_チェンジログ・レポート/フェーズ4実装報告書.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "RAGエージェント統合報告書.md",
+        "path": "08_チェンジログ・レポート/RAGエージェント統合報告書.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "rag"
+        ],
+        "phase": null
+      },
+      {
+        "name": "フェーズ3実装報告書.md",
+        "path": "08_チェンジログ・レポート/フェーズ3実装報告書.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "マークアップ形式ガイド.md",
+        "path": "08_チェンジログ・レポート/マークアップ形式ガイド.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "マークアップ修正報告書.md",
+        "path": "08_チェンジログ・レポート/マークアップ修正報告書.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "フェーズ7実装報告書.md",
+        "path": "08_チェンジログ・レポート/フェーズ7実装報告書.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "フェーズ6実装報告書.md",
+        "path": "08_チェンジログ・レポート/フェーズ6実装報告書.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "プロジェクト構成ガイド.md",
+        "path": "08_チェンジログ・レポート/プロジェクト構成ガイド.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "RAG統合完了報告書.md",
+        "path": "08_チェンジログ・レポート/RAG統合完了報告書.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "rag"
+        ],
+        "phase": null
+      },
+      {
+        "name": "フェーズ1実装報告書.md",
+        "path": "08_チェンジログ・レポート/フェーズ1実装報告書.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "フェーズ5実装報告書.md",
+        "path": "08_チェンジログ・レポート/フェーズ5実装報告書.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "Phase10_最終完了報告.md",
+        "path": "08_チェンジログ・レポート/Phase10_最終完了報告.md",
+        "modified": "2026-04-15",
+        "tags": [
+          "other"
+        ],
+        "phase": "10"
+      },
+      {
+        "name": "自立型LLM検証報告書.md",
+        "path": "08_チェンジログ・レポート/自立型LLM検証報告書.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "llm"
+        ],
+        "phase": null
+      },
+      {
+        "name": "変更ログ.md",
+        "path": "08_チェンジログ・レポート/変更ログ.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "マルチモーダル完了報告書.md",
+        "path": "08_チェンジログ・レポート/マルチモーダル完了報告書.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "プロジェクト完了報告.md",
+        "path": "08_チェンジログ・レポート/プロジェクト完了報告.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "フェーズ2実装報告書.md",
+        "path": "08_チェンジログ・レポート/フェーズ2実装報告書.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE10_最終サマリー.json",
+        "path": "08_チェンジログ・レポート/Phase7-10/PHASE10_最終サマリー.json",
+        "modified": "2026-04-17",
+        "tags": [
+          "other"
+        ],
+        "phase": "10"
+      },
+      {
+        "name": "PHASE10_デプロイレポート.json",
+        "path": "08_チェンジログ・レポート/Phase7-10/PHASE10_デプロイレポート.json",
+        "modified": "2026-04-17",
+        "tags": [
+          "other"
+        ],
+        "phase": "10"
+      },
+      {
+        "name": "PHASE10_COMPLETION_REPORT.json",
+        "path": "08_チェンジログ・レポート/Phase7-10/PHASE10_COMPLETION_REPORT.json",
+        "modified": "2026-04-17",
+        "tags": [
+          "report"
+        ],
+        "phase": "10"
+      }
+    ],
+    "04_技術ドキュメント": [
+      {
+        "name": "統合ガイド.md",
+        "path": "04_技術ドキュメント/統合ガイド.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "Phase7設計書.md",
+        "path": "04_技術ドキュメント/Phase7設計書.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": "7"
+      },
+      {
+        "name": "システム統合ガイド.md",
+        "path": "04_技術ドキュメント/システム統合ガイド.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "API仕様書.md",
+        "path": "04_技術ドキュメント/API仕様書.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "api"
+        ],
+        "phase": null
+      },
+      {
+        "name": "LLM推論エンジン説明.md",
+        "path": "04_技術ドキュメント/LLM推論エンジン説明.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "llm"
+        ],
+        "phase": null
+      },
+      {
+        "name": "利用例.md",
+        "path": "04_技術ドキュメント/利用例.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "自立型LLMブループリント.md",
+        "path": "04_技術ドキュメント/自立型LLMブループリント.md",
+        "modified": "2026-04-13",
+        "tags": [
+          "llm"
+        ],
+        "phase": null
+      }
+    ],
+    "01_仕様書": [
+      {
+        "name": "app.py仕様書.md",
+        "path": "01_仕様書/app.py仕様書.md",
+        "modified": "2026-04-18",
+        "tags": [
+          "other"
+        ],
+        "phase": null
+      },
+      {
+        "name": "API仕様書.md",
+        "path": "01_仕様書/API仕様書.md",
+        "modified": "2026-04-18",
+        "tags": [
+          "api"
+        ],
+        "phase": null
+      }
+    ],
+    "implementation": [
+      {
+        "name": "LANGUAGE_CAPABILITY_IMPLEMENTATION_PLAN.md",
+        "path": "implementation/LANGUAGE_CAPABILITY_IMPLEMENTATION_PLAN.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "plan"
+        ],
+        "phase": null
+      }
+    ],
+    "reports": [
+      {
+        "name": "AUTONOMOUS_LLM_VERIFICATION_REPORT.md",
+        "path": "reports/AUTONOMOUS_LLM_VERIFICATION_REPORT.md",
+        "modified": "2026-04-11",
+        "tags": [
+          "report",
+          "llm"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE3_IMPLEMENTATION_REPORT.md",
+        "path": "reports/PHASE3_IMPLEMENTATION_REPORT.md",
+        "modified": "2026-04-11",
+        "tags": [
+          "report"
+        ],
+        "phase": "3"
+      },
+      {
+        "name": "PHASE17_TASK3_AGENT_ARCHITECTURE_REPORT.md",
+        "path": "reports/PHASE17_TASK3_AGENT_ARCHITECTURE_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report"
+        ],
+        "phase": "17"
+      },
+      {
+        "name": "PHASE5_IMPLEMENTATION_REPORT.md",
+        "path": "reports/PHASE5_IMPLEMENTATION_REPORT.md",
+        "modified": "2026-04-11",
+        "tags": [
+          "report"
+        ],
+        "phase": "5"
+      },
+      {
+        "name": "PHASE2_IMPLEMENTATION_REPORT.md",
+        "path": "reports/PHASE2_IMPLEMENTATION_REPORT.md",
+        "modified": "2026-04-11",
+        "tags": [
+          "report"
+        ],
+        "phase": "2"
+      },
+      {
+        "name": "Phase11_IMPLEMENTATION_OVERVIEW.md",
+        "path": "reports/Phase11_IMPLEMENTATION_OVERVIEW.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "other"
+        ],
+        "phase": "11"
+      },
+      {
+        "name": "Phase11_IMPLEMENTATION_ROADMAP.md",
+        "path": "reports/Phase11_IMPLEMENTATION_ROADMAP.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "other"
+        ],
+        "phase": "11"
+      },
+      {
+        "name": "Phase11_WEEK2_PROGRESS.md",
+        "path": "reports/Phase11_WEEK2_PROGRESS.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "other"
+        ],
+        "phase": "11"
+      },
+      {
+        "name": "WEEK2_FINAL_COMPLETION_REPORT.md",
+        "path": "reports/WEEK2_FINAL_COMPLETION_REPORT.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "report"
+        ],
+        "phase": null
+      },
+      {
+        "name": "WEEK3_DAY3_BENCHMARK_ENGINE_REPORT.md",
+        "path": "reports/WEEK3_DAY3_BENCHMARK_ENGINE_REPORT.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "report",
+          "benchmark"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE1_IMPLEMENTATION_REPORT.md",
+        "path": "reports/PHASE1_IMPLEMENTATION_REPORT.md",
+        "modified": "2026-04-11",
+        "tags": [
+          "report"
+        ],
+        "phase": "1"
+      },
+      {
+        "name": "PHASE16_COMPLETE_REPORT.md",
+        "path": "reports/PHASE16_COMPLETE_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report"
+        ],
+        "phase": "16"
+      },
+      {
+        "name": "PHASE11_IMPROVEMENT_SUMMARY.md",
+        "path": "reports/PHASE11_IMPROVEMENT_SUMMARY.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "report"
+        ],
+        "phase": "11"
+      },
+      {
+        "name": "PHASE11_IMPLEMENTATION_PROGRESS.md",
+        "path": "reports/PHASE11_IMPLEMENTATION_PROGRESS.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "other"
+        ],
+        "phase": "11"
+      },
+      {
+        "name": "PHASE18_MONITORING_OBSERVABILITY_REPORT.md",
+        "path": "reports/PHASE18_MONITORING_OBSERVABILITY_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report"
+        ],
+        "phase": "18"
+      },
+      {
+        "name": "PHASE11_WEEK1_SUMMARY.md",
+        "path": "reports/PHASE11_WEEK1_SUMMARY.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "report"
+        ],
+        "phase": "11"
+      },
+      {
+        "name": "WEEK3_COMPLETE_REPORT.md",
+        "path": "reports/WEEK3_COMPLETE_REPORT.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "report"
+        ],
+        "phase": null
+      },
+      {
+        "name": "WEEK2_DAY23_COMPLETION_REPORT.md",
+        "path": "reports/WEEK2_DAY23_COMPLETION_REPORT.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "report"
+        ],
+        "phase": null
+      },
+      {
+        "name": "IDEAL_LLM_GAP_ANALYSIS_REPORT.md",
+        "path": "reports/IDEAL_LLM_GAP_ANALYSIS_REPORT.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "report",
+          "llm",
+          "security"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE17_TASK2_RAG_INTEGRATION_REPORT.md",
+        "path": "reports/PHASE17_TASK2_RAG_INTEGRATION_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report",
+          "api",
+          "rag"
+        ],
+        "phase": "17"
+      },
+      {
+        "name": "MULTIMODAL_COMPLETION_REPORT.md",
+        "path": "reports/MULTIMODAL_COMPLETION_REPORT.md",
+        "modified": "2026-04-10",
+        "tags": [
+          "report"
+        ],
+        "phase": null
+      },
+      {
+        "name": "WEEK2_DAY45_MULTILINGUAL_REPORT.md",
+        "path": "reports/WEEK2_DAY45_MULTILINGUAL_REPORT.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "report"
+        ],
+        "phase": null
+      },
+      {
+        "name": "IDEAL_LLM_RESEARCH_REPORT.md",
+        "path": "reports/IDEAL_LLM_RESEARCH_REPORT.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "report",
+          "llm"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE16_IMPLEMENTATION_SUMMARY.md",
+        "path": "reports/PHASE16_IMPLEMENTATION_SUMMARY.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report"
+        ],
+        "phase": "16"
+      },
+      {
+        "name": "PHASE7_IMPLEMENTATION_REPORT.md",
+        "path": "reports/PHASE7_IMPLEMENTATION_REPORT.md",
+        "modified": "2026-04-11",
+        "tags": [
+          "report"
+        ],
+        "phase": "7"
+      },
+      {
+        "name": "BASELINE_METRICS_REPORT.md",
+        "path": "reports/BASELINE_METRICS_REPORT.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "report"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE11_FINAL_COMPLETION_REPORT.md",
+        "path": "reports/PHASE11_FINAL_COMPLETION_REPORT.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "report"
+        ],
+        "phase": "11"
+      },
+      {
+        "name": "PHASE16_17_SUMMARY_REPORT.md",
+        "path": "reports/PHASE16_17_SUMMARY_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report"
+        ],
+        "phase": "16"
+      },
+      {
+        "name": "PHASE17_TASK1_SAFETY_HARDENING_REPORT.md",
+        "path": "reports/PHASE17_TASK1_SAFETY_HARDENING_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report",
+          "security",
+          "security"
+        ],
+        "phase": "17"
+      },
+      {
+        "name": "PHASE4_IMPLEMENTATION_REPORT.md",
+        "path": "reports/PHASE4_IMPLEMENTATION_REPORT.md",
+        "modified": "2026-04-11",
+        "tags": [
+          "report"
+        ],
+        "phase": "4"
+      },
+      {
+        "name": "WEEK3_DAY12_SCALING_REPORT.md",
+        "path": "reports/WEEK3_DAY12_SCALING_REPORT.md",
+        "modified": "2026-04-19",
+        "tags": [
+          "report"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE16_17_FINAL_COMPLETION_REPORT.md",
+        "path": "reports/PHASE16_17_FINAL_COMPLETION_REPORT.md",
+        "modified": "2026-04-20",
+        "tags": [
+          "report"
+        ],
+        "phase": "16"
+      },
+      {
+        "name": "PHASE6_IMPLEMENTATION_REPORT.md",
+        "path": "reports/PHASE6_IMPLEMENTATION_REPORT.md",
+        "modified": "2026-04-11",
+        "tags": [
+          "report"
+        ],
+        "phase": "6"
+      }
+    ],
+    "03_Phase7-10資料": [
+      {
+        "name": "RAG仕組み完全ガイド.md",
+        "path": "03_Phase7-10資料/RAG仕組み完全ガイド.md",
+        "modified": "2026-04-14",
+        "tags": [
+          "rag"
+        ],
+        "phase": null
+      },
+      {
+        "name": "PHASE7_RAG_INTEGRATION_COMPLETE.md",
+        "path": "03_Phase7-10資料/docs/PHASE7_RAG_INTEGRATION_COMPLETE.md",
+        "modified": "2026-04-14",
+        "tags": [
+          "api",
+          "rag"
+        ],
+        "phase": "7"
+      }
+    ]
+  }
+}

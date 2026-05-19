@@ -832,7 +832,7 @@ pytest tests/agent/test_autonomy/test_decision_analyzer.py -v
 
 フレームワークに関する質問や問題がある場合は、以下をご参照ください：
 
-- 📖 [ドキュメント](./src/agent/autonomy/__init__.py)
+- 📖 [ドキュメント](../../../src/agent/autonomy/__init__.py)
 - 💻 [ソースコード](../src/agent/autonomy/)
 - 🧪 [テストスイート](../tests/agent/test_autonomy/)
 - 📝 [使用例](../src/agent/autonomy/examples.py)

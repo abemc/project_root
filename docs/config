@@ -1,0 +1,27 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+	symlinks = true
+[user]
+	email = devnull@example.com
+	name = devnull
+[remote "origin"]
+	url = git@github.com:abemc/project_root.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[http]
+	postBuffer = 524288000
+[branch "pr/ci-cache-prefetch-minimal"]
+	remote = origin
+	merge = refs/heads/pr/ci-cache-prefetch-minimal
+[branch "feature/ci-cache-prefetch-from-main"]
+	remote = origin
+	merge = refs/heads/feature/ci-cache-prefetch-from-main
+[branch "feature/ci-cache-prefetch-for-pr"]
+	remote = origin
+	merge = refs/heads/feature/ci-cache-prefetch-for-pr
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+	vscode-merge-base = origin/main

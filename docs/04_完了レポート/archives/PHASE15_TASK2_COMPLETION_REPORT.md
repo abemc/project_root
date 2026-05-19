@@ -51,7 +51,7 @@
 
 ### 🧪 テスト体系
 
-**テストファイル**: [tests/test_distributed_cache.py](tests/test_distributed_cache.py)
+**テストファイル**: [tests/test_distributed_cache.py](../../../tests/test_distributed_cache.py)
 
 #### テスト統計
 - **総テスト数**: 21

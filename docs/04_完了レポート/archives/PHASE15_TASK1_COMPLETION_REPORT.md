@@ -89,7 +89,7 @@
 
 ### 🧪 テスト体系
 
-**テストファイル**: [tests/test_microservices.py](tests/test_microservices.py)
+**テストファイル**: [tests/test_microservices.py](../../../tests/test_microservices.py)
 
 #### テスト統計
 - **総テスト数**: 21

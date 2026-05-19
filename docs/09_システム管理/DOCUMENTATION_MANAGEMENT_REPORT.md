@@ -94,7 +94,7 @@
 ---
 
 ### 6️⃣ **Python管理ツール** 🐍
-**ファイル**: [docs_manager.py](docs_manager.py)
+**ファイル**: [docs_manager.py](../../docs_manager.py)
 
 **特徴**:
 - ✅ キーワード検索（`--search`）

@@ -493,12 +493,12 @@ pytest tests/phase19/test_security_privacy.py --cov=src.phase19.security
 
 ## 🎓 学習リソース
 
-- [暗号化エンジン](src/phase19/security/encryption_engine.py)
-- [PII検出](src/phase19/security/pii_detector.py)
-- [監査ログ](src/phase19/security/audit_log.py)
-- [GDPR・SOC2対応](src/phase19/security/compliance.py)
-- [統合管理](src/phase19/security_manager.py)
-- [テストスイート](tests/phase19/test_security_privacy.py)
+- [暗号化エンジン](../../src/phase19/security/encryption_engine.py)
+- [PII検出](../../src/phase19/security/pii_detector.py)
+- [監査ログ](../../src/phase19/security/audit_log.py)
+- [GDPR・SOC2対応](../../src/phase19/security/compliance.py)
+- [統合管理](../../src/phase19/security_manager.py)
+- [テストスイート](../../tests/phase19/test_security_privacy.py)
 
 ---
 

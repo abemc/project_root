@@ -474,8 +474,8 @@
 ```
 
 **実装ファイル**:
-- [src/model.py](src/model.py)
-- [checkpoints/](checkpoints/) - チェックポイント保存
+- [src/model.py](../../../../src/model.py)
+- [checkpoints/](../../../../checkpoints) - チェックポイント保存
 
 ---
 
@@ -511,7 +511,7 @@
 ```
 
 **実装ファイル**:
-- [src/rag/](src/rag/) - RAGシステム全体
+- [src/rag/](../../../../src/rag) - RAGシステム全体
 
 ---
 
@@ -547,8 +547,8 @@
 ```
 
 **実装ファイル**:
-- [src/multimodal/](src/multimodal/)
-- [app.py](app.py) - Streamlit UI
+- [src/multimodal/](../../../../src/multimodal)
+- [app.py](../../../../app.py) - Streamlit UI
 
 ---
 
@@ -600,7 +600,7 @@ MetricTracker:
 ```
 
 **実装ファイル**:
-- [src/self_improvement/](src/self_improvement/)
+- [src/self_improvement/](../../../../src/self_improvement)
 
 ---
 
@@ -635,8 +635,8 @@ MetricTracker:
 ```
 
 **実装ファイル**:
-- [src/backup.py](src/backup.py)
-- [tools/](tools/) - ユーティリティ
+- [src/backup.py](../../../../src/backup.py)
+- [tools/](../../../../tools) - ユーティリティ
 
 ---
 
