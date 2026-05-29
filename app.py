@@ -847,6 +847,28 @@ def setup_sidebar():
         )
         st.sidebar.markdown("---")
 
+        # ===== チャット履歴クリア機能 =====
+        col1, col2 = st.sidebar.columns(2)
+        with col1:
+            if st.button("🗑️ チャット履歴クリア", key="clear_chat_history", use_container_width=True):
+                st.session_state["messages"] = []
+                st.session_state["presearch_query"] = ""
+                st.session_state["presearch_results"] = []
+                st.session_state["chat_history"] = []
+                # チャット履歴ファイルも削除
+                try:
+                    chat_file = Path(__file__).resolve().parent / "data" / "chat_history.json"
+                    if chat_file.exists():
+                        chat_file.unlink()
+                    st.success("✅ チャット履歴をクリアしました")
+                except Exception as e:
+                    st.warning(f"⚠️ クリア処理中に警告: {e}")
+        with col2:
+            if st.button("🔄 ページリロード", key="reload_page", use_container_width=True):
+                st.rerun()
+
+        st.sidebar.markdown("---")
+
         # 開発者向けの簡易コントロール
         with st.sidebar.expander("👷 開発者ツール", expanded=False):
             if st.button("🔎 プロジェクト検査", key="dev_proj_inspect"):
