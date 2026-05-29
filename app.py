@@ -2883,6 +2883,13 @@ def _generate_assistant_response(query: str) -> None:
             except Exception:
                 treat_as_fresh = True
 
+            # ===== 根本修正：Web 検索結果がある場合は常にチャット履歴を無視 =====
+            # これにより、最初のクエリで誤った回答が生成されても、
+            # 次のクエリで Web 検索結果が優先される
+            if presearch_docs and isinstance(presearch_docs, list) and len(presearch_docs) > 0:
+                treat_as_fresh = True
+                _append_run_log(f"CRITICAL: Web search results found ({len(presearch_docs)} docs) -> ignoring chat history to prioritize fresh search results")
+
             if treat_as_fresh:
                 chat_history = None
             else:
