@@ -2360,7 +2360,10 @@ def _generate_assistant_response(query: str) -> None:
                             st.session_state.presearch_query = query_for_llm
                             _append_run_log(f"presearch_docs_added_to_session: count={len(presearch_docs)}")
                         else:
-                            _append_run_log(f"web_search_no_results: presearch_docs={type(presearch_docs)} len={len(presearch_docs) if isinstance(presearch_docs, list) else 'N/A'}")
+                            # Even if no results, update presearch_query to maintain context
+                            st.session_state.presearch_results = []
+                            st.session_state.presearch_query = query_for_llm
+                            _append_run_log(f"web_search_no_results: presearch_docs={type(presearch_docs)} len={len(presearch_docs) if isinstance(presearch_docs, list) else 'N/A'} [presearch_query still updated]")
                     except Exception as e:
                         _append_run_log(f"web_search_error: {e}")
                         presearch_docs = []
@@ -2471,7 +2474,9 @@ def _generate_assistant_response(query: str) -> None:
             try:
                 if retriever_available:
                     retriever = get_retriever()
+                    _append_run_log(f"DEBUG: retriever_available={retriever_available} retriever={'exists' if retriever else 'None'}")
                     if retriever:
+                        _append_run_log(f"DEBUG: Entering if retriever block")
                         top_k = st.session_state.get('retrieval_top_k', 10)
                         last_src = st.session_state.get('last_added_source')
                         last_file_src = st.session_state.get('last_uploaded_file_source')
@@ -2517,6 +2522,13 @@ def _generate_assistant_response(query: str) -> None:
                         else:
                             local_pre = retriever.hybrid_search(query_for_llm, top_k=top_k, min_score=0.015)
                             _append_run_log(f"DEBUG: hybrid_search called, results: {len(local_pre)}")
+                        
+                        # EARLY presearch_query update - right after hybrid_search to ensure it executes
+                        _append_run_log(f"DEBUG: After hybrid_search - local_pre type={type(local_pre).__name__} len={len(local_pre) if isinstance(local_pre, list) else 'N/A'} condition={bool(local_pre)}")
+                        # Update presearch_query regardless of whether results exist (empty results still should update context)
+                        st.session_state.presearch_results = local_pre if local_pre else []
+                        st.session_state.presearch_query = query_for_llm
+                        _append_run_log(f"DEBUG: EARLY_UPDATE - presearch_query set to '{query_for_llm}' after hybrid_search (results={len(local_pre) if isinstance(local_pre, list) else 0})")
 
                         # Wikipedia等のナビゲーション断片（言語一覧/話題を追加など）を除外
                         def _is_noise_chunk(s: str) -> bool:
@@ -2632,12 +2644,16 @@ def _generate_assistant_response(query: str) -> None:
                         except Exception:
                             pass
 
+                        _append_run_log(f"DEBUG: Line 2635 reached - About to loop over local_pre. local_pre type={type(local_pre).__name__} len={len(local_pre) if isinstance(local_pre, list) else 'N/A'}")
                         for d in local_pre:
                             if 'meta' not in d:
                                 d['meta'] = d.get('meta') or {}
+                        _append_run_log(f"DEBUG: Line 2638 - Loop completed. About to update presearch_query.")
                         # 古い/外部由来の結果を混ぜると話題ずれしやすいため、現在クエリのローカル結果で上書き
+                        _append_run_log(f"DEBUG: About to update presearch_query. Current local_pre len={len(local_pre) if isinstance(local_pre, list) else 'NOT_LIST'}")
                         st.session_state.presearch_results = local_pre
                         st.session_state.presearch_query = current_query
+                        _append_run_log(f"LOCAL_SEARCH: presearch_query set to '{current_query}'") # DEBUG: verify execution
                         try:
                             snap = []
                             for d in local_pre[:3]:
