@@ -2328,23 +2328,22 @@ def _generate_assistant_response(query: str) -> None:
             else:
                 query_for_llm = query
             
-            # ===== 相対日付クエリでの Web 検索（この時点で interpreted_date が生きている）=====
+            # ===== Web 検索：相対日付有無に関わらずすべてのクエリで実行 =====
             presearch_docs = []
             try:
                 do_auto = os.getenv("RAG_ENABLE_DATE_PRESEARCH", "true").lower() == "true" or st.session_state.get("ui_auto_search")
             except Exception:
                 do_auto = os.getenv("RAG_ENABLE_DATE_PRESEARCH", "true").lower() == "true"
             
-            if interpreted_date and do_auto:
-                _append_run_log(f"web_search_check: interpreted_date={interpreted_date} do_auto={do_auto}")
+            # Web 検索実行条件：auto_search が有効
+            if do_auto:
                 simple_date_tokens = ["今日", "昨日", "明日", "一昨日"]
                 original_query_stripped = query.strip()
                 is_simple_date_query = original_query_stripped in simple_date_tokens
-                _append_run_log(f"is_simple_date_query: '{original_query_stripped}' in {simple_date_tokens} = {is_simple_date_query}")
                 
+                # 日付検出有無を問わず、シンプル日付クエリ以外は Web 検索を実行
                 if not is_simple_date_query:
-                    # 具体的なクエリ（例「昨日の試合」）なら Web 検索を実行
-                    _append_run_log(f"executing_web_search: with query='{query_for_llm}'")
+                    _append_run_log(f"executing_web_search: query='{query_for_llm}' interpreted_date={interpreted_date}")
                     try:
                         from src.rag.web_search import search_web_tool as _search_web_tool
                         presearch_docs = _search_web_tool(query_for_llm)
