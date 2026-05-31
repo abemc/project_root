@@ -91,3 +91,26 @@ def test_feedback_manager_uses_ethics_metadata_for_safety_signal(tmp_path):
     value_signals = fb.metadata.get("value_signals") or {}
     assert "safety" in value_signals
     assert value_signals["safety"] < 0.2
+
+
+def test_feedback_manager_returns_value_tuning_timeseries(tmp_path):
+    mgr = FeedbackManager(storage_dir=str(tmp_path / "feedback"))
+    mgr.record_feedback(
+        user_query="q1",
+        model_response="a1",
+        rating=0.9,
+        feedback_text="正確で安全な回答でした",
+        tags=["正確性", "安全性"],
+    )
+    mgr.record_feedback(
+        user_query="q2",
+        model_response="a2",
+        rating=0.8,
+        feedback_text="わかりやすく有用でした",
+        tags=["わかりやすさ", "有用性"],
+    )
+
+    series = mgr.get_value_tuning_timeseries(min_rating=0.0, max_points=10, rolling_window=2)
+    assert len(series["timestamps"]) == 2
+    assert len(series["signals"]["safety"]) == 2
+    assert len(series["signals"]["accuracy"]) == 2

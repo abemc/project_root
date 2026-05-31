@@ -244,6 +244,45 @@ class FeedbackManager:
         """価値軸シグナルの集計サマリーを返す。"""
         source_items = self.export_for_training(min_rating=min_rating)
         return aggregate_value_signals(source_items)
+
+    def get_value_tuning_timeseries(
+        self,
+        min_rating: float = 0.0,
+        max_points: int = 40,
+        rolling_window: int = 5,
+    ) -> Dict[str, Any]:
+        """価値軸シグナルの時系列サマリーを返す。"""
+        items = [f for f in self.feedback_cache if f.rating >= min_rating]
+        items = items[-max_points:]
+        if not items:
+            return {"timestamps": [], "signals": {}}
+
+        signal_names = ["safety", "accuracy", "clarity", "helpfulness", "transparency", "neutrality"]
+        timestamps: List[str] = []
+        series: Dict[str, List[float]] = {name: [] for name in signal_names}
+
+        for index, feedback in enumerate(items):
+            timestamps.append(feedback.timestamp)
+            start = max(0, index - max(1, int(rolling_window)) + 1)
+            window_items = items[start:index + 1]
+            window_records = []
+            for row in window_items:
+                window_records.append({
+                    "tags": row.tags,
+                    "feedback": row.feedback_text,
+                    "metadata": row.metadata,
+                })
+            aggregated = aggregate_value_signals(window_records)
+            means = aggregated.get("signal_means") or {}
+            for name in signal_names:
+                value = means.get(name)
+                series[name].append(float(value) if isinstance(value, (int, float)) else None)
+
+        return {
+            "timestamps": timestamps,
+            "signals": series,
+            "rolling_window": int(rolling_window),
+        }
     
     def get_improvement_areas(self, percentile: float = 25) -> List[str]:
         """

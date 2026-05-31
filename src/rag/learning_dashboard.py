@@ -306,9 +306,12 @@ class LearningDashboard:
             st.caption("Value Tuningモジュールが利用できません。")
         else:
             try:
-                value_summary = FeedbackManager().get_value_tuning_summary(min_rating=0.0)
+                feedback_manager = FeedbackManager()
+                value_summary = feedback_manager.get_value_tuning_summary(min_rating=0.0)
+                value_timeseries = feedback_manager.get_value_tuning_timeseries(min_rating=0.0)
             except Exception:
                 value_summary = {}
+                value_timeseries = {}
 
             signal_means = value_summary.get("signal_means") or {}
             signal_counts = value_summary.get("signal_counts") or {}
@@ -327,6 +330,53 @@ class LearningDashboard:
 
                 top_key = max(signal_means, key=signal_means.get)
                 st.caption(f"現在最も強い価値軸: {top_key} ({signal_means[top_key]:.2f})")
+
+                timestamps = value_timeseries.get("timestamps") or []
+                signal_series = value_timeseries.get("signals") or {}
+                safety_values = signal_series.get("safety") or []
+                if timestamps and any(v is not None for v in safety_values):
+                    trend_df = pd.DataFrame(
+                        {
+                            "timestamp": pd.to_datetime(timestamps),
+                            "safety": safety_values,
+                            "accuracy": signal_series.get("accuracy") or [None] * len(timestamps),
+                            "clarity": signal_series.get("clarity") or [None] * len(timestamps),
+                        }
+                    )
+                    fig_value = go.Figure()
+                    fig_value.add_trace(go.Scatter(
+                        x=trend_df["timestamp"],
+                        y=trend_df["safety"],
+                        mode="lines+markers",
+                        name="safety",
+                        line=dict(color="#e67e22", width=3),
+                    ))
+                    fig_value.add_trace(go.Scatter(
+                        x=trend_df["timestamp"],
+                        y=trend_df["accuracy"],
+                        mode="lines",
+                        name="accuracy",
+                        line=dict(color="#3498db", width=2, dash="dot"),
+                    ))
+                    fig_value.add_trace(go.Scatter(
+                        x=trend_df["timestamp"],
+                        y=trend_df["clarity"],
+                        mode="lines",
+                        name="clarity",
+                        line=dict(color="#2ecc71", width=2, dash="dash"),
+                    ))
+                    fig_value.update_layout(
+                        title="Value Tuning 時系列（rolling average）",
+                        xaxis_title="timestamp",
+                        yaxis_title="signal score",
+                        yaxis=dict(range=[0, 1]),
+                        height=340,
+                        hovermode="x unified",
+                    )
+                    st.plotly_chart(fig_value, use_container_width=True)
+                    st.caption(
+                        f"safety を中心に accuracy / clarity を重ねて表示しています。window={value_timeseries.get('rolling_window', 0)}"
+                    )
 
         st.divider()
         st.subheader("🛡️ RLHF/RLAIF適用ガードレール")
