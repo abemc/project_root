@@ -4329,7 +4329,54 @@ def display_app():
                         with st.expander("詳細表示（元の応答）", expanded=False):
                             detail_text = _normalize_mermaid_blocks(norm_raw)
                             detail_text = re.sub(r"\[web_(\d+)\]", r"[URL\1]", detail_text)
-                            st.markdown(detail_text)
+
+                            # 詳細表示は生ログ由来テキストが1行に潰れやすいため、可読性を補正
+                            detail_text = detail_text.replace("・出典 [URL", "\n\n・出典 [URL")
+                            detail_text = detail_text.replace(") 要約: Title:", ")\n  要約: Title:")
+                            detail_text = re.sub(r"\s+要約:\s*Title:", "\n  要約: Title:", detail_text)
+                            detail_text = re.sub(r"\s+URL:\s*", "\n  URL: ", detail_text)
+                            detail_text = re.sub(r"\s+Body:\s*", "\n  Body: ", detail_text)
+                            detail_text = re.sub(r"\s+Bod\b", "\n  Body", detail_text)
+                            detail_text = detail_text.replace("(//duckduckgo.com", "(https://duckduckgo.com")
+                            detail_text = re.sub(r"\bURL:\s*//", "URL: https://", detail_text)
+
+                            # Web要約形式は生テキストだと詰まりやすいので、出典単位で整形して表示
+                            is_web_digest = (
+                                "・出典 [URL" in detail_text and "要約: Title:" in detail_text and not _has_mermaid_block(detail_text)
+                            )
+                            if is_web_digest:
+                                header = detail_text.split("・出典 [URL", 1)[0].strip()
+                                chunks = re.findall(
+                                    r"・出典 \[URL(\d+)\]:\s*(.*?)(?=・出典 \[URL\d+\]:|$)",
+                                    detail_text,
+                                    re.DOTALL,
+                                )
+                                lines = []
+                                if header:
+                                    lines.append(header)
+                                if chunks:
+                                    if lines:
+                                        lines.append("")
+                                    lines.append("**出典要約（整形）:**")
+                                    for idx, chunk in chunks[:8]:
+                                        one = re.sub(r"\s+", " ", chunk).strip()
+                                        title = one.split(" (", 1)[0].strip(" -") if one else f"URL{idx}"
+                                        u = re.search(r"URL:\s*(https?://[^\s)]+)", one)
+                                        url = u.group(1).rstrip(").,") if u else ""
+                                        s = re.search(r"要約:\s*Title:\s*(.+?)(?:\s+URL:|\s+Body:|$)", one)
+                                        summary = s.group(1).strip() if s else ""
+                                        if url:
+                                            lines.append(f"- URL{idx}: {title} ([リンク]({url}))")
+                                        else:
+                                            lines.append(f"- URL{idx}: {title}")
+                                        if summary and summary != title:
+                                            lines.append(f"  要約: {summary}")
+                                if lines:
+                                    st.markdown("\n".join(lines))
+                                else:
+                                    st.text(detail_text)
+                            else:
+                                st.markdown(detail_text)
                             if _has_mermaid_block(detail_text) or re.search(r"図解|図で|フロー図|構成図|diagram", detail_text, re.IGNORECASE):
                                 diagram_mode = normalize_diagram_mode(st.session_state.get("diagram_render_mode", "stable"))
                                 if diagram_mode == DIAGRAM_MODE_MERMAID:
