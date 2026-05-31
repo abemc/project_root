@@ -4808,10 +4808,47 @@ def display_enterprise_dashboard():
                     decision_df.columns = [f"decision.{c}" for c in decision_df.columns]
                     df_ethics = pd.concat([df_ethics.drop(columns=["decision"]), decision_df], axis=1)
 
-                total = len(df_ethics)
-                warn_count = int((df_ethics.get("decision.action") == "warn").sum()) if "decision.action" in df_ethics.columns else 0
-                block_count = int((df_ethics.get("decision.action") == "block").sum()) if "decision.action" in df_ethics.columns else 0
-                allow_count = int((df_ethics.get("decision.action") == "allow").sum()) if "decision.action" in df_ethics.columns else 0
+                # フィルタUI
+                filt_cols = st.columns([1, 1, 1, 1])
+                with filt_cols[0]:
+                    action_options = sorted(df_ethics["decision.action"].dropna().astype(str).unique().tolist()) if "decision.action" in df_ethics.columns else []
+                    selected_actions = st.multiselect(
+                        "action フィルタ",
+                        options=action_options,
+                        default=action_options,
+                        key="ethics_filter_actions",
+                    )
+                with filt_cols[1]:
+                    category_options = sorted(df_ethics["decision.category"].dropna().astype(str).unique().tolist()) if "decision.category" in df_ethics.columns else []
+                    selected_categories = st.multiselect(
+                        "category フィルタ",
+                        options=category_options,
+                        default=category_options,
+                        key="ethics_filter_categories",
+                    )
+                with filt_cols[2]:
+                    source_options = sorted(df_ethics["source"].dropna().astype(str).unique().tolist()) if "source" in df_ethics.columns else []
+                    selected_sources = st.multiselect(
+                        "source フィルタ",
+                        options=source_options,
+                        default=source_options,
+                        key="ethics_filter_sources",
+                    )
+                with filt_cols[3]:
+                    max_rows = st.slider("表示件数", min_value=10, max_value=300, value=100, step=10, key="ethics_filter_max_rows")
+
+                df_filtered = df_ethics.copy()
+                if "decision.action" in df_filtered.columns and selected_actions:
+                    df_filtered = df_filtered[df_filtered["decision.action"].astype(str).isin(selected_actions)]
+                if "decision.category" in df_filtered.columns and selected_categories:
+                    df_filtered = df_filtered[df_filtered["decision.category"].astype(str).isin(selected_categories)]
+                if "source" in df_filtered.columns and selected_sources:
+                    df_filtered = df_filtered[df_filtered["source"].astype(str).isin(selected_sources)]
+
+                total = len(df_filtered)
+                warn_count = int((df_filtered.get("decision.action") == "warn").sum()) if "decision.action" in df_filtered.columns else 0
+                block_count = int((df_filtered.get("decision.action") == "block").sum()) if "decision.action" in df_filtered.columns else 0
+                allow_count = int((df_filtered.get("decision.action") == "allow").sum()) if "decision.action" in df_filtered.columns else 0
 
                 c1, c2, c3, c4 = st.columns(4)
                 c1.metric("判定総数", total)
@@ -4833,8 +4870,8 @@ def display_enterprise_dashboard():
                 ]
                 sort_col = "timestamp" if "timestamp" in df_ethics.columns else None
                 if sort_col:
-                    df_ethics = df_ethics.sort_values(sort_col, ascending=False)
-                st.dataframe(df_ethics[display_cols].head(100), use_container_width=True)
+                    df_filtered = df_filtered.sort_values(sort_col, ascending=False)
+                st.dataframe(df_filtered[display_cols].head(max_rows), use_container_width=True)
             else:
                 st.info("倫理監査ログが空です。")
         else:
