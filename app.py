@@ -25,6 +25,12 @@ from src.ui.diagram_settings import (
     diagram_title_for_query,
     normalize_diagram_mode,
 )
+try:
+    from src.safety.ethics_guard import EthicsGuard
+    ethics_guard_available = True
+except Exception:
+    EthicsGuard = None
+    ethics_guard_available = False
 
 try:
     from autonomous_rag_agent import AutonomousRAGAgent
@@ -141,6 +147,49 @@ def _detect_audio_ext(audio_bytes: bytes) -> str:
 
 
 _MERMAID_BLOCK_RE = re.compile(r"```mermaid(?:\s*\n|\s+)(.*?)```", re.DOTALL | re.IGNORECASE)
+_ethics_guard = None
+
+
+def _get_ethics_guard():
+    global _ethics_guard
+    if _ethics_guard is None and ethics_guard_available:
+        try:
+            _ethics_guard = EthicsGuard()
+        except Exception:
+            _ethics_guard = None
+    return _ethics_guard
+
+
+def _check_user_instruction_ethics(query: str, source: str = "chat_input") -> dict:
+    """ユーザー指示の倫理チェックを実行し、判定を辞書で返す。"""
+    guard = _get_ethics_guard()
+    if not guard:
+        return {
+            "action": "allow",
+            "category": "unavailable",
+            "reason": "倫理チェック未初期化",
+            "confidence": 0.0,
+            "matched_rules": [],
+        }
+
+    try:
+        decision = guard.evaluate(query or "", source=source)
+        return {
+            "action": decision.action,
+            "category": decision.category,
+            "reason": decision.reason,
+            "confidence": decision.confidence,
+            "matched_rules": decision.matched_rules,
+        }
+    except Exception as e:
+        logger.warning(f"ethics_check_failed: {e}")
+        return {
+            "action": "allow",
+            "category": "error",
+            "reason": "倫理チェック例外",
+            "confidence": 0.0,
+            "matched_rules": [],
+        }
 
 
 def _query_requests_diagram(query: str) -> bool:
@@ -4563,6 +4612,23 @@ def display_app():
             st.session_state.messages.append(user_msg_obj)
             _save_chat_message(user_msg_obj)  # 履歴に保存
             augmented = f"{last_q}\n\n追記（ユーザーの補足）: {user_msg}"
+
+            ethics = _check_user_instruction_ethics(augmented, source="clarification")
+            if ethics.get("action") == "warn":
+                _store_assistant_message(
+                    f"[注意喚起] この依頼はセンシティブ領域（{ethics.get('category')}）に該当する可能性があります。"
+                    "必要に応じて専門家の確認を行ってください。"
+                )
+            if ethics.get("action") in ("block", "escalate"):
+                _store_assistant_message(
+                    "この指示は倫理・安全ポリシーにより対応できません。"
+                    "目的を安全で合法な内容に言い換えて再入力してください。"
+                )
+                st.session_state.clarification_active = False
+                st.session_state.clarification_question = None
+                st.session_state.pop('clarification_input', None)
+                st.session_state.pop('clar_radio', None)
+                return
             # optional: perform a web search with the augmented query to enrich presearch_results
             try:
                 if web_search_available and st.session_state.get('use_web_search'):
@@ -4637,6 +4703,21 @@ def display_app():
         }
         st.session_state.messages.append(user_msg_obj)
         _save_chat_message(user_msg_obj)  # 履歴に保存
+
+        ethics = _check_user_instruction_ethics(query, source="chat_input")
+        if ethics.get("action") == "warn":
+            _store_assistant_message(
+                f"[注意喚起] この依頼はセンシティブ領域（{ethics.get('category')}）に該当する可能性があります。"
+                "必要に応じて専門家の確認を行ってください。"
+            )
+        if ethics.get("action") in ("block", "escalate"):
+            _store_assistant_message(
+                "この指示は倫理・安全ポリシーにより対応できません。"
+                "目的を安全で合法な内容に言い換えて再入力してください。"
+            )
+            st.session_state.last_query_processed = query
+            st.rerun()
+
         _generate_assistant_response(query)
         st.session_state.last_query_processed = query
         st.rerun()
