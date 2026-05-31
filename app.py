@@ -2031,6 +2031,25 @@ def setup_sidebar():
             )
             st.session_state.rlaif_auto_aggregate_ai = bool(rlaif_auto_aggregate_ai)
 
+            rlaif_enable_delta_cap = st.checkbox(
+                "RLAIF重み変動キャップを有効化",
+                value=bool(st.session_state.get("rlaif_enable_delta_cap", True)),
+                key="sidebar_rlaif_enable_delta_cap",
+                help="human+ai ブレンド時に重み変動幅を制限し、急激な変化を防ぎます。",
+            )
+            st.session_state.rlaif_enable_delta_cap = bool(rlaif_enable_delta_cap)
+
+            rlaif_max_weight_delta = st.slider(
+                "重み変動の上限 (rlaif_max_weight_delta)",
+                min_value=0.0,
+                max_value=1.0,
+                value=float(st.session_state.get("rlaif_max_weight_delta", 0.25)),
+                step=0.05,
+                key="sidebar_rlaif_max_weight_delta",
+                help="各重みの1回の更新で許容する最大変動幅です。",
+            )
+            st.session_state.rlaif_max_weight_delta = float(rlaif_max_weight_delta)
+
             rlhf_show_gate_logs = st.checkbox(
                 "RLHFゲートログをLearning Dashboardで表示",
                 value=bool(st.session_state.get("rlhf_show_gate_logs", True)),

@@ -266,3 +266,64 @@ def test_apply_reward_adjustments_auto_aggregates_ai_feedback_when_missing_ai_ag
     assert ai_agg_path.exists()
     assert res.get("auto_ai_aggregate") is not None
     assert res.get("source") == "human_ai_blended"
+
+
+def test_apply_reward_adjustments_caps_weight_delta_for_rlaif(tmp_path, monkeypatch):
+    human_agg_path = tmp_path / "human_agg.json"
+    human_agg_path.write_text(
+        json.dumps(
+            {
+                "total_entries": 80,
+                "csat_mean": 3.2,
+                "nps_mean": 1,
+                "adoption_rate": 0.25,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    ai_agg_path = tmp_path / "ai_agg.json"
+    ai_agg_path.write_text(
+        json.dumps(
+            {
+                "total_entries": 200,
+                "confidence_mean": 0.95,
+                "quality_mean": 1.0,
+                "nps_mean": 10,
+                "adoption_rate": 1.0,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    saved = {}
+
+    class DummyConfig:
+        def load_config(self):
+            return {"reward_weights": {"csat": 0.7, "nps": 0.7, "adoption": 0.7}}
+
+        def save_config(self, conf):
+            saved.update(conf)
+
+    monkeypatch.setattr(rlhf_integration, "RAGAgentConfig", DummyConfig)
+
+    res = rlhf_integration.apply_reward_adjustments(
+        agg_path=str(human_agg_path),
+        ai_agg_path=str(ai_agg_path),
+        min_entries=20,
+        ai_weight=0.8,
+        min_ai_entries=30,
+        min_ai_confidence=0.7,
+        enable_rlaif_delta_cap=True,
+        rlaif_max_weight_delta=0.05,
+    )
+
+    assert res["status"] == "ok"
+    assert res.get("source") == "human_ai_blended"
+    cap = res.get("weight_cap") or {}
+    assert cap.get("enabled") is True
+    assert cap.get("was_clamped") is True
+    assert "reward_weights" in saved
+    # all keys must stay within +/-0.05 from current 0.7
+    for _, v in saved["reward_weights"].items():
+        assert 0.65 <= float(v) <= 0.75

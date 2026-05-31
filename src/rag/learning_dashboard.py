@@ -308,6 +308,8 @@ class LearningDashboard:
         default_min_ai_entries = int(st.session_state.get("rlaif_min_ai_entries", 30))
         default_min_ai_confidence = float(st.session_state.get("rlaif_min_ai_confidence", 0.60))
         default_auto_aggregate_ai = bool(st.session_state.get("rlaif_auto_aggregate_ai", True))
+        default_enable_delta_cap = bool(st.session_state.get("rlaif_enable_delta_cap", True))
+        default_max_weight_delta = float(st.session_state.get("rlaif_max_weight_delta", 0.25))
 
         st.caption("現在の閾値（サイドバーで調整可能）")
         c1, c2, c3, c4 = st.columns(4)
@@ -329,6 +331,7 @@ class LearningDashboard:
             st.metric("min_ai_conf", f"{default_min_ai_confidence:.2f}")
 
         st.caption(f"auto_ai_aggregate: {'on' if default_auto_aggregate_ai else 'off'}")
+        st.caption(f"rlaif_delta_cap: {'on' if default_enable_delta_cap else 'off'} (max_delta={default_max_weight_delta:.2f})")
 
         if st.button("⚙️ RLHF重み更新を実行", use_container_width=True):
             try:
@@ -341,16 +344,49 @@ class LearningDashboard:
                     min_ai_entries=default_min_ai_entries,
                     min_ai_confidence=default_min_ai_confidence,
                     auto_aggregate_ai=default_auto_aggregate_ai,
+                    enable_rlaif_delta_cap=default_enable_delta_cap,
+                    rlaif_max_weight_delta=default_max_weight_delta,
                 )
                 status = result.get("status")
                 if status == "ok":
                     source = result.get("source", "human_only")
                     source_label = "human+ai" if source == "human_ai_blended" else "human_only"
                     st.success(f"RLHF重み更新を適用しました。（source={source_label}）")
+                    cap = result.get("weight_cap") or {}
+                    if cap.get("enabled"):
+                        if cap.get("was_clamped"):
+                            st.warning("重み変動キャップが適用され、更新幅を制限しました。")
+                            st.json(cap)
+                        else:
+                            st.caption("重み変動キャップ有効: 上限制限は発生しませんでした。")
                     blend_details = result.get("blend_details") or {}
                     if blend_details:
                         st.caption("RLAIFブレンド詳細")
                         st.json(blend_details)
+
+                    human_summary = result.get("human_summary") or {}
+                    blended_summary = result.get("summary") or {}
+                    if human_summary and blended_summary:
+                        st.caption("human_only vs blended 指標比較")
+                        x1, x2, x3 = st.columns(3)
+                        with x1:
+                            st.metric(
+                                "CSAT",
+                                f"{(blended_summary.get('csat_mean') or 0):.3f}",
+                                delta=f"{((blended_summary.get('csat_mean') or 0) - (human_summary.get('csat_mean') or 0)):.3f}",
+                            )
+                        with x2:
+                            st.metric(
+                                "NPS",
+                                f"{(blended_summary.get('nps_mean') or 0):.3f}",
+                                delta=f"{((blended_summary.get('nps_mean') or 0) - (human_summary.get('nps_mean') or 0)):.3f}",
+                            )
+                        with x3:
+                            st.metric(
+                                "Adoption",
+                                f"{(blended_summary.get('adoption_rate') or 0):.3f}",
+                                delta=f"{((blended_summary.get('adoption_rate') or 0) - (human_summary.get('adoption_rate') or 0)):.3f}",
+                            )
                     st.json(result)
                 elif status == "skipped":
                     st.warning("ゲート条件未達のため更新をスキップしました。")

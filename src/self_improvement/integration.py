@@ -164,6 +164,42 @@ def _blend_human_and_ai_summary(
     return summary, details, 'human_ai_blended'
 
 
+def _apply_weight_delta_cap(
+    current: Dict[str, Any],
+    proposed: Dict[str, float],
+    max_delta: float = 0.25,
+) -> Tuple[Dict[str, float], Dict[str, Any]]:
+    """Cap per-key absolute weight delta to reduce sudden policy shifts."""
+    cap = max(0.0, float(max_delta))
+    out: Dict[str, float] = {}
+    details: Dict[str, Any] = {
+        'enabled': True,
+        'max_delta': cap,
+        'clamped_keys': {},
+    }
+
+    for key, p_val in proposed.items():
+        c_val = _as_float((current or {}).get(key))
+        p = float(p_val)
+        if c_val is None:
+            out[key] = p
+            continue
+
+        low = c_val - cap
+        high = c_val + cap
+        clamped = min(max(p, low), high)
+        out[key] = round(clamped, 3)
+        if abs(clamped - p) > 1e-9:
+            details['clamped_keys'][key] = {
+                'from': round(c_val, 3),
+                'proposed': round(p, 3),
+                'applied': round(clamped, 3),
+            }
+
+    details['was_clamped'] = bool(details['clamped_keys'])
+    return out, details
+
+
 def apply_reward_adjustments(
     agg_path: str = AGG_PATH,
     ai_agg_path: str = AI_AGG_PATH,
@@ -176,6 +212,8 @@ def apply_reward_adjustments(
     min_ai_entries: int = 30,
     min_ai_confidence: float = 0.60,
     auto_aggregate_ai: bool = True,
+    enable_rlaif_delta_cap: bool = True,
+    rlaif_max_weight_delta: float = 0.25,
 ):
     """Simple heuristic: increase weight for metrics with higher mean.
 
@@ -231,6 +269,13 @@ def apply_reward_adjustments(
                 'nps_mean': agg.get('nps_mean'),
                 'adoption_rate': agg.get('adoption_rate'),
             },
+            'human_summary': {
+                'total_entries': human_agg.get('total_entries'),
+                'csat_mean': human_agg.get('csat_mean'),
+                'nps_mean': human_agg.get('nps_mean'),
+                'adoption_rate': human_agg.get('adoption_rate'),
+            },
+            'ai_summary': ai_agg or {},
         }
         _append_gate_log(payload)
         return payload
@@ -245,7 +290,7 @@ def apply_reward_adjustments(
     adoption_norm = adoption
 
     # simple weights proportional to norms (plus baseline)
-    weights = {
+    proposed_weights = {
         'csat': round(0.5 + csat_norm, 3),
         'nps': round(0.5 + nps_norm, 3),
         'adoption': round(0.5 + adoption_norm, 3)
@@ -253,6 +298,23 @@ def apply_reward_adjustments(
 
     cfg = RAGAgentConfig()
     conf = cfg.load_config()
+    current_weights = conf.get('reward_weights') if isinstance(conf, dict) else {}
+
+    cap_details = {
+        'enabled': bool(enable_rlaif_delta_cap and source == 'human_ai_blended'),
+        'was_clamped': False,
+        'clamped_keys': {},
+        'max_delta': float(rlaif_max_weight_delta),
+    }
+    if enable_rlaif_delta_cap and source == 'human_ai_blended':
+        weights, cap_details = _apply_weight_delta_cap(
+            current=current_weights if isinstance(current_weights, dict) else {},
+            proposed=proposed_weights,
+            max_delta=rlaif_max_weight_delta,
+        )
+    else:
+        weights = proposed_weights
+
     conf['reward_weights'] = weights
     cfg.save_config(conf)
     payload = {
@@ -264,6 +326,8 @@ def apply_reward_adjustments(
         'auto_ai_aggregate': auto_ai_aggregate,
         'source': source,
         'blend_details': blend_details,
+        'weight_cap': cap_details,
+        'proposed_weights': proposed_weights,
         'weights': weights,
         'summary': {
             'total_entries': agg.get('total_entries'),
@@ -271,6 +335,13 @@ def apply_reward_adjustments(
             'nps_mean': agg.get('nps_mean'),
             'adoption_rate': agg.get('adoption_rate'),
         },
+        'human_summary': {
+            'total_entries': human_agg.get('total_entries'),
+            'csat_mean': human_agg.get('csat_mean'),
+            'nps_mean': human_agg.get('nps_mean'),
+            'adoption_rate': human_agg.get('adoption_rate'),
+        },
+        'ai_summary': ai_agg or {},
     }
     _append_gate_log(payload)
     return payload
