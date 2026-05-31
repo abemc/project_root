@@ -327,3 +327,71 @@ def test_apply_reward_adjustments_caps_weight_delta_for_rlaif(tmp_path, monkeypa
     # all keys must stay within +/-0.05 from current 0.7
     for _, v in saved["reward_weights"].items():
         assert 0.65 <= float(v) <= 0.75
+
+
+def test_apply_reward_adjustments_applies_value_tuning_bias(tmp_path, monkeypatch):
+    human_agg_path = tmp_path / "human_agg.json"
+    human_agg_path.write_text(
+        json.dumps(
+            {
+                "total_entries": 60,
+                "csat_mean": 4.0,
+                "nps_mean": 4,
+                "adoption_rate": 0.5,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    feedback_dir = tmp_path / "feedback"
+    feedback_dir.mkdir()
+    feedback_history_path = feedback_dir / "feedback_history.jsonl"
+    feedback_history_path.write_text(
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "id": "v1",
+                        "timestamp": "2026-05-31T00:00:00",
+                        "user_query": "q1",
+                        "model_response": "a1",
+                        "rating": 0.9,
+                        "feedback_text": "正確でわかりやすく、出典も明確でとても良い",
+                        "tags": ["正確性", "わかりやすさ", "出典明示"],
+                        "metadata": {},
+                    }
+                )
+                for _ in range(6)
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    saved = {}
+
+    class DummyConfig:
+        def load_config(self):
+            return {"reward_weights": {"csat": 1.0, "nps": 1.0, "adoption": 1.0}}
+
+        def save_config(self, conf):
+            saved.update(conf)
+
+    monkeypatch.setattr(rlhf_integration, "RAGAgentConfig", DummyConfig)
+
+    res = rlhf_integration.apply_reward_adjustments(
+        agg_path=str(human_agg_path),
+        feedback_history_path=str(feedback_history_path),
+        min_entries=20,
+        auto_aggregate_ai=False,
+        enable_value_tuning_bias=True,
+        value_tuning_min_items=5,
+        value_tuning_max_bias=0.1,
+    )
+
+    assert res["status"] == "ok"
+    value_tuning = res.get("value_tuning") or {}
+    assert value_tuning.get("enabled") is True
+    assert value_tuning.get("applied") is True
+    assert "csat" in (value_tuning.get("weight_biases") or {})
+    assert "reward_weights" in saved

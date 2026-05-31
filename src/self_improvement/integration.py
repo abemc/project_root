@@ -200,6 +200,80 @@ def _apply_weight_delta_cap(
     return out, details
 
 
+def _apply_value_tuning_bias(
+    proposed: Dict[str, float],
+    value_summary: Optional[Dict[str, Any]],
+    min_items: int = 5,
+    max_bias: float = 0.12,
+) -> Tuple[Dict[str, float], Dict[str, Any]]:
+    """Apply a small value-alignment bias to reward weights.
+
+    Value tuning only nudges weights; it must not dominate the main metrics.
+    """
+    details: Dict[str, Any] = {
+        'enabled': True,
+        'applied': False,
+        'min_items': int(min_items),
+        'max_bias': float(max_bias),
+        'dimension_scores': {},
+        'weight_biases': {},
+    }
+    if not value_summary:
+        details['reason'] = 'missing_value_summary'
+        return dict(proposed), details
+
+    counts = value_summary.get('signal_counts') or {}
+    means = value_summary.get('signal_means') or {}
+    if not means:
+        details['reason'] = 'missing_signal_means'
+        return dict(proposed), details
+
+    def dim_avg(keys):
+        vals = []
+        min_count_seen = None
+        for key in keys:
+            if key not in means:
+                continue
+            count = int(counts.get(key) or 0)
+            if count < min_items:
+                continue
+            vals.append(float(means[key]))
+            min_count_seen = count if min_count_seen is None else min(min_count_seen, count)
+        if not vals:
+            return None, 0
+        return sum(vals) / len(vals), int(min_count_seen or 0)
+
+    dimension_map = {
+        'csat': ['accuracy', 'clarity', 'transparency'],
+        'adoption': ['helpfulness', 'clarity'],
+        'nps': ['safety', 'neutrality', 'transparency'],
+    }
+
+    adjusted = dict(proposed)
+    applied_any = False
+    for weight_key, signal_keys in dimension_map.items():
+        avg, supporting_count = dim_avg(signal_keys)
+        if avg is None:
+            continue
+        details['dimension_scores'][weight_key] = {
+            'signals': signal_keys,
+            'mean': round(avg, 3),
+            'supporting_count': supporting_count,
+        }
+        # Center around 0.5 and keep influence intentionally small.
+        bias = max(-max_bias, min(max_bias, (avg - 0.5) * 2.0 * max_bias))
+        if abs(bias) < 1e-9:
+            continue
+        adjusted[weight_key] = round(float(adjusted.get(weight_key, 0.0)) + bias, 3)
+        details['weight_biases'][weight_key] = round(bias, 3)
+        applied_any = True
+
+    details['applied'] = applied_any
+    if not applied_any and 'reason' not in details:
+        details['reason'] = 'insufficient_supported_value_signals'
+    return adjusted, details
+
+
 def apply_reward_adjustments(
     agg_path: str = AGG_PATH,
     ai_agg_path: str = AI_AGG_PATH,
@@ -214,6 +288,9 @@ def apply_reward_adjustments(
     auto_aggregate_ai: bool = True,
     enable_rlaif_delta_cap: bool = True,
     rlaif_max_weight_delta: float = 0.25,
+    enable_value_tuning_bias: bool = True,
+    value_tuning_min_items: int = 5,
+    value_tuning_max_bias: float = 0.12,
 ):
     """Simple heuristic: increase weight for metrics with higher mean.
 
@@ -296,6 +373,29 @@ def apply_reward_adjustments(
         'adoption': round(0.5 + adoption_norm, 3)
     }
 
+    value_tuning = {
+        'enabled': bool(enable_value_tuning_bias),
+        'applied': False,
+        'reason': 'disabled',
+    }
+    value_summary = {}
+    if enable_value_tuning_bias:
+        try:
+            from src.self_improvement.feedback_manager import FeedbackManager
+            value_summary = FeedbackManager(storage_dir=os.path.dirname(feedback_history_path)).get_value_tuning_summary(min_rating=0.0)
+            proposed_weights, value_tuning = _apply_value_tuning_bias(
+                proposed=proposed_weights,
+                value_summary=value_summary,
+                min_items=value_tuning_min_items,
+                max_bias=value_tuning_max_bias,
+            )
+        except Exception as e:
+            value_tuning = {
+                'enabled': True,
+                'applied': False,
+                'reason': f'error:{e}',
+            }
+
     cfg = RAGAgentConfig()
     conf = cfg.load_config()
     current_weights = conf.get('reward_weights') if isinstance(conf, dict) else {}
@@ -326,6 +426,8 @@ def apply_reward_adjustments(
         'auto_ai_aggregate': auto_ai_aggregate,
         'source': source,
         'blend_details': blend_details,
+        'value_tuning': value_tuning,
+        'value_summary': value_summary,
         'weight_cap': cap_details,
         'proposed_weights': proposed_weights,
         'weights': weights,

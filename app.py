@@ -2050,6 +2050,36 @@ def setup_sidebar():
             )
             st.session_state.rlaif_max_weight_delta = float(rlaif_max_weight_delta)
 
+            st.caption("Value Tuning バイアス")
+            value_tuning_bias_enabled = st.checkbox(
+                "Value Tuningバイアスを重み更新へ反映",
+                value=bool(st.session_state.get("value_tuning_bias_enabled", True)),
+                key="sidebar_value_tuning_bias_enabled",
+                help="価値軸シグナルを小さな補助バイアスとして reward_weights に反映します。",
+            )
+            st.session_state.value_tuning_bias_enabled = bool(value_tuning_bias_enabled)
+
+            value_tuning_min_items = st.number_input(
+                "Value Tuning最小件数 (value_tuning_min_items)",
+                min_value=1,
+                max_value=10000,
+                value=int(st.session_state.get("value_tuning_min_items", 5)),
+                step=1,
+                key="sidebar_value_tuning_min_items",
+            )
+            st.session_state.value_tuning_min_items = int(value_tuning_min_items)
+
+            value_tuning_max_bias = st.slider(
+                "Value Tuning最大バイアス (value_tuning_max_bias)",
+                min_value=0.0,
+                max_value=0.5,
+                value=float(st.session_state.get("value_tuning_max_bias", 0.12)),
+                step=0.01,
+                key="sidebar_value_tuning_max_bias",
+                help="各重みに与える価値軸補助バイアスの最大幅です。",
+            )
+            st.session_state.value_tuning_max_bias = float(value_tuning_max_bias)
+
             rlhf_show_gate_logs = st.checkbox(
                 "RLHFゲートログをLearning Dashboardで表示",
                 value=bool(st.session_state.get("rlhf_show_gate_logs", True)),

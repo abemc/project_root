@@ -345,6 +345,9 @@ class LearningDashboard:
         default_auto_aggregate_ai = bool(st.session_state.get("rlaif_auto_aggregate_ai", True))
         default_enable_delta_cap = bool(st.session_state.get("rlaif_enable_delta_cap", True))
         default_max_weight_delta = float(st.session_state.get("rlaif_max_weight_delta", 0.25))
+        default_value_tuning_bias_enabled = bool(st.session_state.get("value_tuning_bias_enabled", True))
+        default_value_tuning_min_items = int(st.session_state.get("value_tuning_min_items", 5))
+        default_value_tuning_max_bias = float(st.session_state.get("value_tuning_max_bias", 0.12))
 
         st.caption("現在の閾値（サイドバーで調整可能）")
         c1, c2, c3, c4 = st.columns(4)
@@ -367,6 +370,10 @@ class LearningDashboard:
 
         st.caption(f"auto_ai_aggregate: {'on' if default_auto_aggregate_ai else 'off'}")
         st.caption(f"rlaif_delta_cap: {'on' if default_enable_delta_cap else 'off'} (max_delta={default_max_weight_delta:.2f})")
+        st.caption(
+            f"value_tuning_bias: {'on' if default_value_tuning_bias_enabled else 'off'} "
+            f"(min_items={default_value_tuning_min_items}, max_bias={default_value_tuning_max_bias:.2f})"
+        )
 
         if st.button("⚙️ RLHF重み更新を実行", use_container_width=True):
             try:
@@ -381,6 +388,9 @@ class LearningDashboard:
                     auto_aggregate_ai=default_auto_aggregate_ai,
                     enable_rlaif_delta_cap=default_enable_delta_cap,
                     rlaif_max_weight_delta=default_max_weight_delta,
+                    enable_value_tuning_bias=default_value_tuning_bias_enabled,
+                    value_tuning_min_items=default_value_tuning_min_items,
+                    value_tuning_max_bias=default_value_tuning_max_bias,
                 )
                 status = result.get("status")
                 if status == "ok":
@@ -398,6 +408,11 @@ class LearningDashboard:
                     if blend_details:
                         st.caption("RLAIFブレンド詳細")
                         st.json(blend_details)
+
+                    value_tuning = result.get("value_tuning") or {}
+                    if value_tuning.get("enabled"):
+                        st.caption("Value Tuning重み補正")
+                        st.json(value_tuning)
 
                     human_summary = result.get("human_summary") or {}
                     blended_summary = result.get("summary") or {}
