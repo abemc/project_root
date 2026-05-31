@@ -37,6 +37,13 @@ try:
 except Exception:
     VALUE_TUNING_AVAILABLE = False
 
+try:
+    from src.evaluation.regression_gate import RegressionGate
+    REGRESSION_GATE_AVAILABLE = True
+except Exception:
+    RegressionGate = None
+    REGRESSION_GATE_AVAILABLE = False
+
 
 def _read_gate_logs(limit: int = 50) -> List[Dict[str, Any]]:
     """Read latest RLHF gate decisions from JSONL log."""
@@ -59,6 +66,232 @@ def _read_gate_logs(limit: int = 50) -> List[Dict[str, Any]]:
         return []
 
     return list(reversed(records[-limit:]))
+
+
+def _build_gate_history_rows(logs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Build gate history rows with delta values versus the previous run."""
+    rows: List[Dict[str, Any]] = []
+
+    for idx, item in enumerate(logs):
+        summary = item.get("summary") or {}
+        prev_summary = (logs[idx + 1].get("summary") or {}) if idx + 1 < len(logs) else {}
+
+        entries = summary.get("total_entries") if isinstance(summary.get("total_entries"), (int, float)) else None
+        csat = summary.get("csat_mean") if isinstance(summary.get("csat_mean"), (int, float)) else None
+        nps = summary.get("nps_mean") if isinstance(summary.get("nps_mean"), (int, float)) else None
+        adoption = summary.get("adoption_rate") if isinstance(summary.get("adoption_rate"), (int, float)) else None
+
+        prev_entries = prev_summary.get("total_entries") if isinstance(prev_summary.get("total_entries"), (int, float)) else None
+        prev_csat = prev_summary.get("csat_mean") if isinstance(prev_summary.get("csat_mean"), (int, float)) else None
+        prev_nps = prev_summary.get("nps_mean") if isinstance(prev_summary.get("nps_mean"), (int, float)) else None
+        prev_adoption = prev_summary.get("adoption_rate") if isinstance(prev_summary.get("adoption_rate"), (int, float)) else None
+
+        rows.append(
+            {
+                "timestamp": item.get("timestamp", ""),
+                "status": item.get("status", ""),
+                "source": item.get("source", "human_only"),
+                "reasons": ", ".join(item.get("reasons") or []),
+                "entries": entries,
+                "csat": csat,
+                "nps": nps,
+                "adoption": adoption,
+                "Δentries": None if entries is None or prev_entries is None else entries - prev_entries,
+                "Δcsat": None if csat is None or prev_csat is None else csat - prev_csat,
+                "Δnps": None if nps is None or prev_nps is None else nps - prev_nps,
+                "Δadoption": None if adoption is None or prev_adoption is None else adoption - prev_adoption,
+            }
+        )
+
+    return rows
+
+
+def _format_gate_history_rows(rows: List[Dict[str, Any]]) -> pd.DataFrame:
+    """Format gate history rows for display in Streamlit."""
+    if not rows:
+        return pd.DataFrame()
+
+    frame = pd.DataFrame(rows)
+
+    def _format_number(value: Any) -> Any:
+        if isinstance(value, (int, float)):
+            return f"{value:.2f}"
+        return value
+
+    def _format_delta(value: Any) -> Any:
+        if value is None or not isinstance(value, (int, float)):
+            return None
+        if value > 0:
+            return f"↑ {value:+.2f}"
+        if value < 0:
+            return f"↓ {value:+.2f}"
+        return "→ +0.00"
+
+    for column in ["csat", "nps", "adoption"]:
+        if column in frame.columns:
+            frame[column] = frame[column].apply(_format_number)
+
+    for column in ["Δentries", "Δcsat", "Δnps", "Δadoption"]:
+        if column in frame.columns:
+            frame[column] = frame[column].apply(_format_delta)
+
+    return frame
+
+
+def _style_gate_history_rows(frame: pd.DataFrame):
+    """Apply emphasis to delta columns in the gate history table."""
+    if frame.empty:
+        return frame.style
+
+    def _is_strong_delta(value: Any) -> bool:
+        if not isinstance(value, str):
+            return False
+        try:
+            parts = value.split()
+            if len(parts) < 2:
+                return False
+            return abs(float(parts[1])) >= 0.10
+        except Exception:
+            return False
+
+    def _delta_style(value: Any) -> str:
+        if isinstance(value, str) and value.startswith("↑"):
+            base = "background-color: #e8f5e9; color: #1b5e20; font-weight: 600;"
+            return base + " font-weight: 700;" if _is_strong_delta(value) else base
+        if isinstance(value, str) and value.startswith("↓"):
+            base = "background-color: #ffebee; color: #b71c1c; font-weight: 600;"
+            return base + " font-weight: 700;" if _is_strong_delta(value) else base
+        if value == "→ +0.00":
+            return "background-color: #f5f5f5; color: #616161;"
+        return ""
+
+    return frame.style.map(_delta_style, subset=["Δcsat", "Δnps", "Δadoption"])
+
+
+def _find_recent_benchmark_results(limit: int = 2) -> List[str]:
+    """Find recent benchmark-like result files under results/benchmarks."""
+    base_dir = os.path.join(os.getcwd(), "results", "benchmarks")
+    if not os.path.isdir(base_dir):
+        return []
+
+    candidates: List[str] = []
+    for entry in os.scandir(base_dir):
+        if not entry.is_file() or not entry.name.endswith(".json"):
+            continue
+        if not (
+            entry.name.startswith("benchmark_results")
+            or entry.name.startswith("benchmark")
+            or entry.name.startswith("results")
+            or entry.name.startswith("rag_evaluation_")
+        ):
+            continue
+        candidates.append(entry.path)
+
+    candidates.sort(key=lambda path: os.path.getmtime(path), reverse=True)
+    return candidates[:limit]
+
+
+def _read_regression_gate_reports(limit: int = 30) -> List[Dict[str, Any]]:
+    """Read saved regression gate reports from results/benchmarks."""
+    base_dir = os.path.join(os.getcwd(), "results", "benchmarks")
+    if not os.path.isdir(base_dir):
+        return []
+
+    candidates: List[str] = []
+    for entry in os.scandir(base_dir):
+        if entry.is_file() and entry.name.startswith("regression_gate_") and entry.name.endswith(".json"):
+            candidates.append(entry.path)
+
+    candidates.sort(key=lambda path: os.path.getmtime(path), reverse=True)
+
+    records: List[Dict[str, Any]] = []
+    for path in candidates[:limit]:
+        try:
+            with open(path, "r", encoding="utf-8") as handle:
+                record = json.load(handle)
+                record["_path"] = path
+                records.append(record)
+        except Exception:
+            continue
+
+    return records
+
+
+def _format_regression_gate_rows(records: List[Dict[str, Any]]) -> pd.DataFrame:
+    """Format saved regression gate reports for display."""
+    if not records:
+        return pd.DataFrame()
+
+    rows: List[Dict[str, Any]] = []
+    for record in records:
+        summary = record.get("summary") or {}
+        rows.append(
+            {
+                "timestamp": record.get("current_timestamp", ""),
+                "status": record.get("status", ""),
+                "comparable": summary.get("comparable_benchmarks", 0),
+                "regressed": summary.get("regressed_benchmarks", 0),
+                "improved": summary.get("improved_benchmarks", 0),
+                "notes": "; ".join(record.get("notes") or []),
+                "path": os.path.basename(record.get("_path", "")),
+            }
+        )
+
+    return pd.DataFrame(rows)
+
+
+def _read_rag_evaluation_reports(limit: int = 30) -> List[Dict[str, Any]]:
+    """Read saved RAG evaluation reports from results/benchmarks."""
+    base_dir = os.path.join(os.getcwd(), "results", "benchmarks")
+    if not os.path.isdir(base_dir):
+        return []
+
+    candidates: List[str] = []
+    for entry in os.scandir(base_dir):
+        if entry.is_file() and entry.name.startswith("rag_evaluation_") and entry.name.endswith(".json"):
+            candidates.append(entry.path)
+
+    candidates.sort(key=lambda path: os.path.getmtime(path), reverse=True)
+
+    records: List[Dict[str, Any]] = []
+    for path in candidates[:limit]:
+        try:
+            with open(path, "r", encoding="utf-8") as handle:
+                record = json.load(handle)
+                record["_path"] = path
+                records.append(record)
+        except Exception:
+            continue
+
+    return records
+
+
+def _format_rag_evaluation_rows(records: List[Dict[str, Any]]) -> pd.DataFrame:
+    """Format saved RAG evaluation reports for display."""
+    if not records:
+        return pd.DataFrame()
+
+    rows: List[Dict[str, Any]] = []
+    for record in records:
+        summary = record.get("summary") or {}
+        average_metrics = summary.get("average_metrics") or {}
+        results = record.get("results") or []
+        sample_count = summary.get("total_samples")
+        if sample_count is None and results:
+            sample_count = results[0].get("num_samples", 0)
+        rows.append(
+            {
+                "timestamp": record.get("timestamp", ""),
+                "samples": sample_count or 0,
+                "end_to_end": average_metrics.get("end_to_end_score", 0.0),
+                "factual_consistency": average_metrics.get("factual_consistency", 0.0),
+                "rouge": average_metrics.get("rouge", 0.0),
+                "bleu": average_metrics.get("bleu", 0.0),
+                "path": os.path.basename(record.get("_path", "")),
+            }
+        )
+
+    return pd.DataFrame(rows)
 
 
 class LearningDashboard:
@@ -326,6 +559,15 @@ class LearningDashboard:
             with info_col2:
                 st.metric("Latest Feedback", latest_feedback_at or "-")
 
+            if recent_feedback:
+                latest = recent_feedback[-1]
+                query = getattr(latest, "user_query", "") or getattr(latest, "query", "") or "-"
+                rating = getattr(latest, "rating", None)
+                tags = getattr(latest, "tags", None) or []
+                rating_text = f"{float(rating):.2f}" if isinstance(rating, (int, float)) else "-"
+                tag_text = ", ".join(tags) if tags else "-"
+                st.caption(f"Latest Feedback Summary: query={query} | rating={rating_text} | tags={tag_text}")
+
             if not signal_means:
                 st.caption("価値軸シグナルはまだありません。フィードバックタグやコメントが蓄積されると表示されます。")
             else:
@@ -526,20 +768,118 @@ class LearningDashboard:
             if not logs:
                 st.caption("ログはまだありません。")
             else:
-                rows = []
-                for item in logs:
-                    summary = item.get("summary") or {}
-                    rows.append({
-                        "timestamp": item.get("timestamp", ""),
-                        "status": item.get("status", ""),
-                        "source": item.get("source", "human_only"),
-                        "reasons": ", ".join(item.get("reasons") or []),
-                        "entries": summary.get("total_entries"),
-                        "csat": summary.get("csat_mean"),
-                        "nps": summary.get("nps_mean"),
-                        "adoption": summary.get("adoption_rate"),
-                    })
-                st.dataframe(pd.DataFrame(rows), use_container_width=True)
+                st.caption("Δ列は1つ前の実行結果との差分です。")
+                rows = _build_gate_history_rows(logs)
+                frame = _format_gate_history_rows(rows)
+                st.dataframe(frame, use_container_width=True)
+
+        st.divider()
+        st.subheader("🧪 ベンチマーク回帰ゲート")
+
+        if not REGRESSION_GATE_AVAILABLE:
+            st.info("回帰ゲートモジュールが利用できません。")
+        else:
+            result_files = _find_recent_benchmark_results(limit=2)
+            if len(result_files) < 2:
+                st.caption("比較可能なベンチマーク結果ファイルが2件以上ありません。")
+                st.caption("results/benchmarks 配下に直近2回の結果があると自動表示されます。")
+            else:
+                baseline_file, current_file = result_files[1], result_files[0]
+                st.caption(f"baseline: {os.path.basename(baseline_file)}")
+                st.caption(f"current: {os.path.basename(current_file)}")
+
+                try:
+                    report = RegressionGate().compare(baseline_file, current_file)
+                except Exception as exc:
+                    st.error(f"回帰ゲートの評価に失敗しました: {exc}")
+                    report = None
+
+                if report is not None:
+                    status_col1, status_col2, status_col3 = st.columns(3)
+                    with status_col1:
+                        st.metric("status", report.status)
+                    with status_col2:
+                        st.metric("regressed", report.summary.get("regressed_benchmarks", 0))
+                    with status_col3:
+                        st.metric("improved", report.summary.get("improved_benchmarks", 0))
+
+                    if report.notes:
+                        for note in report.notes:
+                            st.caption(note)
+
+                    if report.benchmark_deltas:
+                        delta_rows = []
+                        for item in report.benchmark_deltas:
+                            delta_rows.append(
+                                {
+                                    "benchmark": item.benchmark_name,
+                                    "regressions": ", ".join(item.regressions) or "-",
+                                    "improvements": ", ".join(item.improvements) or "-",
+                                }
+                            )
+                        st.dataframe(pd.DataFrame(delta_rows), use_container_width=True)
+
+        st.divider()
+        st.subheader("🧾 保存済み回帰ゲート履歴")
+
+        saved_reports = _read_regression_gate_reports(limit=30)
+        if not saved_reports:
+            st.caption("保存済み回帰ゲートレポートはまだありません。")
+            st.caption("--auto-gate 実行後に results/benchmarks 配下へ保存されます。")
+        else:
+            history_frame = _format_regression_gate_rows(saved_reports)
+            st.dataframe(history_frame, use_container_width=True)
+
+            status_counts = history_frame["status"].value_counts().reset_index()
+            status_counts.columns = ["status", "count"]
+            fig_status = px.bar(
+                status_counts,
+                x="status",
+                y="count",
+                title="Regression Gate Status Distribution",
+                color="status",
+                color_discrete_sequence=["#2ecc71", "#f39c12", "#e74c3c"],
+            )
+            fig_status.update_layout(height=280, showlegend=False)
+            st.plotly_chart(fig_status, use_container_width=True)
+
+        st.divider()
+        st.subheader("📊 RAG評価履歴")
+
+        rag_reports = _read_rag_evaluation_reports(limit=30)
+        if not rag_reports:
+            st.caption("保存済みRAG評価レポートはまだありません。")
+            st.caption("RAG評価を保存すると factual_consistency と end_to_end_score の履歴が表示されます。")
+        else:
+            rag_frame = _format_rag_evaluation_rows(rag_reports)
+            st.dataframe(rag_frame, use_container_width=True)
+
+            trend_df = rag_frame.copy()
+            if not trend_df.empty:
+                trend_df["timestamp"] = pd.to_datetime(trend_df["timestamp"], errors="coerce")
+                trend_df = trend_df.sort_values("timestamp")
+
+                fig_rag = go.Figure()
+                fig_rag.add_trace(go.Scatter(
+                    x=trend_df["timestamp"],
+                    y=trend_df["factual_consistency"],
+                    mode="lines+markers",
+                    name="factual_consistency",
+                    line=dict(color="#e67e22", width=3),
+                ))
+                fig_rag.add_trace(go.Scatter(
+                    x=trend_df["timestamp"],
+                    y=trend_df["end_to_end"],
+                    mode="lines+markers",
+                    name="end_to_end_score",
+                    line=dict(color="#3498db", width=3),
+                ))
+                fig_rag.update_layout(
+                    title="RAG Evaluation Trend",
+                    height=320,
+                    yaxis_title="score",
+                )
+                st.plotly_chart(fig_rag, use_container_width=True)
     
     def _render_memory_management(self):
         """Render Memory Management dashboard."""
