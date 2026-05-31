@@ -1928,6 +1928,17 @@ def setup_sidebar():
             
             show_memories = st.checkbox("関連する記憶を表示", value=True, key="sidebar_show_memories")
             st.session_state.show_memories = show_memories
+
+            show_pref_profile = st.checkbox("🧭 推定プロファイルを表示", value=False, key="sidebar_show_pref_profile")
+            st.session_state.show_pref_profile = show_pref_profile
+
+            if show_pref_profile:
+                profile = st.session_state.get("response_preference_profile") or {}
+                if profile:
+                    st.caption("会話履歴から推定した応答スタイル（セッション内）")
+                    st.json(profile)
+                else:
+                    st.info("推定プロファイルはまだありません。1回以上対話すると表示されます。")
             
             auto_train_enabled = st.checkbox("自動トレーニングを有効化", value=False, key="sidebar_auto_train")
             st.session_state.auto_train_enabled = auto_train_enabled
