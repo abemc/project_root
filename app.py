@@ -3,9 +3,12 @@ import sys
 import tempfile
 from pathlib import Path
 from datetime import datetime
+import html
+import uuid
 from src.rag.date_utils import parse_relative_date
 
 import streamlit as st
+import streamlit.components.v1 as components
 import logging
 import json
 import time
@@ -13,6 +16,15 @@ import re
 import difflib
 import pandas as pd
 import plotly.express as px
+from src.ui.diagram_settings import (
+    DIAGRAM_MODE_MERMAID,
+    diagram_mode_from_label,
+    diagram_mode_options,
+    diagram_mode_to_label,
+    diagram_steps_for_query,
+    diagram_title_for_query,
+    normalize_diagram_mode,
+)
 
 try:
     from autonomous_rag_agent import AutonomousRAGAgent
@@ -126,6 +138,277 @@ def _detect_audio_ext(audio_bytes: bytes) -> str:
         return ".flac"
     # WebM (1a 45 df a3) などその他はwebmとして扱う
     return ".webm"
+
+
+_MERMAID_BLOCK_RE = re.compile(r"```mermaid(?:\s*\n|\s+)(.*?)```", re.DOTALL | re.IGNORECASE)
+
+
+def _query_requests_diagram(query: str) -> bool:
+    if not query:
+        return False
+    return bool(re.search(r"図解|図で|フロー図|構成図|mermaid|チャート|diagram", query, re.IGNORECASE))
+
+
+def _has_mermaid_block(text: str) -> bool:
+    return bool(text and _MERMAID_BLOCK_RE.search(text))
+
+
+def _normalize_mermaid_blocks(text: str) -> str:
+    """Mermaid フェンスの揺れを正規化する（1行記法や余分空白を吸収）。"""
+    s = str(text or "")
+    if not s:
+        return s
+
+    def _repl(match):
+        body = (match.group(1) or "").strip()
+        return f"```mermaid\n{body}\n```"
+
+    # ```mermaid graph TD; ... ``` のような1行/崩れた表記を正規化
+    s = re.sub(r"```mermaid\s+([\s\S]*?)```", _repl, s, flags=re.IGNORECASE)
+    return s
+
+
+def _fallback_mermaid_for_query(query: str) -> str:
+    q = (query or "質問").strip().replace("\n", " ")[:60]
+    escaped_q = q.replace("\"", "'")
+    return (
+        "\n\n```mermaid\n"
+        "flowchart TD\n"
+        f"    A[質問: {escaped_q}] --> B[要点を整理]\n"
+        "    B --> C[根拠を確認]\n"
+        "    C --> D[結論]\n"
+        "```\n"
+    )
+
+
+def _render_markdown_with_mermaid(markdown_text: str) -> None:
+    """Markdown 内の Mermaid ブロックを図として描画し、それ以外は通常表示する。"""
+    if not markdown_text:
+        return
+
+    parts = []
+    last_end = 0
+    for m in _MERMAID_BLOCK_RE.finditer(markdown_text):
+        if m.start() > last_end:
+            parts.append(("md", markdown_text[last_end:m.start()]))
+        parts.append(("mermaid", m.group(1).strip()))
+        last_end = m.end()
+    if last_end < len(markdown_text):
+        parts.append(("md", markdown_text[last_end:]))
+
+    # Mermaid ブロックが無ければ従来表示
+    if not any(kind == "mermaid" for kind, _ in parts):
+        st.markdown(markdown_text, unsafe_allow_html=True)
+        return
+
+    for kind, chunk in parts:
+        if kind == "md":
+            if chunk and chunk.strip():
+                st.markdown(chunk, unsafe_allow_html=True)
+            continue
+
+        if not chunk:
+            continue
+
+        block_id = f"mermaid-{uuid.uuid4().hex}"
+        escaped_code = html.escape(chunk)
+        est_height = max(260, min(1200, 180 + (chunk.count("\n") + 1) * 26))
+        mermaid_html = f"""
+<style>
+    body {{ margin: 0; background: transparent; }}
+    .mermaid-wrap {{
+        overflow-x: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+        padding: 10px 12px;
+    }}
+    .mermaid svg {{ max-width: 100%; height: auto; }}
+</style>
+<div class=\"mermaid-wrap\"> 
+    <pre class=\"mermaid\" id=\"{block_id}\">{escaped_code}</pre>
+</div>
+<script type=\"module\"> 
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({{
+            startOnLoad: false,
+            securityLevel: 'loose',
+            theme: 'neutral',
+            fontFamily: '"Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif',
+            flowchart: {{ useMaxWidth: true, htmlLabels: false, curve: 'linear' }},
+            themeVariables: {{
+                primaryColor: '#e8f0ff',
+                primaryBorderColor: '#5b7fd1',
+                lineColor: '#5b7fd1',
+                textColor: '#0f172a',
+                fontSize: '14px'
+            }}
+        }});
+    const el = document.getElementById('{block_id}');
+    if (el) {{
+            try {{
+                const src = (el.textContent || '').trim();
+                // まずパース検証し、文法エラー時は Mermaid エラーカードを出さずにコード表示へフォールバック
+                await mermaid.parse(src);
+                const renderId = '{block_id}-svg';
+                const r = await mermaid.render(renderId, src);
+                const host = document.createElement('div');
+                host.innerHTML = r.svg;
+                el.replaceWith(host);
+            }} catch (e) {{
+                console.error('Mermaid render/parse error:', e);
+                const fallback = document.createElement('pre');
+                fallback.style.margin = '0';
+                fallback.style.padding = '8px';
+                fallback.style.whiteSpace = 'pre-wrap';
+                fallback.style.wordBreak = 'break-word';
+                fallback.textContent = (el.textContent || '').trim();
+                el.replaceWith(fallback);
+            }}
+    }}
+</script>
+"""
+        components.html(mermaid_html, height=est_height, scrolling=True)
+
+
+def _render_mermaid_blocks_only(markdown_text: str) -> bool:
+    """Markdown から Mermaid ブロックのみ抽出して描画する。描画したら True を返す。"""
+    if not markdown_text:
+        return False
+    found = False
+    for m in _MERMAID_BLOCK_RE.finditer(markdown_text):
+        code = (m.group(1) or "").strip()
+        if not code:
+            continue
+        found = True
+        _render_markdown_with_mermaid(f"```mermaid\n{code}\n```")
+    return found
+
+
+def _safe_render_mermaid_blocks(markdown_text: str) -> None:
+    """Mermaid 図の描画を安全に行い、失敗時はコード表示へフォールバックする。"""
+    try:
+        rendered = _render_mermaid_blocks_only(markdown_text)
+        if not rendered:
+            return
+    except Exception as e:
+        _append_run_log(f"mermaid_render_error: {e}")
+        st.info("図の再表示で問題が発生したため、図コードを表示します。")
+        # フォールバック: Mermaid コードをそのまま表示
+        for m in _MERMAID_BLOCK_RE.finditer(markdown_text or ""):
+            code = (m.group(1) or "").strip()
+            if code:
+                st.code(code, language="mermaid")
+
+
+def _render_safe_flow_diagram(title: str, steps: list[str]) -> None:
+        """Streamlit/preview で安定して表示できる純HTMLの図解を描画する。"""
+        safe_steps = [str(step).strip() for step in steps if str(step).strip()]
+        if not safe_steps:
+                safe_steps = ["要点を整理", "根拠を確認", "結論をまとめる"]
+
+        boxes = []
+        for idx, step in enumerate(safe_steps, start=1):
+                boxes.append(
+                        '<div class="diag-node">'
+                        f'<span class="diag-badge">{idx}</span>'
+                        f'<span class="diag-text">{html.escape(step)}</span>'
+                        '</div>'
+                )
+                if idx < len(safe_steps):
+                        boxes.append('<div class="diag-arrow" aria-hidden="true">→</div>')
+
+        est_height = 180 if len(safe_steps) <= 4 else 230
+        html_body = f"""
+<style>
+    .diag-wrap {{
+        margin: 10px 0 6px 0;
+        padding: 14px 16px;
+        border: 1px solid #cfd8e6;
+        border-radius: 14px;
+        background:
+            radial-gradient(circle at 8% 14%, #fff7e6 0 18%, transparent 20%),
+            radial-gradient(circle at 92% 80%, #e8f4ff 0 20%, transparent 22%),
+            linear-gradient(180deg, #f7fbff 0%, #ffffff 100%);
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    }}
+    .diag-title {{
+        font-weight: 700;
+        color: #102a43;
+        margin-bottom: 10px;
+        font-size: 0.98rem;
+        letter-spacing: 0.02em;
+    }}
+    .diag-flow {{
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        color: #102a43;
+        font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }}
+    .diag-node {{
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        min-height: 46px;
+        padding: 8px 12px;
+        border: 1px solid #7b9bd6;
+        border-radius: 999px;
+        background: #edf4ff;
+        color: #1f3a67;
+        font-weight: 600;
+        line-height: 1.35;
+        box-sizing: border-box;
+        max-width: 100%;
+    }}
+    .diag-badge {{
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #2f5fb7;
+        color: #ffffff;
+        font-size: 0.78rem;
+        font-weight: 700;
+        flex: 0 0 22px;
+    }}
+    .diag-text {{
+        word-break: break-word;
+    }}
+    .diag-arrow {{
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #6c7d93;
+        padding: 0 2px;
+    }}
+    @media (max-width: 640px) {{
+        .diag-flow {{
+            align-items: stretch;
+        }}
+        .diag-arrow {{
+            width: 100%;
+            text-align: center;
+            transform: rotate(90deg);
+            padding: 0;
+            margin: -3px 0;
+        }}
+        .diag-node {{
+            width: 100%;
+            border-radius: 12px;
+        }}
+    }}
+</style>
+<div class="diag-wrap">
+    <div class="diag-title">{html.escape(title)}</div>
+    <div class="diag-flow">
+        {''.join(boxes)}
+    </div>
+</div>
+"""
+        components.html(html_body, height=est_height, scrolling=False)
 
 def transcribe_audio_bytes(audio_bytes: bytes, model_size: str = "tiny") -> str:
     """音声バイトデータをWhisperで文字起こし"""
@@ -603,6 +886,7 @@ def _fetch_weather_context(query: str) -> str:
 
 # OneNote設定の保存先
 ONENOTE_SETTINGS_PATH = Path(__file__).resolve().parent / "config" / "onenote_settings.json"
+SIDEBAR_CONFIG_PATH = Path(__file__).resolve().parent / "config" / "sidebar_config.json"
 
 
 def _load_onenote_settings() -> dict:
@@ -628,6 +912,42 @@ def _save_onenote_settings(client_id: str, tenant_id: str) -> None:
         "updated_at": datetime.now().isoformat(timespec="seconds"),
     }
     with open(ONENOTE_SETTINGS_PATH, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+
+
+def _load_sidebar_history_days(default: int = 5) -> int:
+    """サイドバー設定ファイルから実行履歴の表示日数を読み込む。"""
+    try:
+        if not SIDEBAR_CONFIG_PATH.exists():
+            return default
+        with open(SIDEBAR_CONFIG_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        value = ((data or {}).get("history") or {}).get("history_days", default)
+        value = int(value)
+        return max(1, min(30, value))
+    except Exception:
+        return default
+
+
+def _save_sidebar_history_days(days: int) -> None:
+    """実行履歴の表示日数をサイドバー設定へ保存する。"""
+    value = max(1, min(30, int(days)))
+    SIDEBAR_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    payload = {}
+    if SIDEBAR_CONFIG_PATH.exists():
+        try:
+            with open(SIDEBAR_CONFIG_PATH, "r", encoding="utf-8") as f:
+                loaded = json.load(f)
+                if isinstance(loaded, dict):
+                    payload = loaded
+        except Exception:
+            payload = {}
+    history_cfg = payload.get("history")
+    if not isinstance(history_cfg, dict):
+        history_cfg = {}
+    history_cfg["history_days"] = value
+    payload["history"] = history_cfg
+    with open(SIDEBAR_CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
 # RAG Agent 設定管理のインポート
@@ -696,6 +1016,12 @@ def get_retriever():
 # サイドバーの設定
 def setup_sidebar():
     """サイドバーの設定を行う関数"""
+    if "sidebar_history_days" not in st.session_state:
+        loaded_days = _load_sidebar_history_days(default=5)
+        st.session_state.sidebar_history_days = loaded_days
+        st.session_state._last_saved_sidebar_history_days = loaded_days
+        _save_sidebar_history_days(loaded_days)
+
     # --- 開発者向けユーティリティ ---
     def _append_dev_log(action: str, result: str) -> None:
         """開発者ツールの出力を JSONL で保存する。"""
@@ -857,9 +1183,14 @@ def setup_sidebar():
                 st.session_state["chat_history"] = []
                 # チャット履歴ファイルも削除
                 try:
-                    chat_file = Path(__file__).resolve().parent / "data" / "chat_history.json"
-                    if chat_file.exists():
-                        chat_file.unlink()
+                    base_dir = Path(__file__).resolve().parent
+                    chat_files = [
+                        base_dir / "logs" / "chat_history.jsonl",  # 現在の保存先
+                        base_dir / "data" / "chat_history.json",   # 旧保存先（互換）
+                    ]
+                    for chat_file in chat_files:
+                        if chat_file.exists():
+                            chat_file.unlink()
                     st.success("✅ チャット履歴をクリアしました")
                 except Exception as e:
                     st.warning(f"⚠️ クリア処理中に警告: {e}")
@@ -1380,6 +1711,14 @@ def setup_sidebar():
                 key="sidebar_depth"
             )
             st.session_state.depth = depth
+            current_diagram_mode = normalize_diagram_mode(st.session_state.get("diagram_render_mode", "stable"))
+            diagram_label = st.selectbox(
+                "図解表示モード",
+                options=diagram_mode_options(),
+                index=diagram_mode_options().index(diagram_mode_to_label(current_diagram_mode)),
+                key="sidebar_diagram_mode"
+            )
+            st.session_state.diagram_render_mode = diagram_mode_from_label(diagram_label)
             # 深掘りレベルに応じた推奨パラメータを適用（ユーザーの手動設定を上書きする）
             if depth == "簡潔":
                 st.session_state.temperature = 0.0
@@ -1390,6 +1729,35 @@ def setup_sidebar():
             else:  # 深掘り
                 st.session_state.temperature = 0.2
                 st.session_state.max_tokens = 4096
+
+        with st.sidebar.expander("📝 クエリ設定", expanded=False):
+            use_web_search_sidebar = st.checkbox(
+                "🌐 ウェブ検索",
+                value=bool(st.session_state.get("use_web_search", False)),
+                key="sidebar_query_use_web_search",
+            )
+            st.session_state.use_web_search = use_web_search_sidebar
+
+            use_autonomous_rag_sidebar = st.checkbox(
+                "🤖 自律RAGモード",
+                value=bool(st.session_state.get("use_autonomous_rag", False)),
+                key="sidebar_query_use_autonomous_rag",
+            )
+            st.session_state.use_autonomous_rag = use_autonomous_rag_sidebar
+
+            include_reasoning_sidebar = st.checkbox(
+                "🧠 推論詳細",
+                value=bool(st.session_state.get("include_reasoning", True)),
+                key="sidebar_query_include_reasoning",
+            )
+            st.session_state.include_reasoning = include_reasoning_sidebar
+
+            stream_output_sidebar = st.checkbox(
+                "⚡ ストリーム",
+                value=bool(st.session_state.get("stream_output", True)),
+                key="sidebar_query_stream_output",
+            )
+            st.session_state.stream_output = stream_output_sidebar
         
         # ===== 検索・再ランク設定セクション =====
         with st.sidebar.expander("🔍 検索設定", expanded=False):
@@ -1529,6 +1897,19 @@ def setup_sidebar():
         # ===== 実行履歴セクション =====
         st.sidebar.markdown("---")
         st.sidebar.subheader("📋 実行履歴")
+        history_days = st.sidebar.number_input(
+            "表示日数",
+            min_value=1,
+            max_value=30,
+            value=int(st.session_state.get("sidebar_history_days", 5)),
+            step=1,
+            key="sidebar_history_days",
+            help="実行履歴を表示する日数を指定します（最新日から）。",
+        )
+        history_days_int = int(history_days)
+        if st.session_state.get("_last_saved_sidebar_history_days") != history_days_int:
+            _save_sidebar_history_days(history_days_int)
+            st.session_state._last_saved_sidebar_history_days = history_days_int
         with st.sidebar.expander("過去のクエリと結果"):
             # チャット履歴ファイルから過去のやり取りを表示
             history = _load_chat_history()
@@ -1548,7 +1929,7 @@ def setup_sidebar():
                             continue
                 
                 # 最新の日付から古い順に表示
-                for date_key in sorted(grouped.keys(), reverse=True)[:5]:  # 最新5日分
+                for date_key in sorted(grouped.keys(), reverse=True)[:history_days_int]:
                     with st.sidebar.expander(f"📅 {date_key}"):
                         for msg in reversed(grouped[date_key]):
                             role_icon = "👤" if msg.get("role") == "user" else "🤖"
@@ -1833,6 +2214,47 @@ def _extract_conclusion_and_sources(text: str) -> dict:
     return {"conclusion": conclusion or text[:200], "sources": sources, "raw": text}
 
 
+def _normalize_source_records(items) -> list[dict]:
+    """Normalize mixed source schemas into {id, text} records for UI rendering."""
+    if not isinstance(items, list):
+        return []
+
+    normalized = []
+    seen = set()
+
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+
+        src_id = it.get("id") or it.get("name") or it.get("source_id")
+        src_text = it.get("text") or it.get("title") or it.get("snippet") or ""
+        src_url = it.get("url") or it.get("path")
+
+        meta = it.get("meta") if isinstance(it.get("meta"), dict) else {}
+        if not src_url:
+            src_url = meta.get("source_url") or meta.get("source")
+
+        if isinstance(src_url, str):
+            src_url = src_url.strip()
+        else:
+            src_url = ""
+
+        if src_url and src_url not in str(src_text):
+            src_text = f"{src_text} {src_url}".strip()
+
+        if not src_id:
+            src_id = src_url or "source"
+
+        rec = {"id": str(src_id), "text": str(src_text).strip()}
+        key = (rec["id"], rec["text"])
+        if key in seen:
+            continue
+        seen.add(key)
+        normalized.append(rec)
+
+    return normalized
+
+
 def _sanitize_japanese_response_text(text: str) -> str:
     """表示前に日本語回答の混在表記を最小限で正規化する。"""
     s = str(text or "")
@@ -2057,6 +2479,7 @@ def _store_assistant_message(content) -> None:
     try:
         # If agent returned a structured dict (e.g., from autonomous_rag_agent), handle specially
         if isinstance(content, dict):
+            provided_sources = _normalize_source_records(content.get("sources"))
             # If clarification is required, surface it to the UI
             if content.get("clarification_required"):
                 st.session_state.clarification_active = True
@@ -2071,7 +2494,7 @@ def _store_assistant_message(content) -> None:
                 readable = f"[確認が必要] {st.session_state.clarification_question}"
                 readable = _sanitize_japanese_response_text(readable)
                 parsed = _extract_conclusion_and_sources(readable)
-                msg = {"role": "assistant", "content": readable, "conclusion": parsed["conclusion"], "sources": parsed["sources"], "clarification_required": True}
+                msg = {"role": "assistant", "content": readable, "conclusion": parsed["conclusion"], "sources": provided_sources or parsed["sources"], "clarification_required": True}
                 st.session_state.messages.append(msg)
                 _save_chat_message(msg)  # 履歴に保存
                 return
@@ -2081,8 +2504,9 @@ def _store_assistant_message(content) -> None:
             st.session_state.clarification_question = None
             st.session_state.clarification_candidates = None
             clean_text = _sanitize_japanese_response_text(str(text))
+            clean_text = _normalize_mermaid_blocks(clean_text)
             parsed = _extract_conclusion_and_sources(clean_text)
-            msg = {"role": "assistant", "content": clean_text, "conclusion": parsed["conclusion"], "sources": parsed["sources"]}
+            msg = {"role": "assistant", "content": clean_text, "conclusion": parsed["conclusion"], "sources": provided_sources or parsed["sources"]}
             st.session_state.messages.append(msg)
             _save_chat_message(msg)  # 履歴に保存
             return
@@ -2095,6 +2519,7 @@ def _store_assistant_message(content) -> None:
     st.session_state.clarification_question = None
     st.session_state.clarification_candidates = None
     clean_text = _sanitize_japanese_response_text(str(content))
+    clean_text = _normalize_mermaid_blocks(clean_text)
     parsed = _extract_conclusion_and_sources(clean_text)
     msg = {"role": "assistant", "content": clean_text, "conclusion": parsed["conclusion"], "sources": parsed["sources"]}
     st.session_state.messages.append(msg)
@@ -2312,6 +2737,8 @@ def _generate_assistant_response(query: str) -> None:
 
 【フォローアップ・深掘りの指示】
 - ユーザーの質問が前の質問の続き、あるいは同一トピックに関する追加の照会である場合は、それを "フォローアップ" とみなしてください。
+- ただし、プロンプト内に `【会話継続コンテキスト】` セクションが存在しない場合はフォローアップ扱いにしないでください。
+- `【会話継続コンテキスト】` が無い場合、"前回の結論:" という文言は出力せず、今回の質問への結論から直接回答してください。
 - フォローアップと判断した場合は、次の順序で回答してください:
     1) 最初に前回の簡潔な結論（1行）を要約する（"前回の結論: ..." と明記）。
     2) 次に、今回の質問に基づく新しい分析・追加情報を箇条書きで3〜5点示す。各項目は可能な限り出典ID（[web_n]）かURLを付記する。
@@ -2852,6 +3279,7 @@ def _generate_assistant_response(query: str) -> None:
             import re as _re_local
             recent_query = (query or "").strip()
             treat_as_fresh = True
+            followup_like = False
             try:
                 # 直前ユーザー質問を取得（現在質問は messages の末尾に入っている前提）
                 prev_user_query = ""
@@ -2864,6 +3292,13 @@ def _generate_assistant_response(query: str) -> None:
                 explicit_follow = bool(_re_local.search(r"続き|前回|さっき|先ほど|その件|もう少し|詳しく|補足|それで|ちなみに|じゃあ", recent_query))
                 referential = bool(_re_local.search(r"これ|それ|あれ|上記|前者|後者|同じ|その|どれ|どの", recent_query))
                 short_follow = len(recent_query) <= 24
+                marketplace_follow = bool(
+                    _re_local.search(
+                        r"amazon|アマゾン|楽天|yahoo|ヤフー|価格\.com|モノタロウ|ヨドバシ|通販|ショップ|販売",
+                        recent_query,
+                        _re_local.IGNORECASE,
+                    )
+                )
 
                 # 内容語の重なりで関連度を推定
                 stop_words = {
@@ -2878,24 +3313,32 @@ def _generate_assistant_response(query: str) -> None:
                 if is_file_referential_query:
                     treat_as_fresh = True
                 # 参照語+短文、または語彙重なりがあるときは会話継続扱い
-                elif explicit_follow or (referential and short_follow) or overlap >= 1:
+                elif explicit_follow or (referential and short_follow) or overlap >= 1 or (marketplace_follow and short_follow):
+                    followup_like = True
                     treat_as_fresh = False
             except Exception:
                 treat_as_fresh = True
 
-            # ===== 根本修正：Web 検索結果がある場合は常にチャット履歴を無視 =====
-            # これにより、最初のクエリで誤った回答が生成されても、
-            # 次のクエリで Web 検索結果が優先される
-            if presearch_docs and isinstance(presearch_docs, list) and len(presearch_docs) > 0:
-                treat_as_fresh = True
-                _append_run_log(f"CRITICAL: Web search results found ({len(presearch_docs)} docs) -> ignoring chat history to prioritize fresh search results")
+            # Web検索結果がある場合でも、フォローアップ質問は会話継続を優先する
+            presearch_has_docs = bool(presearch_docs and isinstance(presearch_docs, list) and len(presearch_docs) > 0)
+            if presearch_has_docs:
+                if followup_like:
+                    treat_as_fresh = False
+                    _append_run_log(f"INFO: Web search results found ({len(presearch_docs)} docs) + followup detected -> preserving recent chat context")
+                else:
+                    treat_as_fresh = True
+                    _append_run_log(f"CRITICAL: Web search results found ({len(presearch_docs)} docs) -> ignoring chat history to prioritize fresh search results")
 
             if treat_as_fresh:
                 chat_history = None
             else:
+                history_source = st.session_state.messages[:-1]
+                if presearch_has_docs and followup_like:
+                    # 直近2往復に限定して、話題継続と履歴汚染抑制を両立する
+                    history_source = history_source[-4:]
                 chat_history = [
                     {"role": msg["role"], "content": msg["content"]}
-                    for msg in st.session_state.messages[:-1]
+                    for msg in history_source
                 ]
                 # フォローアップ時は、直前QAを短く明示して話題の連続性を強制する
                 try:
@@ -2929,6 +3372,17 @@ def _generate_assistant_response(query: str) -> None:
                 )
             except Exception:
                 pass
+
+            needs_diagram = _query_requests_diagram(current_query)
+            if needs_diagram:
+                prompt = (
+                    prompt
+                    + "\n\n【図解出力の必須要件】\n"
+                    + "- ユーザーは図解を求めています。本文の最後に必ず 1 つ以上の Mermaid 図を ```mermaid ... ``` 形式で含めてください。\n"
+                    + "- 図だけでなく、図の読み方を2〜4行で補足してください。\n"
+                )
+                _append_run_log("diagram_request_detected: forcing_mermaid_output=True")
+
             # LLM 呼び出しを実行し、例外は捕捉してログに残す
             try:
                 _append_run_log(f"DEBUG: About to call LLM with prompt_len={len(prompt)} model={st.session_state.llm_model}")
@@ -2953,6 +3407,25 @@ def _generate_assistant_response(query: str) -> None:
                 logger.exception(f"LLM 呼び出し中に例外: {e}")
                 _append_run_log(f"LLM exception: {e}")
                 response = f"Error: LLM exception: {e}"
+
+            # 図解要求時に Mermaid が欠けていたら、最低限の図を補完する
+            try:
+                if needs_diagram and isinstance(response, str) and response.strip() and not str(response).startswith("Error"):
+                    if not _has_mermaid_block(response):
+                        response = response + _fallback_mermaid_for_query(current_query)
+                        _append_run_log("diagram_fallback_injected: mermaid_block_appended")
+            except Exception:
+                pass
+
+            # Fresh回答（履歴未使用）では「前回の結論」表現を強制的に抑止する
+            try:
+                if not chat_history and isinstance(response, str) and response:
+                    normalized_response = re.sub(r"前回の結論[：:]\s*", "結論: ", response)
+                    if normalized_response != response:
+                        _append_run_log("response_normalization: replaced '前回の結論' -> '結論' (fresh mode)")
+                        response = normalized_response
+            except Exception:
+                pass
 
             # 「このPDF」系で内容不明応答になった場合は、取得済みチャンクから抽出的に要約を返す
             try:
@@ -3219,7 +3692,7 @@ def _generate_assistant_response(query: str) -> None:
                     except Exception:
                         pass
                     _append_run_log(f"DEBUG: Response OK - storing to session_state")
-                    _store_assistant_message(response)
+                    _store_assistant_message({"text": str(response), "sources": provenance})
                     
                     # Display Web search results in UI if available
                     if presearch_docs and isinstance(presearch_docs, list) and len(presearch_docs) > 0:
@@ -3325,332 +3798,392 @@ def _generate_assistant_response(query: str) -> None:
 
 def display_app():
     """アプリのメイン画面を表示する関数 - チャット形式で質問と回答を表示"""
+    st.markdown(
+        """
+        <style>
+            /* チャット画面の情報密度を上げる（表題・余白を縮小） */
+            .stApp [data-testid="stAppViewContainer"] .main .block-container {
+                padding-top: 0.65rem;
+                padding-bottom: 0.8rem;
+                max-width: 96%;
+            }
+
+            .stApp h1 {
+                font-size: 1.5rem !important;
+                line-height: 1.2 !important;
+                margin: 0 0 0.35rem 0 !important;
+            }
+
+            .stApp h2 {
+                font-size: 1.05rem !important;
+                line-height: 1.3 !important;
+                margin: 0.35rem 0 0.25rem 0 !important;
+            }
+
+            .stApp h3 {
+                font-size: 0.96rem !important;
+                line-height: 1.3 !important;
+                margin: 0.25rem 0 0.2rem 0 !important;
+            }
+
+            .chat-scroll-host {
+                max-height: 58vh;
+                overflow-y: auto;
+                padding-right: 0.35rem;
+                border: 1px solid #e5ebf3;
+                border-radius: 10px;
+                padding-left: 0.45rem;
+                padding-top: 0.35rem;
+                padding-bottom: 0.3rem;
+                background: #ffffff;
+            }
+
+            .stApp [data-testid="stSidebar"] {
+                min-width: 275px;
+                max-width: 275px;
+            }
+
+            @media (max-width: 900px) {
+                .stApp [data-testid="stSidebar"] {
+                    min-width: 255px;
+                    max-width: 255px;
+                }
+                .stApp [data-testid="stAppViewContainer"] .main .block-container {
+                    max-width: 100%;
+                    padding-top: 0.55rem;
+                }
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
     st.title("🤖 自律型RAGエージェント")
     logger.debug("display_app function is being called...")
     
     _init_display_session_state()
-    
-    # ===== クエリ入力セクション =====
-    st.subheader("📝 クエリ入力")
-    
-    # オプション設定（シンプル表示）
-    col1, col2 = st.columns([1, 3])
-    with col1:
-        # ウェブ検索はデフォルトOFF。ONにする場合は確認が必要。
-        use_web_search = st.checkbox("🌐 ウェブ検索", value=st.session_state.get("use_web_search", False))
-        # confirm flow for web search
-        if use_web_search and not st.session_state.get("web_search_confirmed"):
-            st.warning("ウェブ検索を有効にすると外部APIへ問い合わせます。プライバシーとコストを確認してください。")
-            if st.button("はい、ウェブ検索を有効にする", key="confirm_web_search"):
-                st.session_state.web_search_confirmed = True
-                st.session_state.use_web_search = True
-                use_web_search = True
-            else:
-                # keep it off until explicitly confirmed
-                st.session_state.use_web_search = False
-                use_web_search = False
-        else:
-            st.session_state.use_web_search = use_web_search
 
-    with col2:
-        # Model/temperature shown in a collapsible panel to reduce visual noise
-        with st.expander("📌 現在の設定", expanded=False):
-            st.write(f"モデル: {st.session_state.get('llm_model')}  ／  Temperature: {st.session_state.get('temperature')}")
-            if st.button("設定を変更", key="open_model_settings"):
-                st.info("モデル設定 UI は現在ここでは実装されていません。設定ファイルを編集してください。")
-
-    # 高度設定は expander にまとめる
-    with st.expander("⚙️ 詳細設定", expanded=False):
-        col_a, col_b, col_c = st.columns(3)
-        with col_a:
-            use_autonomous_rag = st.checkbox("🤖 自律RAGモード", value=st.session_state.get('use_autonomous_rag', False))
-            st.session_state.use_autonomous_rag = use_autonomous_rag
-        with col_b:
-            include_reasoning = st.checkbox("🧠 推論詳細", value=st.session_state.get('include_reasoning', True))
-            st.session_state.include_reasoning = include_reasoning
-        with col_c:
-            stream_output = st.checkbox("⚡ ストリーム", value=st.session_state.get('stream_output', True))
-            st.session_state.stream_output = stream_output
-    
-    st.markdown("---")
-    
-    # チャット履歴の表示
     st.subheader("💬 会話")
-    st.markdown("---")
-    
-    if st.session_state.messages:
-        for message in st.session_state.messages:
-            if message["role"] == "user":
-                st.markdown(f"**🙋 あなた：**")
-                st.markdown(message['content'])
-            else:
-                st.markdown(f"**🤖 エージェント：**")
-                # If structured conclusion available, show concise Q->A style
-                concl = message.get("conclusion")
-                sources = message.get("sources") or []
-                if concl:
-                    # Normalize combined organization+model mentions (display-side)
-                    def _normalize_org_model(text):
-                        import re as _re_local
-                        mapping = {
-                            'Anthropic': ['Claude Mythos', 'Claude', 'Mythos', 'Claude 2'],
-                            'アンソロピック': ['Claude Mythos', 'Claude', 'ミトス', 'Mythos']
-                        }
-                        for org, models in mapping.items():
-                            if org not in text:
-                                continue
-                            for m in models:
-                                if m in text:
-                                    # attempt to remove the org+model fragment, allowing surrounding quotes
-                                    start = text.find(org + 'の')
-                                    mid = text.find(m, start if start>=0 else 0)
-                                    if start >= 0 and mid >= 0 and mid - start < 80:
-                                        seg_start = start
-                                        seg_end = mid + len(m)
-                                    else:
-                                        # fallback: look for proximity of org and model without 'の'
-                                        pos_org = text.find(org)
-                                        pos_m = text.find(m)
-                                        if pos_org >= 0 and pos_m >= 0 and abs(pos_m - pos_org) < 80:
-                                            seg_start = min(pos_org, pos_m)
-                                            seg_end = max(pos_org + len(org), pos_m + len(m))
+
+    chat_scroll_container = st.container(height=560, border=False)
+    with chat_scroll_container:
+        if st.session_state.messages:
+            for message in st.session_state.messages:
+                if message["role"] == "user":
+                    st.markdown(f"**🙋 あなた：**")
+                    st.markdown(message['content'])
+                else:
+                    st.markdown(f"**🤖 エージェント：**")
+                    # If structured conclusion available, show concise Q->A style
+                    concl = message.get("conclusion")
+                    sources = message.get("sources") or []
+                    if concl:
+                        # Normalize combined organization+model mentions (display-side)
+                        def _normalize_org_model(text):
+                            import re as _re_local
+                            mapping = {
+                                'Anthropic': ['Claude Mythos', 'Claude', 'Mythos', 'Claude 2'],
+                                'アンソロピック': ['Claude Mythos', 'Claude', 'ミトス', 'Mythos']
+                            }
+                            for org, models in mapping.items():
+                                if org not in text:
+                                    continue
+                                for m in models:
+                                    if m in text:
+                                        # attempt to remove the org+model fragment, allowing surrounding quotes
+                                        start = text.find(org + 'の')
+                                        mid = text.find(m, start if start>=0 else 0)
+                                        if start >= 0 and mid >= 0 and mid - start < 80:
+                                            seg_start = start
+                                            seg_end = mid + len(m)
                                         else:
-                                            continue
-                                    while seg_end < len(text) and text[seg_end] in '」」"\'）)]。、':
-                                        seg_end += 1
-                                    while seg_start > 0 and text[seg_start] in '「“"\'（(':
-                                        seg_start -= 1
-                                    # replace the extracted fragment with the model name to preserve predicate
-                                    replaced = (text[:seg_start] + m + text[seg_end:]).strip()
-                                    # cleanup spacing and stray punctuation
-                                    import re as _clean_re
-                                    replaced = _clean_re.sub(r'\s+', ' ', replaced).strip()
-                                    # ensure model name is separated by spaces
-                                    replaced = replaced.replace(m, f" {m} ")
-                                    replaced = _clean_re.sub(r'\s+', ' ', replaced).strip()
-                                    # remove stray closing paren immediately after words (e.g. 'Claudepic)')
-                                    replaced = _clean_re.sub(r"(\w)\)+", r"\1", replaced)
-                                    parts = [f"組織: {org}", f"モデル: {m}"]
-                                    if replaced:
-                                        parts.append(replaced)
-                                    return "\n\n".join(parts)
-                        return text
-
-                    norm_concl = _normalize_org_model(concl)
-                    # Post-process common mixed-script artifacts (e.g. "マンドOLA")
-                    try:
-                        # helper: replace some simplified Chinese characters with Japanese equivalents
-                        def _replace_simplified_chinese(s: str) -> str:
-                            if not s:
-                                return s
-                            # minimal mapping for common mixed-character artifacts observed in outputs
-                            simple_map = {
-                                '乐': '楽',
-                                '馆': '館',
-                                '发': '発',
-                                '后': '後',
-                                '测': '測',
-                                '确': '確',
-                            }
-                            for k, v in simple_map.items():
-                                s = s.replace(k, v)
-                            return s
-
-                        # map common English terms to preferred katakana
-                        entity_kana_map = {
-                            'mandola': 'マンドーラ',
-                            'mandolin': 'マンドリン',
-                        }
-                        import re as _re_fix
-                        # If user query mentioned an English term, prefer its katakana form
-                        user_q = (st.session_state.get('messages') or [])
-                        last_user = ''
-                        if user_q:
-                            for m in reversed(user_q):
-                                if m.get('role') == 'user' and m.get('content'):
-                                    last_user = m.get('content')
-                                    break
-                        for eng, kana in entity_kana_map.items():
-                            if last_user and re.search(rf"\b{eng}\b", last_user, flags=re.IGNORECASE):
-                                # replace ASCII, mixed-case, and weirdly-capitalized forms in conclusion
-                                norm_concl = _re_fix.sub(rf"(?i){eng}", kana, norm_concl)
-                                # fix cases like マンドOLA where ASCII hangs onto katakana
-                                norm_concl = _re_fix.sub(rf"マンド[A-Za-z]+", kana, norm_concl)
-
-                        # fix simplified-chinese artifacts (e.g. '乐器' -> '楽器')
-                        norm_concl = _replace_simplified_chinese(norm_concl)
-                    except Exception:
-                        pass
-                    st.markdown(f"**回答（簡潔）:** {norm_concl}")
-                # show sources as concise bullets and collect URLs as footnotes
-                if sources:
-                    # load any prior presearch results from session state
-                    pre_search = st.session_state.get("presearch_results") or []
-
-                    # surface any scrape warnings included in pre_search
-                    pre_search_warnings = []
-                    for d in pre_search:
-                        meta = d.get('meta') or {}
-                        if meta.get('scrape_warning'):
-                            pre_search_warnings.append(meta.get('scrape_warning'))
-                    if pre_search_warnings:
-                        for w in pre_search_warnings:
-                            st.warning(f"検索スクレイピングの警告: {w}")
-
-                    import re as _re
-                    src_lines = []
-                    footnotes = []
-
-                    # build maps from pre_search for canonicalization
-                    pre_by_id = {str(d.get('id')): d for d in pre_search}
-                    pre_by_url = {}
-
-                    def _normalize_url(u):
-                        if not u or not isinstance(u, str):
-                            return None
-                        u = u.strip()
-                        if u.startswith('//'):
-                            u = 'https:' + u
-                        u = u.rstrip(').,]')
-                        # remove trailing slash for stable comparison
-                        if u.endswith('/'):
-                            u = u[:-1]
-                        return u
-
-                    for d in pre_search:
-                        d_url = (d.get('meta') or {}).get('source') or d.get('url')
-                        norm = _normalize_url(d_url)
-                        if norm:
-                            pre_by_url[norm] = d
-
-                    # canonical entries preserve first-seen order
-                    canonical = []
-                    seen_keys = set()
-
-                    def _extract_url_from_text(txt):
-                        m = _re.search(r"(https?://[^\s)\]]+)", txt)
-                        if not m:
-                            m = _re.search(r"(//[^\s)\]]+)", txt)
-                        found = m.group(1) if m else None
-                        return _normalize_url(found) if found else None
-
-                    for s in sources:
-                        sid = s.get('id')
-                        txt = (s.get('text') or '').replace('\n', ' ')
-                        url = _extract_url_from_text(txt)
-                        # if sid is a URL, prefer that as url
-                        if isinstance(sid, str) and sid.startswith('http') and not url:
-                            url = sid.rstrip(').,]')
-
-                        canonical_id = None
-                        # prefer pre_search id if url matches
-                        if url:
-                            url_norm = _normalize_url(url)
-                        else:
-                            url_norm = None
-                        if url_norm and url_norm in pre_by_url:
-                            canonical_id = str(pre_by_url[url_norm].get('id'))
-                        elif isinstance(sid, str) and str(sid) in pre_by_id:
-                            canonical_id = str(sid)
-                        else:
-                            canonical_id = url or str(sid) or None
-
-                        key = canonical_id or url_norm or url or txt
-                        if not key or key in seen_keys:
-                            continue
-                        seen_keys.add(key)
-
-                        # determine title/label
-                        title = ''
-                        if canonical_id and canonical_id in pre_by_id:
-                            d = pre_by_id[canonical_id]
-                            text_content = str(d.get('text', '')).replace('\n', ' ')
-                            t_m = _re.search(r"Title:\s*(.*?)(?:URL:|Body:|$)", text_content)
-                            title = t_m.group(1).strip() if t_m else (text_content[:120] + ('...' if len(text_content) > 120 else ''))
-                            url = url or (d.get('meta') or {}).get('source') or d.get('url')
-                        else:
-                            # fallback title from snippet
-                            if url:
-                                title = txt.replace(url, '').replace('URL:', '').replace('[', '').replace(']', '').strip()
-                            else:
-                                title = txt[:120]
-
-                        canonical.append({'id': canonical_id, 'label': title or '-', 'url': url})
-
-                    # render canonical entries with footnotes
-                    note_idx = 1
-                    url_to_note = {}
-                    for entry in canonical:
-                        cid = entry.get('id') or '-'
-                        title = entry.get('label')
-                        url = entry.get('url')
-                        retrieved_at = entry.get('retrieved_at')
-                        # format retrieved date as YYYY-MM-DD if present
-                        retrieved_text = ''
-                        if retrieved_at:
-                            try:
-                                dt = retrieved_at
-                                # accept ISO strings
-                                if isinstance(dt, str):
-                                    dtf = dt.split('T')[0]
-                                else:
-                                    dtf = str(dt)
-                                retrieved_text = f" (取得: {dtf})"
-                            except Exception:
-                                retrieved_text = ''
-
-                        ref_text = ''
-                        if url:
-                            if url in url_to_note:
-                                ref_text = f" [{url_to_note[url]}]"
-                            else:
-                                url_to_note[url] = note_idx
-                                ref_text = f" [{note_idx}]"
-                                footnotes.append((note_idx, url))
-                                note_idx += 1
-                        # If URL present, render title as a clickable markdown link
-                        if url:
-                            title_display = f"[{title}]({url})"
-                        else:
-                            title_display = title
-                        src_lines.append(f"- [{cid}]: {title_display}{ref_text}{retrieved_text}")
-
-                    if src_lines:
-                        st.markdown("**出典:**\n" + "\n".join(src_lines))
-                    if footnotes:
-                        st.markdown("**出典（注釈）:**\n" + "\n".join([f"[{n}]: {u}" for n,u in footnotes]))
-                # provide full raw content in an expander for context
-                if message.get("content"):
-                    # also show a normalized view of the raw content when helpful
-                    raw = message.get("content")
-                    norm_raw = raw
-                    try:
-                        # apply same normalization to raw block for readability
-                        norm_raw = _normalize_org_model(raw)
-                        # also apply simplified->Japanese character cleanup
-                        def _replace_simplified_chinese(s: str) -> str:
-                            if not s:
-                                return s
-                            simple_map = {
-                                '乐': '楽',
-                                '馆': '館',
-                                '发': '発',
-                                '后': '後',
-                                '测': '測',
-                                '确': '確',
-                            }
-                            for k, v in simple_map.items():
-                                s = s.replace(k, v)
-                            return s
-                        norm_raw = _replace_simplified_chinese(norm_raw)
-                    except Exception:
-                        norm_raw = raw
-                    with st.expander("詳細表示（元の応答）", expanded=False):
-                        st.markdown(norm_raw, unsafe_allow_html=True)
-            st.markdown("---")
-    else:
-        st.info("💬 クエリを入力して、会話を開始してください")
+                                            # fallback: look for proximity of org and model without 'の'
+                                            pos_org = text.find(org)
+                                            pos_m = text.find(m)
+                                            if pos_org >= 0 and pos_m >= 0 and abs(pos_m - pos_org) < 80:
+                                                seg_start = min(pos_org, pos_m)
+                                                seg_end = max(pos_org + len(org), pos_m + len(m))
+                                            else:
+                                                continue
+                                        while seg_end < len(text) and text[seg_end] in '」」"\'）)]。、':
+                                            seg_end += 1
+                                        while seg_start > 0 and text[seg_start] in '「“"\'（(':
+                                            seg_start -= 1
+                                        # replace the extracted fragment with the model name to preserve predicate
+                                        replaced = (text[:seg_start] + m + text[seg_end:]).strip()
+                                        # cleanup spacing and stray punctuation
+                                        import re as _clean_re
+                                        replaced = _clean_re.sub(r'\s+', ' ', replaced).strip()
+                                        # ensure model name is separated by spaces
+                                        replaced = replaced.replace(m, f" {m} ")
+                                        replaced = _clean_re.sub(r'\s+', ' ', replaced).strip()
+                                        # remove stray closing paren immediately after words (e.g. 'Claudepic)')
+                                        replaced = _clean_re.sub(r"(\w)\)+", r"\1", replaced)
+                                        parts = [f"組織: {org}", f"モデル: {m}"]
+                                        if replaced:
+                                            parts.append(replaced)
+                                        return "\n\n".join(parts)
+                            return text
     
+                        norm_concl = _normalize_org_model(concl)
+                        # Post-process common mixed-script artifacts (e.g. "マンドOLA")
+                        try:
+                            # helper: replace some simplified Chinese characters with Japanese equivalents
+                            def _replace_simplified_chinese(s: str) -> str:
+                                if not s:
+                                    return s
+                                # minimal mapping for common mixed-character artifacts observed in outputs
+                                simple_map = {
+                                    '乐': '楽',
+                                    '馆': '館',
+                                    '发': '発',
+                                    '后': '後',
+                                    '测': '測',
+                                    '确': '確',
+                                }
+                                for k, v in simple_map.items():
+                                    s = s.replace(k, v)
+                                return s
+    
+                            # map common English terms to preferred katakana
+                            entity_kana_map = {
+                                'mandola': 'マンドーラ',
+                                'mandolin': 'マンドリン',
+                            }
+                            import re as _re_fix
+                            # If user query mentioned an English term, prefer its katakana form
+                            user_q = (st.session_state.get('messages') or [])
+                            last_user = ''
+                            if user_q:
+                                for m in reversed(user_q):
+                                    if m.get('role') == 'user' and m.get('content'):
+                                        last_user = m.get('content')
+                                        break
+                            for eng, kana in entity_kana_map.items():
+                                if last_user and re.search(rf"\b{eng}\b", last_user, flags=re.IGNORECASE):
+                                    # replace ASCII, mixed-case, and weirdly-capitalized forms in conclusion
+                                    norm_concl = _re_fix.sub(rf"(?i){eng}", kana, norm_concl)
+                                    # fix cases like マンドOLA where ASCII hangs onto katakana
+                                    norm_concl = _re_fix.sub(rf"マンド[A-Za-z]+", kana, norm_concl)
+    
+                            # fix simplified-chinese artifacts (e.g. '乐器' -> '楽器')
+                            norm_concl = _replace_simplified_chinese(norm_concl)
+                        except Exception:
+                            pass
+                        st.markdown(f"**回答（簡潔）:** {norm_concl}")
+    
+                    # 図解要求の回答は、詳細表示を開かなくても主表示に図を出す
+                    raw_content_for_diagram = str(message.get("content") or "")
+                    if _has_mermaid_block(raw_content_for_diagram):
+                        st.markdown("**図解:**")
+                        diagram_mode = normalize_diagram_mode(st.session_state.get("diagram_render_mode", "stable"))
+                        try:
+                            latest_user_q = ""
+                            for mm in reversed(st.session_state.get("messages") or []):
+                                if mm.get("role") == "user":
+                                    latest_user_q = str(mm.get("content") or "")
+                                    break
+                        except Exception:
+                            latest_user_q = ""
+                        if diagram_mode == DIAGRAM_MODE_MERMAID:
+                            _safe_render_mermaid_blocks(raw_content_for_diagram)
+                        else:
+                            _render_safe_flow_diagram(
+                                diagram_title_for_query(latest_user_q),
+                                diagram_steps_for_query(latest_user_q),
+                            )
+    
+                    # show sources as concise bullets and collect URLs as footnotes
+                    if sources:
+                        # load any prior presearch results from session state
+                        pre_search = st.session_state.get("presearch_results") or []
+    
+                        # surface any scrape warnings included in pre_search
+                        pre_search_warnings = []
+                        for d in pre_search:
+                            meta = d.get('meta') or {}
+                            if meta.get('scrape_warning'):
+                                pre_search_warnings.append(meta.get('scrape_warning'))
+                        if pre_search_warnings:
+                            for w in pre_search_warnings:
+                                st.warning(f"検索スクレイピングの警告: {w}")
+    
+                        import re as _re
+                        src_lines = []
+                        footnotes = []
+    
+                        # build maps from pre_search for canonicalization
+                        pre_by_id = {str(d.get('id')): d for d in pre_search}
+                        pre_by_url = {}
+    
+                        def _normalize_url(u):
+                            if not u or not isinstance(u, str):
+                                return None
+                            u = u.strip()
+                            if u.startswith('//'):
+                                u = 'https:' + u
+                            u = u.rstrip(').,]')
+                            # remove trailing slash for stable comparison
+                            if u.endswith('/'):
+                                u = u[:-1]
+                            return u
+    
+                        for d in pre_search:
+                            d_url = (d.get('meta') or {}).get('source') or d.get('url')
+                            norm = _normalize_url(d_url)
+                            if norm:
+                                pre_by_url[norm] = d
+    
+                        # canonical entries preserve first-seen order
+                        canonical = []
+                        seen_keys = set()
+    
+                        def _extract_url_from_text(txt):
+                            m = _re.search(r"(https?://[^\s)\]]+)", txt)
+                            if not m:
+                                m = _re.search(r"(//[^\s)\]]+)", txt)
+                            found = m.group(1) if m else None
+                            return _normalize_url(found) if found else None
+    
+                        for s in sources:
+                            sid = s.get('id') or s.get('name') or s.get('source_id')
+                            txt = (s.get('text') or s.get('title') or '').replace('\n', ' ')
+                            seeded_url = s.get('url') or s.get('path') or ((s.get('meta') or {}).get('source') if isinstance(s.get('meta'), dict) else None)
+                            url = _extract_url_from_text(txt)
+                            if not url and seeded_url:
+                                url = _normalize_url(str(seeded_url))
+                            # if sid is a URL, prefer that as url
+                            if isinstance(sid, str) and sid.startswith('http') and not url:
+                                url = sid.rstrip(').,]')
+    
+                            canonical_id = None
+                            # prefer pre_search id if url matches
+                            if url:
+                                url_norm = _normalize_url(url)
+                            else:
+                                url_norm = None
+                            if url_norm and url_norm in pre_by_url:
+                                canonical_id = str(pre_by_url[url_norm].get('id'))
+                            elif isinstance(sid, str) and str(sid) in pre_by_id:
+                                canonical_id = str(sid)
+                            else:
+                                canonical_id = url or str(sid) or None
+    
+                            key = canonical_id or url_norm or url or txt
+                            if not key or key in seen_keys:
+                                continue
+                            seen_keys.add(key)
+    
+                            # determine title/label
+                            title = ''
+                            if canonical_id and canonical_id in pre_by_id:
+                                d = pre_by_id[canonical_id]
+                                text_content = str(d.get('text', '')).replace('\n', ' ')
+                                t_m = _re.search(r"Title:\s*(.*?)(?:URL:|Body:|$)", text_content)
+                                title = t_m.group(1).strip() if t_m else (text_content[:120] + ('...' if len(text_content) > 120 else ''))
+                                url = url or (d.get('meta') or {}).get('source') or d.get('url')
+                            else:
+                                # fallback title from snippet
+                                if url:
+                                    title = txt.replace(url, '').replace('URL:', '').replace('[', '').replace(']', '').strip()
+                                else:
+                                    title = txt[:120]
+    
+                            canonical.append({'id': canonical_id, 'label': title or '-', 'url': url})
+    
+                        # render canonical entries with footnotes
+                        note_idx = 1
+                        url_to_note = {}
+                        for entry in canonical:
+                            cid = entry.get('id') or '-'
+                            title = entry.get('label')
+                            url = entry.get('url')
+                            retrieved_at = entry.get('retrieved_at')
+                            # format retrieved date as YYYY-MM-DD if present
+                            retrieved_text = ''
+                            if retrieved_at:
+                                try:
+                                    dt = retrieved_at
+                                    # accept ISO strings
+                                    if isinstance(dt, str):
+                                        dtf = dt.split('T')[0]
+                                    else:
+                                        dtf = str(dt)
+                                    retrieved_text = f" (取得: {dtf})"
+                                except Exception:
+                                    retrieved_text = ''
+    
+                            ref_text = ''
+                            if url:
+                                if url in url_to_note:
+                                    ref_text = f" [URL{url_to_note[url]}]"
+                                else:
+                                    url_to_note[url] = note_idx
+                                    ref_text = f" [URL{note_idx}]"
+                                    footnotes.append((note_idx, url))
+                                    note_idx += 1
+                            # If URL present, render title as a clickable markdown link
+                            if url:
+                                title_display = f"[{title}]({url})"
+                            else:
+                                title_display = title
+                            src_lines.append(f"- [URL{url_to_note.get(url, 0)}]: {title}{retrieved_text}" if url else f"- [{cid}]: {title}{retrieved_text}")
+
+                        if footnotes:
+                            st.markdown("**出典URL:**\n" + "\n".join([f"- URL{n}: [リンク]({u})" for n,u in footnotes]))
+                    # provide full raw content in an expander for context
+                    if message.get("content"):
+                        # also show a normalized view of the raw content when helpful
+                        raw = message.get("content")
+                        norm_raw = raw
+                        try:
+                            # apply same normalization to raw block for readability
+                            norm_raw = _normalize_org_model(raw)
+                            # also apply simplified->Japanese character cleanup
+                            def _replace_simplified_chinese(s: str) -> str:
+                                if not s:
+                                    return s
+                                simple_map = {
+                                    '乐': '楽',
+                                    '馆': '館',
+                                    '发': '発',
+                                    '后': '後',
+                                    '测': '測',
+                                    '确': '確',
+                                }
+                                for k, v in simple_map.items():
+                                    s = s.replace(k, v)
+                                return s
+                            norm_raw = _replace_simplified_chinese(norm_raw)
+                        except Exception:
+                            norm_raw = raw
+                        with st.expander("詳細表示（元の応答）", expanded=False):
+                            detail_text = _normalize_mermaid_blocks(norm_raw)
+                            detail_text = re.sub(r"\[web_(\d+)\]", r"[URL\1]", detail_text)
+                            st.markdown(detail_text)
+                            if _has_mermaid_block(detail_text) or re.search(r"図解|図で|フロー図|構成図|diagram", detail_text, re.IGNORECASE):
+                                diagram_mode = normalize_diagram_mode(st.session_state.get("diagram_render_mode", "stable"))
+                                if diagram_mode == DIAGRAM_MODE_MERMAID:
+                                    mermaid_source = detail_text
+                                    if not _has_mermaid_block(mermaid_source):
+                                        mermaid_source = mermaid_source + _fallback_mermaid_for_query("質問")
+                                    _safe_render_mermaid_blocks(mermaid_source)
+                                else:
+                                    latest_user_q = ""
+                                    try:
+                                        for mm in reversed(st.session_state.get("messages") or []):
+                                            if mm.get("role") == "user":
+                                                latest_user_q = str(mm.get("content") or "")
+                                                break
+                                    except Exception:
+                                        latest_user_q = ""
+                                    _render_safe_flow_diagram(
+                                        diagram_title_for_query(latest_user_q),
+                                        diagram_steps_for_query(latest_user_q),
+                                    )
+                st.markdown("---")
+        else:
+            st.info("💬 クエリを入力して、会話を開始してください")
+        
     # ===== ファイルアップロード機能 =====
     st.markdown("---")
     st.subheader("📎 ファイル添付")
@@ -3846,7 +4379,7 @@ def display_app():
         with col_cancel:
             st.button("キャンセル", key="clar_cancel", on_click=_clar_cancel)
 
-    # チャット入力（Enterキーで送信）
+    # チャット入力（常時表示）
     query = st.chat_input("ここにクエリを入力してください: (Enterキーで送信)", max_chars=2000)
 
     # 音声入力からの送信を処理
