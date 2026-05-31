@@ -395,3 +395,126 @@ def test_apply_reward_adjustments_applies_value_tuning_bias(tmp_path, monkeypatc
     assert value_tuning.get("applied") is True
     assert "csat" in (value_tuning.get("weight_biases") or {})
     assert "reward_weights" in saved
+
+
+def test_apply_reward_adjustments_reflects_recent_ai_feedback_count_in_summary(tmp_path, monkeypatch):
+    human_agg_path = tmp_path / "human_agg.json"
+    human_agg_path.write_text(
+        json.dumps(
+            {
+                "total_entries": 50,
+                "csat_mean": 4.0,
+                "nps_mean": 6,
+                "adoption_rate": 0.6,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    feedback_history_path = tmp_path / "feedback_history.jsonl"
+    feedback_history_path.write_text(
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "id": "r1",
+                        "rating": 0.8,
+                        "model_name": "judge-v1",
+                        "metadata": {
+                            "ai_feedback": {
+                                "quality": 0.80,
+                                "confidence": 0.90,
+                                "nps": 7,
+                                "adoption_rate": 0.80,
+                            }
+                        },
+                    }
+                ),
+                json.dumps(
+                    {
+                        "id": "r2",
+                        "rating": 0.9,
+                        "model_name": "judge-v1",
+                        "metadata": {
+                            "ai_feedback": {
+                                "quality": 0.85,
+                                "confidence": 0.92,
+                                "nps": 8,
+                                "adoption_rate": 0.82,
+                            }
+                        },
+                    }
+                ),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    ai_agg_path = tmp_path / "ai_agg_generated.json"
+
+    class DummyConfig:
+        def load_config(self):
+            return {"reward_weights": {"csat": 1.0, "nps": 1.0, "adoption": 1.0}}
+
+        def save_config(self, conf):
+            return None
+
+    monkeypatch.setattr(rlhf_integration, "RAGAgentConfig", DummyConfig)
+
+    first = rlhf_integration.apply_reward_adjustments(
+        agg_path=str(human_agg_path),
+        ai_agg_path=str(ai_agg_path),
+        feedback_history_path=str(feedback_history_path),
+        min_entries=20,
+        ai_weight=0.3,
+        min_ai_entries=1,
+        min_ai_confidence=0.5,
+        auto_aggregate_ai=True,
+        enable_value_tuning_bias=False,
+    )
+
+    assert first["status"] == "ok"
+    assert first.get("source") == "human_ai_blended"
+    assert first.get("ai_summary", {}).get("total_entries") == 2
+    assert first.get("summary", {}).get("total_entries") == 52
+
+    with open(feedback_history_path, "a", encoding="utf-8") as f:
+        f.write(
+            json.dumps(
+                {
+                    "id": "r3",
+                    "rating": 0.7,
+                    "model_name": "judge-v1",
+                    "metadata": {
+                        "ai_feedback": {
+                            "quality": 0.78,
+                            "confidence": 0.88,
+                            "nps": 6,
+                            "adoption_rate": 0.79,
+                        }
+                    },
+                }
+            )
+            + "\n"
+        )
+
+    if ai_agg_path.exists():
+        ai_agg_path.unlink()
+
+    second = rlhf_integration.apply_reward_adjustments(
+        agg_path=str(human_agg_path),
+        ai_agg_path=str(ai_agg_path),
+        feedback_history_path=str(feedback_history_path),
+        min_entries=20,
+        ai_weight=0.3,
+        min_ai_entries=1,
+        min_ai_confidence=0.5,
+        auto_aggregate_ai=True,
+        enable_value_tuning_bias=False,
+    )
+
+    assert second["status"] == "ok"
+    assert second.get("source") == "human_ai_blended"
+    assert second.get("ai_summary", {}).get("total_entries") == 3
+    assert second.get("summary", {}).get("total_entries") == 53
