@@ -309,12 +309,23 @@ class LearningDashboard:
                 feedback_manager = FeedbackManager()
                 value_summary = feedback_manager.get_value_tuning_summary(min_rating=0.0)
                 value_timeseries = feedback_manager.get_value_tuning_timeseries(min_rating=0.0)
+                recent_feedback = feedback_manager.get_recent_feedback(n=1)
             except Exception:
                 value_summary = {}
                 value_timeseries = {}
+                recent_feedback = []
 
             signal_means = value_summary.get("signal_means") or {}
             signal_counts = value_summary.get("signal_counts") or {}
+            total_items = int(value_summary.get("total_items") or 0)
+            latest_feedback_at = recent_feedback[-1].timestamp if recent_feedback else None
+
+            info_col1, info_col2 = st.columns(2)
+            with info_col1:
+                st.metric("Feedback Items", total_items)
+            with info_col2:
+                st.metric("Latest Feedback", latest_feedback_at or "-")
+
             if not signal_means:
                 st.caption("価値軸シグナルはまだありません。フィードバックタグやコメントが蓄積されると表示されます。")
             else:
