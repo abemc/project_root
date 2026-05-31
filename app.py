@@ -149,6 +149,32 @@ def _query_requests_diagram(query: str) -> bool:
     return bool(re.search(r"図解|図で|フロー図|構成図|mermaid|チャート|diagram", query, re.IGNORECASE))
 
 
+def _query_is_beginner_learning_request(query: str) -> bool:
+    if not query:
+        return False
+    q = str(query).strip()
+    beginner_terms = [
+        r"知識は?ゼロ",
+        r"初心者",
+        r"入門",
+        r"何から始め",
+        r"どう勉強",
+        r"勉強したい",
+        r"学習(したい|方法)",
+        r"はじめたい",
+    ]
+    topic_terms = [
+        r"LLM",
+        r"大規模言語モデル",
+        r"生成AI",
+        r"RAG",
+        r"プロンプト",
+    ]
+    beginner_hit = any(re.search(p, q, re.IGNORECASE) for p in beginner_terms)
+    topic_hit = any(re.search(p, q, re.IGNORECASE) for p in topic_terms)
+    return beginner_hit and topic_hit
+
+
 def _has_mermaid_block(text: str) -> bool:
     return bool(text and _MERMAID_BLOCK_RE.search(text))
 
@@ -171,12 +197,21 @@ def _normalize_mermaid_blocks(text: str) -> str:
 def _fallback_mermaid_for_query(query: str) -> str:
     q = (query or "質問").strip().replace("\n", " ")[:60]
     escaped_q = q.replace("\"", "'")
+    if re.search(r"構造|仕組み|流れ|関係|説明|解説", q, re.IGNORECASE):
+        step2 = "要素を分解"
+        step3 = "関係を整理"
+        step4 = "全体の流れ"
+    else:
+        step2 = "要点を整理"
+        step3 = "根拠を確認"
+        step4 = "結論"
     return (
         "\n\n```mermaid\n"
         "flowchart TD\n"
-        f"    A[質問: {escaped_q}] --> B[要点を整理]\n"
-        "    B --> C[根拠を確認]\n"
-        "    C --> D[結論]\n"
+        f"    A[質問: {escaped_q}] --> B[{step2}]\n"
+        f"    B --> C[{step3}]\n"
+        f"    C --> D[{step4}]\n"
+        "    D --> E[結論]\n"
         "```\n"
     )
 
@@ -3383,6 +3418,22 @@ def _generate_assistant_response(query: str) -> None:
                 )
                 _append_run_log("diagram_request_detected: forcing_mermaid_output=True")
 
+            needs_beginner_learning_guide = _query_is_beginner_learning_request(current_query)
+            if needs_beginner_learning_guide:
+                prompt = (
+                    prompt
+                    + "\n\n【初心者学習ガイドの必須要件】\n"
+                    + "- ユーザーは初学者です。リンク列挙だけで終わらせず、まず何をするべきかを具体的に説明してください。\n"
+                    + "- 回答は次の順序で構成してください。\n"
+                    + "  1) 最初の一歩（今日やること）を1〜3個\n"
+                    + "  2) 7日間の学習プラン（各日1行）\n"
+                    + "  3) 最低限おさえる用語を3〜5個（一言説明付き）\n"
+                    + "  4) 最初の実践課題を1つ（達成条件つき）\n"
+                    + "- 参照リンクは補助として最後に示し、本文の主役にしないでください。\n"
+                    + "- 専門用語はかみ砕いて説明し、前提知識ゼロでも実行できる内容にしてください。\n"
+                )
+                _append_run_log("beginner_learning_request_detected: enforcing_actionable_study_plan=True")
+
             # LLM 呼び出しを実行し、例外は捕捉してログに残す
             try:
                 _append_run_log(f"DEBUG: About to call LLM with prompt_len={len(prompt)} model={st.session_state.llm_model}")
@@ -3867,8 +3918,10 @@ def display_app():
     chat_scroll_container = st.container(height=560, border=False)
     with chat_scroll_container:
         if st.session_state.messages:
+            last_user_query = ""
             for message in st.session_state.messages:
                 if message["role"] == "user":
+                    last_user_query = str(message.get("content") or "")
                     st.markdown(f"**🙋 あなた：**")
                     st.markdown(message['content'])
                 else:
@@ -3970,6 +4023,123 @@ def display_app():
                         except Exception:
                             pass
                         st.markdown(f"**回答（簡潔）:** {norm_concl}")
+
+                        # 初学者向け質問では、結論だけで終わらず実行ステップを主表示に補う
+                        try:
+                            if _query_is_beginner_learning_request(last_user_query):
+                                raw_answer = str(message.get("content") or "")
+                                raw_lines = [ln.strip() for ln in raw_answer.splitlines() if ln.strip()]
+                                guide_lines = []
+                                uniq = []
+
+                                def _is_noise_line(ln: str) -> bool:
+                                    return bool(
+                                        re.search(
+                                            r"^結論\s*:|回答（簡潔）|出典|https?://|\bURL\d+\b|\[web_\d+\]",
+                                            ln,
+                                        )
+                                    )
+
+                                def _is_heading_like_line(ln: str) -> bool:
+                                    return bool(
+                                        re.search(
+                                            r"^(初めの一歩|最初の一歩|7日間の学習プラン|最低限おさえる用語|最初の実践課題)(（.*）)?[:：]?$",
+                                            ln,
+                                        )
+                                    )
+
+                                def _is_concrete_action_line(ln: str) -> bool:
+                                    return bool(
+                                        re.search(
+                                            r"第?\d+日|^Day\s*\d+|[:：]|今日|明日|やる|試す|作る|書く|読む|実践",
+                                            ln,
+                                            re.IGNORECASE,
+                                        )
+                                    )
+
+                                # 学習計画に関係する行を優先抽出
+                                for i, ln in enumerate(raw_lines):
+                                    if _is_noise_line(ln):
+                                        continue
+                                    if re.search(r"最初の一歩|初めの一歩|7日間|日目|用語|実践課題|今日やる|ステップ|学習プラン|まずは", ln):
+                                        guide_lines.append(ln)
+                                        # 「学習プラン」見出しがあれば、続く日次行も拾う
+                                        if re.search(r"7日間|学習プラン", ln):
+                                            for nxt in raw_lines[i + 1 : i + 9]:
+                                                if _is_noise_line(nxt):
+                                                    continue
+                                                if re.search(r"^第?\d+日|^Day\s*\d+", nxt):
+                                                    guide_lines.append(nxt)
+                                                if len(guide_lines) >= 6:
+                                                    break
+                                    if len(guide_lines) >= 6:
+                                        break
+
+                                # 見出しが拾えない場合は、URL行を除いた箇条書き/番号行を補助的に使用
+                                if not guide_lines:
+                                    for ln in raw_lines:
+                                        if _is_noise_line(ln):
+                                            continue
+                                        if re.match(r"^[-*]\s+|^\d+[\.)]\s+", ln):
+                                            guide_lines.append(ln)
+                                        if len(guide_lines) >= 6:
+                                            break
+
+                                # 重複・ノイズの最終除去
+                                seen = set()
+                                concrete = []
+                                headings = []
+                                for ln in guide_lines:
+                                    cleaned_ln = re.sub(r"^[-*]\s+|^\d+[\.)]\s+", "", ln).strip()
+                                    if not cleaned_ln or _is_noise_line(cleaned_ln):
+                                        continue
+                                    if cleaned_ln in seen:
+                                        continue
+                                    seen.add(cleaned_ln)
+
+                                    if _is_heading_like_line(cleaned_ln):
+                                        headings.append(cleaned_ln)
+                                    elif _is_concrete_action_line(cleaned_ln):
+                                        concrete.append(cleaned_ln)
+                                    else:
+                                        headings.append(cleaned_ln)
+
+                                    if len(concrete) + len(headings) >= 6:
+                                        break
+
+                                # 具体行動を優先し、足りない分だけ見出し系を補完
+                                uniq = (concrete + headings)[:6]
+
+                                # 具体行動が不足する場合は、最低限の行動提案を補う
+                                if len(concrete) < 2:
+                                    fallback_steps = [
+                                        "今日: Python実行環境を準備し、LLMを1回呼び出してみる",
+                                        "明日: トークン・プロンプト・温度の3用語を1行ずつ説明できるようにする",
+                                        "3日目: 小さな要約プロンプトを作り、入力と出力を比較して改善する",
+                                    ]
+                                    for fb in fallback_steps:
+                                        if fb not in uniq:
+                                            uniq.append(fb)
+                                        if len(uniq) >= 6:
+                                            break
+
+                                # 具体行動が入った場合は、見出しだけの行を省いて可読性を上げる
+                                if any(re.search(r"^今日:|^明日:|^\d+日目:", ln) for ln in uniq):
+                                    uniq = [
+                                        ln
+                                        for ln in uniq
+                                        if not re.search(
+                                            r"^(最初の一歩|7日間の学習プラン|最低限おさえる用語|最初の実践課題)[:：]?$",
+                                            ln,
+                                        )
+                                    ][:6]
+
+                                if uniq:
+                                    st.markdown("**最初にやること（要点）:**")
+                                    for ln in uniq:
+                                        st.markdown(f"- {ln}")
+                        except Exception:
+                            pass
     
                     # 図解要求の回答は、詳細表示を開かなくても主表示に図を出す
                     raw_content_for_diagram = str(message.get("content") or "")
