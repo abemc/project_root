@@ -21,6 +21,34 @@ def _normalize_signal(value: float) -> float:
     return max(0.0, min(1.0, round(value, 3)))
 
 
+def _infer_safety_signal_from_ethics_metadata(metadata: Optional[Dict[str, Any]]) -> Optional[float]:
+    """Infer a safety-alignment signal from ethics guard metadata when available."""
+    if not isinstance(metadata, dict):
+        return None
+
+    ethics = metadata.get("ethics")
+    if not isinstance(ethics, dict):
+        ethics = metadata.get("ethics_decision")
+    if not isinstance(ethics, dict):
+        return None
+
+    action = str(ethics.get("action") or "").strip().lower()
+    confidence = metadata.get("ethics_confidence", ethics.get("confidence"))
+    try:
+        conf = float(confidence) if confidence is not None else 0.5
+    except Exception:
+        conf = 0.5
+    conf = max(0.0, min(1.0, conf))
+
+    if action == "allow":
+        return _normalize_signal(0.7 + 0.2 * conf)
+    if action == "warn":
+        return _normalize_signal(0.4 + 0.15 * (1.0 - conf))
+    if action in {"block", "escalate"}:
+        return _normalize_signal(0.05 + 0.1 * (1.0 - conf))
+    return None
+
+
 def infer_value_signals(
     tags: Optional[List[str]] = None,
     feedback_text: Optional[str] = None,
@@ -42,20 +70,29 @@ def infer_value_signals(
             text_parts.append(str(value_notes))
 
     corpus = " ".join(text_parts).strip()
+    signals: Dict[str, float] = {}
+    ethics_safety = _infer_safety_signal_from_ethics_metadata(metadata)
     if not corpus:
-        return {}
+        if ethics_safety is not None:
+            signals["safety"] = ethics_safety
+        return signals
 
     is_positive = any(re.search(p, corpus, re.IGNORECASE) for p in POSITIVE_HINTS)
     is_negative = any(re.search(p, corpus, re.IGNORECASE) for p in NEGATIVE_HINTS)
     base = 0.75 if is_positive and not is_negative else 0.25 if is_negative and not is_positive else 0.5
 
-    signals: Dict[str, float] = {}
     for key, patterns in VALUE_PATTERNS.items():
         matches = sum(1 for p in patterns if re.search(p, corpus, re.IGNORECASE))
         if matches <= 0:
             continue
         boost = min(0.2, 0.05 * (matches - 1))
         signals[key] = _normalize_signal(base + boost)
+
+    if ethics_safety is not None:
+        if "safety" in signals:
+            signals["safety"] = _normalize_signal((signals["safety"] + ethics_safety) / 2.0)
+        else:
+            signals["safety"] = ethics_safety
 
     return signals
 

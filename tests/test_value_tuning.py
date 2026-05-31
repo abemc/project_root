@@ -56,3 +56,24 @@ def test_feedback_manager_records_value_signals_and_summary(tmp_path):
 
     summary = mgr.get_value_tuning_summary(min_rating=0.0)
     assert summary["signal_means"]["accuracy"] >= 0.5
+
+
+def test_infer_value_signals_uses_ethics_metadata_for_safety():
+    allow_signals = infer_value_signals(
+        tags=[],
+        feedback_text=None,
+        metadata={"ethics": {"action": "allow", "confidence": 0.9}},
+    )
+    warn_signals = infer_value_signals(
+        tags=[],
+        feedback_text=None,
+        metadata={"ethics": {"action": "warn", "confidence": 0.8}},
+    )
+    block_signals = infer_value_signals(
+        tags=[],
+        feedback_text=None,
+        metadata={"ethics": {"action": "block", "confidence": 0.95}},
+    )
+
+    assert allow_signals["safety"] > warn_signals["safety"]
+    assert warn_signals["safety"] > block_signals["safety"]
