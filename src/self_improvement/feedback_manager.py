@@ -12,6 +12,8 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
 import numpy as np
 
+from .value_tuning import aggregate_value_signals, infer_value_signals
+
 logger = logging.getLogger(__name__)
 
 
@@ -124,6 +126,13 @@ class FeedbackManager:
             prompt_version=prompt_version,
             metadata=metadata or {},
         )
+
+        if not isinstance(feedback.metadata.get("value_signals"), dict):
+            feedback.metadata["value_signals"] = infer_value_signals(
+                tags=feedback.tags,
+                feedback_text=feedback.feedback_text,
+                metadata=feedback.metadata,
+            )
         
         self.feedback_cache.append(feedback)
         
@@ -221,6 +230,7 @@ class FeedbackManager:
                 "rating": feedback.rating,
                 "feedback": feedback.feedback_text,
                 "tags": feedback.tags,
+                "value_signals": feedback.metadata.get("value_signals") or {},
                 "response_id": feedback.response_id,
                 "query_hash": feedback.query_hash,
                 "model_name": feedback.model_name,
@@ -229,6 +239,11 @@ class FeedbackManager:
             })
         
         return training_data
+
+    def get_value_tuning_summary(self, min_rating: float = 0.0) -> Dict[str, Any]:
+        """価値軸シグナルの集計サマリーを返す。"""
+        source_items = self.export_for_training(min_rating=min_rating)
+        return aggregate_value_signals(source_items)
     
     def get_improvement_areas(self, percentile: float = 25) -> List[str]:
         """

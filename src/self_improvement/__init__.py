@@ -12,6 +12,7 @@
 """
 
 from .feedback_manager import FeedbackManager
+from .value_tuning import infer_value_signals, aggregate_value_signals
 from .prompt_optimizer import PromptOptimizer
 from .continuous_training import ContinuousTrainer
 from .metric_tracker import MetricTracker
@@ -119,6 +120,8 @@ except ImportError:
 
 __all__ = [
     "FeedbackManager",
+    "infer_value_signals",
+    "aggregate_value_signals",
     "PromptOptimizer",
     "ContinuousTrainer",
     "MetricTracker",

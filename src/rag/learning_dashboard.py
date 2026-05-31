@@ -31,6 +31,12 @@ try:
 except Exception:
     RLHF_GUARD_AVAILABLE = False
 
+try:
+    from src.self_improvement.feedback_manager import FeedbackManager
+    VALUE_TUNING_AVAILABLE = True
+except Exception:
+    VALUE_TUNING_AVAILABLE = False
+
 
 def _read_gate_logs(limit: int = 50) -> List[Dict[str, Any]]:
     """Read latest RLHF gate decisions from JSONL log."""
@@ -292,6 +298,35 @@ class LearningDashboard:
         
         for i, signal in enumerate(reward_signals, 1):
             st.write(f"{i}. {signal}")
+
+        st.divider()
+        st.subheader("🎯 Value Tuning")
+
+        if not VALUE_TUNING_AVAILABLE:
+            st.caption("Value Tuningモジュールが利用できません。")
+        else:
+            try:
+                value_summary = FeedbackManager().get_value_tuning_summary(min_rating=0.0)
+            except Exception:
+                value_summary = {}
+
+            signal_means = value_summary.get("signal_means") or {}
+            signal_counts = value_summary.get("signal_counts") or {}
+            if not signal_means:
+                st.caption("価値軸シグナルはまだありません。フィードバックタグやコメントが蓄積されると表示されます。")
+            else:
+                rows = [
+                    {
+                        "value_dimension": key,
+                        "mean": value,
+                        "count": signal_counts.get(key, 0),
+                    }
+                    for key, value in signal_means.items()
+                ]
+                st.dataframe(pd.DataFrame(rows), use_container_width=True)
+
+                top_key = max(signal_means, key=signal_means.get)
+                st.caption(f"現在最も強い価値軸: {top_key} ({signal_means[top_key]:.2f})")
 
         st.divider()
         st.subheader("🛡️ RLHF/RLAIF適用ガードレール")
