@@ -26,10 +26,17 @@ class Feedback:
     feedback_text: Optional[str] = None
     tags: List[str] = None
     suggestions: Optional[str] = None
+    response_id: Optional[str] = None
+    query_hash: Optional[str] = None
+    model_name: Optional[str] = None
+    prompt_version: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
     
     def __post_init__(self):
         if self.tags is None:
             self.tags = []
+        if self.metadata is None:
+            self.metadata = {}
     
     def to_dict(self) -> Dict:
         return asdict(self)
@@ -77,6 +84,11 @@ class FeedbackManager:
         feedback_text: Optional[str] = None,
         tags: Optional[List[str]] = None,
         suggestions: Optional[str] = None,
+        response_id: Optional[str] = None,
+        query_hash: Optional[str] = None,
+        model_name: Optional[str] = None,
+        prompt_version: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> Feedback:
         """
         フィードバックを記録
@@ -106,6 +118,11 @@ class FeedbackManager:
             feedback_text=feedback_text,
             tags=tags or [],
             suggestions=suggestions,
+            response_id=response_id,
+            query_hash=query_hash or hashlib.sha256((user_query or "").encode("utf-8", errors="ignore")).hexdigest()[:16],
+            model_name=model_name,
+            prompt_version=prompt_version,
+            metadata=metadata or {},
         )
         
         self.feedback_cache.append(feedback)
@@ -204,6 +221,11 @@ class FeedbackManager:
                 "rating": feedback.rating,
                 "feedback": feedback.feedback_text,
                 "tags": feedback.tags,
+                "response_id": feedback.response_id,
+                "query_hash": feedback.query_hash,
+                "model_name": feedback.model_name,
+                "prompt_version": feedback.prompt_version,
+                "metadata": feedback.metadata,
             })
         
         return training_data
