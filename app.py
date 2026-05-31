@@ -4788,6 +4788,58 @@ def display_enterprise_dashboard():
         else:
             st.warning("監査ログファイルが見つかりません。")
 
+        st.markdown("---")
+        st.subheader("倫理チェック監査ログ")
+        ethics_log = Path("logs/ethics_audit.jsonl")
+        if ethics_log.exists():
+            ethics_data = []
+            with open(ethics_log, "r", encoding="utf-8") as f:
+                for line in f:
+                    try:
+                        ethics_data.append(json.loads(line))
+                    except Exception:
+                        continue
+
+            if ethics_data:
+                df_ethics = pd.DataFrame(ethics_data)
+                if "decision" in df_ethics.columns:
+                    # decision(dict) を列へ展開
+                    decision_df = pd.json_normalize(df_ethics["decision"])
+                    decision_df.columns = [f"decision.{c}" for c in decision_df.columns]
+                    df_ethics = pd.concat([df_ethics.drop(columns=["decision"]), decision_df], axis=1)
+
+                total = len(df_ethics)
+                warn_count = int((df_ethics.get("decision.action") == "warn").sum()) if "decision.action" in df_ethics.columns else 0
+                block_count = int((df_ethics.get("decision.action") == "block").sum()) if "decision.action" in df_ethics.columns else 0
+                allow_count = int((df_ethics.get("decision.action") == "allow").sum()) if "decision.action" in df_ethics.columns else 0
+
+                c1, c2, c3, c4 = st.columns(4)
+                c1.metric("判定総数", total)
+                c2.metric("ALLOW", allow_count)
+                c3.metric("WARN", warn_count)
+                c4.metric("BLOCK", block_count)
+
+                display_cols = [
+                    c for c in [
+                        "timestamp",
+                        "source",
+                        "query_preview",
+                        "decision.action",
+                        "decision.category",
+                        "decision.reason",
+                        "decision.confidence",
+                    ]
+                    if c in df_ethics.columns
+                ]
+                sort_col = "timestamp" if "timestamp" in df_ethics.columns else None
+                if sort_col:
+                    df_ethics = df_ethics.sort_values(sort_col, ascending=False)
+                st.dataframe(df_ethics[display_cols].head(100), use_container_width=True)
+            else:
+                st.info("倫理監査ログが空です。")
+        else:
+            st.info("倫理監査ログファイル（logs/ethics_audit.jsonl）はまだ作成されていません。")
+
     # --- 3. パフォーマンス ---
     with tab_performance:
         st.subheader("キャッシュ & 最適化統計")

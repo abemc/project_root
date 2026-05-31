@@ -95,6 +95,18 @@ class EthicsGuard:
         },
     ]
 
+    SAFE_CONTEXT_PATTERNS = [
+        r"対策",
+        r"防御",
+        r"予防",
+        r"検知",
+        r"監査",
+        r"教育",
+        r"学習",
+        r"ctf",
+        r"セキュリティ研修",
+    ]
+
     def __init__(self, audit_log_path: str = "logs/ethics_audit.jsonl"):
         self.audit_log_path = Path(audit_log_path)
 
@@ -116,6 +128,20 @@ class EthicsGuard:
         for rule in self.BLOCK_RULES:
             hits = [p for p in rule["patterns"] if re.search(p, normalized, re.IGNORECASE)]
             if hits:
+                # セキュリティ教育/防御文脈では、サイバー系の過剰ブロックを緩和
+                if rule["category"] == "cyber_abuse":
+                    safe_hits = [p for p in self.SAFE_CONTEXT_PATTERNS if re.search(p, normalized, re.IGNORECASE)]
+                    if safe_hits:
+                        decision = EthicsDecision(
+                            action="warn",
+                            category="cyber_safety_education",
+                            reason="サイバー領域だが防御・教育文脈のため注意喚起で継続",
+                            confidence=0.75,
+                            matched_rules=hits + safe_hits,
+                        )
+                        self._audit(decision, q, source)
+                        return decision
+
                 decision = EthicsDecision(
                     action="block",
                     category=rule["category"],
