@@ -176,6 +176,16 @@ def _check_user_instruction_ethics(query: str, source: str = "chat_input") -> di
             "matched_rules": [],
         }
 
+
+def _remember_ethics_decision(query: str, ethics: dict, source: str) -> None:
+    """Keep the latest ethics decision in session state for downstream feedback metadata."""
+    try:
+        st.session_state.last_ethics_decision = dict(ethics or {})
+        st.session_state.last_ethics_query = str(query or "")
+        st.session_state.last_ethics_source = str(source or "chat_input")
+    except Exception:
+        pass
+
     try:
         decision = guard.evaluate(query or "", source=source)
         return {
@@ -4833,6 +4843,7 @@ def display_app():
             augmented = f"{last_q}\n\n追記（ユーザーの補足）: {user_msg}"
 
             ethics = _check_user_instruction_ethics(augmented, source="clarification")
+            _remember_ethics_decision(augmented, ethics, "clarification")
             if ethics.get("action") == "warn":
                 _store_assistant_message(
                     f"[注意喚起] この依頼はセンシティブ領域（{ethics.get('category')}）に該当する可能性があります。"
@@ -4924,6 +4935,7 @@ def display_app():
         _save_chat_message(user_msg_obj)  # 履歴に保存
 
         ethics = _check_user_instruction_ethics(query, source="chat_input")
+        _remember_ethics_decision(query, ethics, "chat_input")
         if ethics.get("action") == "warn":
             _store_assistant_message(
                 f"[注意喚起] この依頼はセンシティブ領域（{ethics.get('category')}）に該当する可能性があります。"

@@ -77,3 +77,17 @@ def test_infer_value_signals_uses_ethics_metadata_for_safety():
 
     assert allow_signals["safety"] > warn_signals["safety"]
     assert warn_signals["safety"] > block_signals["safety"]
+
+
+def test_feedback_manager_uses_ethics_metadata_for_safety_signal(tmp_path):
+    mgr = FeedbackManager(storage_dir=str(tmp_path / "feedback"))
+    fb = mgr.record_feedback(
+        user_query="危険な依頼のテスト",
+        model_response="対応できません",
+        rating=0.2,
+        metadata={"ethics": {"action": "block", "confidence": 0.95}},
+    )
+
+    value_signals = fb.metadata.get("value_signals") or {}
+    assert "safety" in value_signals
+    assert value_signals["safety"] < 0.2

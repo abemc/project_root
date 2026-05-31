@@ -14,6 +14,20 @@ logger = logging.getLogger(__name__)
 
 class StreamlitIntegration:
     """Streamlitへの統合ユーティリティ"""
+
+    @staticmethod
+    def _build_feedback_metadata_from_session() -> Dict[str, Any]:
+        """Collect lightweight metadata for feedback recording from session state."""
+        metadata: Dict[str, Any] = {}
+        try:
+            ethics = st.session_state.get("last_ethics_decision")
+            if isinstance(ethics, dict) and ethics:
+                metadata["ethics"] = dict(ethics)
+                metadata["ethics_source"] = st.session_state.get("last_ethics_source")
+                metadata["ethics_query"] = st.session_state.get("last_ethics_query")
+        except Exception:
+            return metadata
+        return metadata
     
     @staticmethod
     def render_feedback_ui(session_state_key: str = "feedback_form"):
@@ -72,6 +86,7 @@ class StreamlitIntegration:
             "feedback_text": feedback_text,
             "tags": tags,
             "suggestions": suggestions,
+            "metadata": StreamlitIntegration._build_feedback_metadata_from_session(),
         }
     
     @staticmethod
