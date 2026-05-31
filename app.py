@@ -1942,6 +1942,101 @@ def setup_sidebar():
             
             auto_train_enabled = st.checkbox("自動トレーニングを有効化", value=False, key="sidebar_auto_train")
             st.session_state.auto_train_enabled = auto_train_enabled
+
+            st.markdown("---")
+            st.caption("RLHF適用ゲート閾値")
+
+            rlhf_gate_min_entries = st.number_input(
+                "最小サンプル数 (min_entries)",
+                min_value=1,
+                max_value=10000,
+                value=int(st.session_state.get("rlhf_gate_min_entries", 20)),
+                step=1,
+                key="sidebar_rlhf_gate_min_entries",
+                help="この件数未満ではRLHF重み更新をスキップします。",
+            )
+            st.session_state.rlhf_gate_min_entries = int(rlhf_gate_min_entries)
+
+            rlhf_gate_min_csat = st.slider(
+                "最小CSAT (min_csat)",
+                min_value=1.0,
+                max_value=5.0,
+                value=float(st.session_state.get("rlhf_gate_min_csat", 3.2)),
+                step=0.1,
+                key="sidebar_rlhf_gate_min_csat",
+                help="平均CSATがこの値未満の場合は更新をスキップします。",
+            )
+            st.session_state.rlhf_gate_min_csat = float(rlhf_gate_min_csat)
+
+            rlhf_gate_min_adoption_rate = st.slider(
+                "最小採用率 (min_adoption_rate)",
+                min_value=0.0,
+                max_value=1.0,
+                value=float(st.session_state.get("rlhf_gate_min_adoption_rate", 0.30)),
+                step=0.05,
+                key="sidebar_rlhf_gate_min_adoption_rate",
+                help="採用率がこの値未満の場合は更新をスキップします。",
+            )
+            st.session_state.rlhf_gate_min_adoption_rate = float(rlhf_gate_min_adoption_rate)
+
+            rlhf_gate_min_nps = st.slider(
+                "最小NPS (min_nps)",
+                min_value=-10.0,
+                max_value=10.0,
+                value=float(st.session_state.get("rlhf_gate_min_nps", 0.0)),
+                step=0.5,
+                key="sidebar_rlhf_gate_min_nps",
+                help="平均NPSがこの値未満の場合は更新をスキップします。",
+            )
+            st.session_state.rlhf_gate_min_nps = float(rlhf_gate_min_nps)
+
+            st.caption("RLAIF（AIフィードバック統合）")
+            rlaif_ai_weight = st.slider(
+                "AI評価の重み (ai_weight)",
+                min_value=0.0,
+                max_value=1.0,
+                value=float(st.session_state.get("rlaif_ai_weight", 0.35)),
+                step=0.05,
+                key="sidebar_rlaif_ai_weight",
+                help="人手指標に対するAI評価の統合重みです。乖離が大きい場合は内部で自動減衰します。",
+            )
+            st.session_state.rlaif_ai_weight = float(rlaif_ai_weight)
+
+            rlaif_min_ai_entries = st.number_input(
+                "AI評価の最小件数 (min_ai_entries)",
+                min_value=1,
+                max_value=100000,
+                value=int(st.session_state.get("rlaif_min_ai_entries", 30)),
+                step=1,
+                key="sidebar_rlaif_min_ai_entries",
+                help="この件数未満のAI評価は統合に使いません。",
+            )
+            st.session_state.rlaif_min_ai_entries = int(rlaif_min_ai_entries)
+
+            rlaif_min_ai_confidence = st.slider(
+                "AI評価の最小信頼度 (min_ai_confidence)",
+                min_value=0.0,
+                max_value=1.0,
+                value=float(st.session_state.get("rlaif_min_ai_confidence", 0.60)),
+                step=0.05,
+                key="sidebar_rlaif_min_ai_confidence",
+                help="AI評価の平均信頼度がこの値未満の場合は統合をスキップします。",
+            )
+            st.session_state.rlaif_min_ai_confidence = float(rlaif_min_ai_confidence)
+
+            rlaif_auto_aggregate_ai = st.checkbox(
+                "AI評価集計を自動実行（ai_feedback_aggregated.jsonを生成）",
+                value=bool(st.session_state.get("rlaif_auto_aggregate_ai", True)),
+                key="sidebar_rlaif_auto_aggregate_ai",
+            )
+            st.session_state.rlaif_auto_aggregate_ai = bool(rlaif_auto_aggregate_ai)
+
+            rlhf_show_gate_logs = st.checkbox(
+                "RLHFゲートログをLearning Dashboardで表示",
+                value=bool(st.session_state.get("rlhf_show_gate_logs", True)),
+                key="sidebar_rlhf_show_gate_logs",
+            )
+            st.session_state.rlhf_show_gate_logs = bool(rlhf_show_gate_logs)
         
         # ===== 設定の管理セクション =====
         with st.sidebar.expander("💾 設定の管理", expanded=False):

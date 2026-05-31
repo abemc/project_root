@@ -11,6 +11,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
+import os
+import json
 import logging
 
 # Import Phase 5 manager
@@ -22,6 +24,35 @@ except ImportError:
     Phase5IntegrationManager = None
 
 logger = logging.getLogger(__name__)
+
+try:
+    from src.self_improvement.integration import apply_reward_adjustments
+    RLHF_GUARD_AVAILABLE = True
+except Exception:
+    RLHF_GUARD_AVAILABLE = False
+
+
+def _read_gate_logs(limit: int = 50) -> List[Dict[str, Any]]:
+    """Read latest RLHF gate decisions from JSONL log."""
+    log_path = os.path.join(os.getcwd(), "logs", "feedback", "rlhf_gate.jsonl")
+    if not os.path.exists(log_path):
+        return []
+
+    records: List[Dict[str, Any]] = []
+    try:
+        with open(log_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    records.append(json.loads(line))
+                except Exception:
+                    continue
+    except Exception:
+        return []
+
+    return list(reversed(records[-limit:]))
 
 
 class LearningDashboard:
@@ -105,6 +136,20 @@ class LearningDashboard:
                 delta=None,
                 help="Number of learning systems active"
             )
+
+        # Show last learning time and agents involved
+        if self.manager.execution_traces:
+            last_ts = max((t.timestamp for t in self.manager.execution_traces))
+            agents = sorted(set(t.agent_id for t in self.manager.execution_traces if getattr(t, 'agent_id', None)))
+        else:
+            last_ts = None
+            agents = []
+
+        col5, col6 = st.columns(2)
+        with col5:
+            st.metric(label="Last Learned", value=last_ts.strftime('%Y-%m-%d %H:%M:%S') if last_ts else "-")
+        with col6:
+            st.write("**Agents:** " + (", ".join(agents) if agents else "-"))
         
         # Execution timeline
         if self.manager.execution_traces:
@@ -115,7 +160,10 @@ class LearningDashboard:
             for trace in self.manager.execution_traces[-20:]:  # Last 20
                 traces_data.append({
                     "Time": trace.timestamp,
-                    "Task": trace.task_family[:20],
+                    "Task": trace.task_family[:40],
+                    "Agent": getattr(trace, 'agent_id', 'unknown'),
+                    "Input": (getattr(trace, 'input_query', '') or '')[:200],
+                    "Error": getattr(trace, 'error_message', '') or '',
                     "Success": "✅" if trace.success else "❌",
                     "Quality": trace.output_quality,
                     "Duration (ms)": trace.execution_time_ms,
@@ -244,6 +292,107 @@ class LearningDashboard:
         
         for i, signal in enumerate(reward_signals, 1):
             st.write(f"{i}. {signal}")
+
+        st.divider()
+        st.subheader("🛡️ RLHF/RLAIF適用ガードレール")
+
+        if not RLHF_GUARD_AVAILABLE:
+            st.info("RLHFガードレールモジュールが利用できません。")
+            return
+
+        default_min_entries = int(st.session_state.get("rlhf_gate_min_entries", 20))
+        default_min_csat = float(st.session_state.get("rlhf_gate_min_csat", 3.2))
+        default_min_adoption = float(st.session_state.get("rlhf_gate_min_adoption_rate", 0.30))
+        default_min_nps = float(st.session_state.get("rlhf_gate_min_nps", 0.0))
+        default_ai_weight = float(st.session_state.get("rlaif_ai_weight", 0.35))
+        default_min_ai_entries = int(st.session_state.get("rlaif_min_ai_entries", 30))
+        default_min_ai_confidence = float(st.session_state.get("rlaif_min_ai_confidence", 0.60))
+        default_auto_aggregate_ai = bool(st.session_state.get("rlaif_auto_aggregate_ai", True))
+
+        st.caption("現在の閾値（サイドバーで調整可能）")
+        c1, c2, c3, c4 = st.columns(4)
+        with c1:
+            st.metric("min_entries", default_min_entries)
+        with c2:
+            st.metric("min_csat", f"{default_min_csat:.2f}")
+        with c3:
+            st.metric("min_adoption", f"{default_min_adoption:.2f}")
+        with c4:
+            st.metric("min_nps", f"{default_min_nps:.2f}")
+
+        d1, d2, d3 = st.columns(3)
+        with d1:
+            st.metric("ai_weight", f"{default_ai_weight:.2f}")
+        with d2:
+            st.metric("min_ai_entries", default_min_ai_entries)
+        with d3:
+            st.metric("min_ai_conf", f"{default_min_ai_confidence:.2f}")
+
+        st.caption(f"auto_ai_aggregate: {'on' if default_auto_aggregate_ai else 'off'}")
+
+        if st.button("⚙️ RLHF重み更新を実行", use_container_width=True):
+            try:
+                result = apply_reward_adjustments(
+                    min_entries=default_min_entries,
+                    min_csat=default_min_csat,
+                    min_adoption_rate=default_min_adoption,
+                    min_nps=default_min_nps,
+                    ai_weight=default_ai_weight,
+                    min_ai_entries=default_min_ai_entries,
+                    min_ai_confidence=default_min_ai_confidence,
+                    auto_aggregate_ai=default_auto_aggregate_ai,
+                )
+                status = result.get("status")
+                if status == "ok":
+                    source = result.get("source", "human_only")
+                    source_label = "human+ai" if source == "human_ai_blended" else "human_only"
+                    st.success(f"RLHF重み更新を適用しました。（source={source_label}）")
+                    blend_details = result.get("blend_details") or {}
+                    if blend_details:
+                        st.caption("RLAIFブレンド詳細")
+                        st.json(blend_details)
+                    st.json(result)
+                elif status == "skipped":
+                    st.warning("ゲート条件未達のため更新をスキップしました。")
+                    reasons = result.get("reasons") or []
+                    if reasons:
+                        st.write("判定理由:")
+                        for reason in reasons:
+                            st.write(f"- {reason}")
+                    st.json(result.get("summary") or {})
+                    blend_details = result.get("blend_details") or {}
+                    if blend_details:
+                        st.caption("RLAIFブレンド詳細")
+                        st.json(blend_details)
+                elif status == "missing_agg":
+                    st.info("集計ファイルが見つかりません。先に集計を実行してください。")
+                else:
+                    st.info("RLHF更新結果")
+                    st.json(result)
+            except Exception as e:
+                st.error(f"RLHF重み更新中にエラーが発生しました: {e}")
+
+        show_logs = bool(st.session_state.get("rlhf_show_gate_logs", True))
+        if show_logs:
+            st.write("**最近のゲート判定ログ**")
+            logs = _read_gate_logs(limit=30)
+            if not logs:
+                st.caption("ログはまだありません。")
+            else:
+                rows = []
+                for item in logs:
+                    summary = item.get("summary") or {}
+                    rows.append({
+                        "timestamp": item.get("timestamp", ""),
+                        "status": item.get("status", ""),
+                        "source": item.get("source", "human_only"),
+                        "reasons": ", ".join(item.get("reasons") or []),
+                        "entries": summary.get("total_entries"),
+                        "csat": summary.get("csat_mean"),
+                        "nps": summary.get("nps_mean"),
+                        "adoption": summary.get("adoption_rate"),
+                    })
+                st.dataframe(pd.DataFrame(rows), use_container_width=True)
     
     def _render_memory_management(self):
         """Render Memory Management dashboard."""
@@ -329,4 +478,14 @@ def add_learning_panel_to_sidebar():
     )
     
     if st.sidebar.button("📊 View Learning Dashboard"):
+        # Set the app page to the Learning Dashboard and request a rerun
         st.session_state.show_dashboard = True
+        try:
+            st.session_state.app_page = "🧠 Learning Dashboard"
+        except Exception:
+            pass
+        try:
+            st.experimental_rerun()
+        except Exception:
+            # If rerun isn't available in this context, proceed without crashing
+            pass
