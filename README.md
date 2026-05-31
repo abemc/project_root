@@ -96,6 +96,36 @@ export OPENAI_MODEL=gpt-4o-mini  # 任意
 - シークレットや API キーなどの機密情報は自動送信されない設計です。検出したシークレットはログに警告します。
 - 大きなファイルはデフォルトでスニペットのみを解析対象とするため、必要に応じて `analyzer.scanner.scan` の `size_threshold` を調整してください。
 
+### RAG評価と自動ゲート
+
+RAG の評価結果を保存し、そのまま回帰ゲートまで実行できます。
+
+1. 評価入力を JSON で用意します。`evaluation_data` キー、またはルート配列のどちらでも読み込めます。
+2. 評価と保存を実行します。
+
+```bash
+python -m src.evaluation.rag_evaluation \
+    --input results/rag_inputs.json \
+    --output results/benchmarks/rag_evaluation_20260601_120000.json
+```
+
+3. 保存と同時に直近 2 件を比較してゲートレポートも出す場合は `--auto-gate` を付けます。
+
+```bash
+python -m src.evaluation.rag_evaluation \
+    --input results/rag_inputs.json \
+    --output results/benchmarks/rag_evaluation_20260601_120000.json \
+    --auto-gate
+```
+
+4. 保存済みの RAG 評価レポートと回帰ゲート履歴は、Streamlit の Learning Dashboard で確認できます。
+    - 実画面では `🧠 Learning Dashboard` の `🎲 Reinforcement Learning` タブで、`🧪 ベンチマーク回帰ゲート`、`🧾 保存済み回帰ゲート履歴`、`📊 RAG評価履歴` が並んで表示されることを確認済みです。
+
+補足:
+- 回帰ゲートは `results/benchmarks/regression_gate_*.json` を保存します。
+- RAG 評価レポートは `results/benchmarks/rag_evaluation_*.json` を保存します。
+- ゲートは `factual_consistency` と `end_to_end_score` を含むベンチマーク互換 JSON を比較します。
+
 ### トークン使用量のロギングとファイル出力
 
 `OpenAIClient` は API 呼び出し時にレスポンスの `usage` を内部 `usage_history` に蓄積します。ローカルに書き出すには `flush_usage_to(path, max_bytes, backup_count)` を使います。
