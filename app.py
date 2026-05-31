@@ -25,6 +25,10 @@ from src.ui.diagram_settings import (
     diagram_title_for_query,
     normalize_diagram_mode,
 )
+from src.ui.user_preference_profile import (
+    build_response_style_directive,
+    infer_response_preferences,
+)
 try:
     from src.safety.ethics_guard import EthicsGuard
     ethics_guard_available = True
@@ -2256,6 +2260,7 @@ def _init_display_session_state() -> None:
         "retrieval_top_k": 10,
         "rerank_top_k": 5,
         "presearch_query": "",
+        "response_preference_profile": {},
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -3482,6 +3487,17 @@ def _generate_assistant_response(query: str) -> None:
                     + "- 専門用語はかみ砕いて説明し、前提知識ゼロでも実行できる内容にしてください。\n"
                 )
                 _append_run_log("beginner_learning_request_detected: enforcing_actionable_study_plan=True")
+
+            # 会話履歴から推定したユーザー志向を反映（セッション内のみ）
+            try:
+                inferred_profile = infer_response_preferences(st.session_state.get("messages") or [])
+                st.session_state.response_preference_profile = inferred_profile
+                style_directive = build_response_style_directive(inferred_profile)
+                if style_directive:
+                    prompt = style_directive + prompt
+                    _append_run_log(f"response_style_profile_applied: {json.dumps(inferred_profile, ensure_ascii=False)}")
+            except Exception as e:
+                _append_run_log(f"response_style_profile_failed: {e}")
 
             # LLM 呼び出しを実行し、例外は捕捉してログに残す
             try:
