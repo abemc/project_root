@@ -2990,6 +2990,50 @@ def _generate_assistant_response(query: str) -> None:
                 query_for_llm = normalized_query
             else:
                 query_for_llm = query
+
+            # 省略フォローアップ（例: "無料ですか"）は直前トピックを補って検索・回答の話題ずれを防ぐ
+            try:
+                import re as _re_q
+
+                def _extract_topic_terms(text: str):
+                    stop = {
+                        "について", "とは", "です", "ます", "したい", "ください", "教えて", "知りたい", "何", "なに",
+                        "どこ", "いつ", "無料", "有料", "料金", "価格", "値段", "使える", "できる", "可能", "対応"
+                    }
+                    terms = _re_q.findall(r"[A-Za-z][A-Za-z0-9_\-]{1,24}|[ァ-ヶー]{2,}|[一-龠々]{2,}", text or "")
+                    return [t for t in terms if t not in stop]
+
+                _recent_q = (query_for_llm or "").strip()
+                _msgs = st.session_state.get("messages") or []
+                _prev_user_q = ""
+                for _m in reversed(_msgs[:-1]):
+                    if _m.get("role") == "user":
+                        _prev_user_q = str(_m.get("content") or "").strip()
+                        break
+
+                _ellipsis_follow = bool(
+                    _re_q.search(r"^(無料|有料|料金|値段|価格|いくら|使える|使えますか|できますか|可能ですか|対応していますか).*[？?]?$", _recent_q)
+                    or _re_q.search(r"(無料|有料|料金|値段|価格|いくら).*(ですか|ますか|\?|？)$", _recent_q)
+                )
+                _short_q = len(_recent_q) <= 24
+                _has_subject_like = bool(_re_q.search(r"[A-Za-z]{2,}|[ァ-ヶー]{2,}|[一-龠々]{2,}", _recent_q))
+                if _prev_user_q and _ellipsis_follow and _short_q:
+                    _topic_terms = _extract_topic_terms(_prev_user_q)
+                    if _topic_terms:
+                        _topic_hint = " ".join(_topic_terms[:3])
+                        query_for_llm = f"{_topic_hint} {_recent_q}"
+                        _append_run_log(
+                            f"followup_query_contextualized: original='{_recent_q}' expanded='{query_for_llm}' prev='{_prev_user_q[:80]}'"
+                        )
+                    elif not _has_subject_like:
+                        # 最低限のフォールバックとして直前質問を短縮付与
+                        _prev_hint = _prev_user_q[:40]
+                        query_for_llm = f"{_prev_hint} {_recent_q}"
+                        _append_run_log(
+                            f"followup_query_contextualized_fallback: original='{_recent_q}' expanded='{query_for_llm}'"
+                        )
+            except Exception:
+                pass
             
             # ===== Web 検索：相対日付有無に関わらずすべてのクエリで実行 =====
             presearch_docs = []
@@ -3506,6 +3550,10 @@ def _generate_assistant_response(query: str) -> None:
                 explicit_follow = bool(_re_local.search(r"続き|前回|さっき|先ほど|その件|もう少し|詳しく|補足|それで|ちなみに|じゃあ", recent_query))
                 referential = bool(_re_local.search(r"これ|それ|あれ|上記|前者|後者|同じ|その|どれ|どの", recent_query))
                 short_follow = len(recent_query) <= 24
+                elliptical_follow = bool(
+                    _re_local.search(r"^(無料|有料|料金|値段|価格|いくら|使える|使えますか|できますか|可能ですか|対応していますか).*[？?]?$", recent_query)
+                    or _re_local.search(r"(無料|有料|料金|値段|価格|いくら).*(ですか|ますか|\?|？)$", recent_query)
+                )
                 marketplace_follow = bool(
                     _re_local.search(
                         r"amazon|アマゾン|楽天|yahoo|ヤフー|価格\.com|モノタロウ|ヨドバシ|通販|ショップ|販売",
@@ -3527,7 +3575,7 @@ def _generate_assistant_response(query: str) -> None:
                 if is_file_referential_query:
                     treat_as_fresh = True
                 # 参照語+短文、または語彙重なりがあるときは会話継続扱い
-                elif explicit_follow or (referential and short_follow) or overlap >= 1 or (marketplace_follow and short_follow):
+                elif explicit_follow or (referential and short_follow) or overlap >= 1 or (marketplace_follow and short_follow) or (elliptical_follow and short_follow):
                     followup_like = True
                     treat_as_fresh = False
             except Exception:
