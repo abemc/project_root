@@ -12,6 +12,7 @@ import streamlit.components.v1 as components
 import logging
 import json
 import time
+import hashlib
 import re
 import difflib
 import pandas as pd
@@ -29,6 +30,14 @@ from src.ui.user_preference_profile import (
     build_response_style_directive,
     infer_response_preferences,
 )
+try:
+    from src.self_improvement.feedback_manager import FeedbackManager
+    from src.self_improvement.streamlit_integration import StreamlitIntegration
+    feedback_runtime_available = True
+except Exception:
+    FeedbackManager = None
+    StreamlitIntegration = None
+    feedback_runtime_available = False
 try:
     from src.safety.ethics_guard import EthicsGuard
     ethics_guard_available = True
@@ -152,6 +161,7 @@ def _detect_audio_ext(audio_bytes: bytes) -> str:
 
 _MERMAID_BLOCK_RE = re.compile(r"```mermaid(?:\s*\n|\s+)(.*?)```", re.DOTALL | re.IGNORECASE)
 _ethics_guard = None
+_feedback_manager = None
 
 
 def _get_ethics_guard():
@@ -162,6 +172,16 @@ def _get_ethics_guard():
         except Exception:
             _ethics_guard = None
     return _ethics_guard
+
+
+def _get_feedback_manager():
+    global _feedback_manager
+    if _feedback_manager is None and feedback_runtime_available:
+        try:
+            _feedback_manager = FeedbackManager()
+        except Exception:
+            _feedback_manager = None
+    return _feedback_manager
 
 
 def _check_user_instruction_ethics(query: str, source: str = "chat_input") -> dict:
@@ -175,16 +195,6 @@ def _check_user_instruction_ethics(query: str, source: str = "chat_input") -> di
             "confidence": 0.0,
             "matched_rules": [],
         }
-
-
-def _remember_ethics_decision(query: str, ethics: dict, source: str) -> None:
-    """Keep the latest ethics decision in session state for downstream feedback metadata."""
-    try:
-        st.session_state.last_ethics_decision = dict(ethics or {})
-        st.session_state.last_ethics_query = str(query or "")
-        st.session_state.last_ethics_source = str(source or "chat_input")
-    except Exception:
-        pass
 
     try:
         decision = guard.evaluate(query or "", source=source)
@@ -204,6 +214,88 @@ def _remember_ethics_decision(query: str, ethics: dict, source: str) -> None:
             "confidence": 0.0,
             "matched_rules": [],
         }
+
+
+def _remember_ethics_decision(query: str, ethics: dict, source: str) -> None:
+    """Keep the latest ethics decision in session state for downstream feedback metadata."""
+    try:
+        st.session_state.last_ethics_decision = dict(ethics or {})
+        st.session_state.last_ethics_query = str(query or "")
+        st.session_state.last_ethics_source = str(source or "chat_input")
+    except Exception:
+        pass
+
+
+def _build_feedback_target() -> dict | None:
+    """Return the latest user/assistant pair for inline feedback."""
+    messages = st.session_state.get("messages") or []
+    last_assistant = None
+    last_user = ""
+    for item in reversed(messages):
+        if last_assistant is None and item.get("role") == "assistant":
+            last_assistant = item
+            continue
+        if last_assistant is not None and item.get("role") == "user":
+            last_user = str(item.get("content") or "")
+            break
+    if not last_assistant:
+        return None
+
+    response_text = str(last_assistant.get("content") or last_assistant.get("conclusion") or "").strip()
+    if not response_text:
+        return None
+
+    response_key = hashlib.sha256(
+        f"{last_user}\n{response_text}".encode("utf-8", errors="ignore")
+    ).hexdigest()[:16]
+    return {
+        "user_query": last_user,
+        "response_text": response_text,
+        "response_key": response_key,
+    }
+
+
+def _render_inline_feedback_panel() -> None:
+    """Render an inline feedback form for the latest assistant response."""
+    if not feedback_runtime_available:
+        return
+    target = _build_feedback_target()
+    if not target:
+        return
+
+    submitted_keys = list(st.session_state.get("feedback_submitted_response_keys") or [])
+    response_key = target["response_key"]
+    st.markdown("---")
+    if response_key in submitted_keys:
+        st.caption("この回答へのフィードバックは送信済みです。")
+        return
+
+    feedback_data = StreamlitIntegration.render_feedback_ui(session_state_key=f"feedback_{response_key}")
+    if not feedback_data.get("submitted"):
+        return
+
+    feedback_manager = _get_feedback_manager()
+    if not feedback_manager:
+        st.error("フィードバック保存機能を初期化できませんでした。")
+        return
+
+    try:
+        feedback_manager.record_feedback(
+            user_query=target["user_query"],
+            model_response=target["response_text"],
+            rating=float(feedback_data.get("rating") or 0.0),
+            feedback_text=feedback_data.get("feedback_text"),
+            tags=feedback_data.get("tags") or [],
+            suggestions=feedback_data.get("suggestions"),
+            response_id=response_key,
+            model_name=st.session_state.get("llm_model"),
+            metadata=feedback_data.get("metadata") or {},
+        )
+        st.session_state.feedback_submitted_response_keys = submitted_keys + [response_key]
+        st.success("フィードバックを保存しました。")
+    except Exception as e:
+        logger.error(f"feedback_record_failed: {e}")
+        st.error(f"フィードバック保存に失敗しました: {e}")
 
 
 def _query_requests_diagram(query: str) -> bool:
@@ -2426,6 +2518,7 @@ def _init_display_session_state() -> None:
         "rerank_top_k": 5,
         "presearch_query": "",
         "response_preference_profile": {},
+        "feedback_submitted_response_keys": [],
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -4678,6 +4771,8 @@ def display_app():
                 st.markdown("---")
         else:
             st.info("💬 クエリを入力して、会話を開始してください")
+
+    _render_inline_feedback_panel()
         
     # ===== ファイルアップロード機能 =====
     st.markdown("---")

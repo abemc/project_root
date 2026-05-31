@@ -33,20 +33,23 @@ class StreamlitIntegration:
     def render_feedback_ui(session_state_key: str = "feedback_form"):
         """フィードバック入力UIをレンダリング"""
         st.subheader("💬 回答フィードバック")
+        key_prefix = session_state_key or "feedback_form"
         
-        with st.form("feedback_form", clear_on_submit=True):
+        with st.form(key_prefix, clear_on_submit=True):
             # 評価スライダー
             rating = st.slider(
                 "この回答の品質は？",
                 0.0, 1.0, 0.5, 0.05,
-                help="0 = 不満足、1 = 完璧"
+                help="0 = 不満足、1 = 完璧",
+                key=f"{key_prefix}_rating",
             )
             
             # フィードバックテキスト
             feedback_text = st.text_area(
                 "フィードバック（オプション）",
                 placeholder="改善してほしい点や良かった点などを自由に記入してください",
-                height=100
+                height=100,
+                key=f"{key_prefix}_feedback_text",
             )
             
             # タグ選択
@@ -68,14 +71,16 @@ class StreamlitIntegration:
             tags = st.multiselect(
                 "タグを選択（複数可）",
                 available_tags,
-                help="この回答に該当するタグを選択してください"
+                help="この回答に該当するタグを選択してください",
+                key=f"{key_prefix}_tags",
             )
             
             # 提案
             suggestions = st.text_area(
                 "改善提案（オプション）",
                 placeholder="より良い回答にするための具体的な提案があれば入力してください",
-                height=80
+                height=80,
+                key=f"{key_prefix}_suggestions",
             )
             
             submitted = st.form_submit_button("✅ フィードバック送信")
