@@ -53,6 +53,22 @@ class _FakeStreamlit:
         label = args[0] if args else ""
         return bool(self.button_values.get(label, False))
 
+    def selectbox(self, *args, **kwargs):
+        # args: (label, options)
+        if len(args) >= 2:
+            options = args[1]
+            return options[0] if options else None
+        return None
+
+    def expander(self, *args, **kwargs):
+        return _DummyColumn()
+
+    def text(self, txt):
+        self.captions.append(str(txt))
+
+    def markdown(self, txt):
+        self.captions.append(str(txt))
+
     def info(self, *args, **kwargs):
         return None
 
@@ -131,6 +147,55 @@ class _DummyRegressionGate:
         return _DummyRegressionGateReport()
 
 
+class _DummySampleDiff:
+    def __init__(self, status, query, d_e2e, d_fact, d_rouge, d_bleu):
+        self.status = status
+        self.query = query
+        self.delta_end_to_end = d_e2e
+        self.delta_factual_consistency = d_fact
+        self.delta_rouge = d_rouge
+        self.delta_bleu = d_bleu
+
+
+class _DummyEvaluationDiffReport:
+    def __init__(self):
+        self.shared_samples = 2
+        self.improved_samples = 1
+        self.regressed_samples = 1
+        self.added_samples = 0
+        self.removed_samples = 0
+        self.sample_diffs = [
+            _DummySampleDiff("improved", "Q improved", 0.1, 0.2, 0.0, 0.0),
+            _DummySampleDiff("regressed", "Q regressed", -0.2, -0.1, -0.05, -0.02),
+            _DummySampleDiff("added", "Q added", None, None, None, None),
+        ]
+
+
+class _DummyEvaluationDiffViewer:
+    def compare(self, baseline, current):
+        return _DummyEvaluationDiffReport()
+
+
+class _DummyTraceCase:
+    def __init__(self, index, query):
+        self.sample_index = index
+        self.query = query
+        self.generated_answer = "ans"
+        self.ground_truth = "gt"
+        self.retrieved_documents = ["doc1"]
+        self.retrieved_scores = [0.9]
+        self.relevant_documents = ["doc1"]
+        self.metrics = {"factual_consistency": 0.5}
+
+
+class _DummyTraceViewer:
+    def build_case_trace(self, source, query=None, index=None):
+        return _DummyTraceCase(0, query or "")
+
+    def format_case(self, case):
+        return f"query={case.query} answer={case.generated_answer}"
+
+
 def test_reinforcement_dashboard_shows_feedback_total_and_latest(monkeypatch):
     fake_st = _FakeStreamlit()
 
@@ -150,7 +215,9 @@ def test_reinforcement_dashboard_shows_feedback_total_and_latest(monkeypatch):
     assert metrics["Feedback Items"] == 216
     assert metrics["Latest Feedback"] == "2026-05-31T16:45:29.916267"
     assert "現在最も強い価値軸: accuracy (0.75)" in fake_st.captions
-    assert any("Latest Feedback Summary:" in text for text in fake_st.captions)
+    # Check for latest feedback detail display (new format)
+    captions_str = " ".join(fake_st.captions)
+    assert "アンソロピック社の概要を簡潔に説明して" in captions_str
 
 
 def test_reinforcement_dashboard_runs_rlhf_update_and_shows_delta_metrics(monkeypatch):
@@ -297,10 +364,13 @@ def test_reinforcement_dashboard_shows_benchmark_regression_gate(monkeypatch):
 
     dashboard._render_reinforcement_learning()
 
-    metrics = dict(fake_st.metrics)
-    assert metrics["status"] == "pass"
-    assert metrics["regressed"] == 0
-    assert metrics["improved"] == 1
+    metric_values = {}
+    for label, value in fake_st.metrics:
+        metric_values.setdefault(label, []).append(value)
+
+    assert "pass" in metric_values.get("status", [])
+    assert 0 in metric_values.get("regressed", [])
+    assert 1 in metric_values.get("improved", [])
     assert any("no regressions detected" in text for text in fake_st.captions)
     assert fake_st.dataframes
 
@@ -476,6 +546,93 @@ def test_reinforcement_dashboard_shows_saved_rag_evaluation_history(monkeypatch)
     )
 
 
+def test_format_evaluation_diff_rows_keeps_improved_and_regressed_only():
+    report = _DummyEvaluationDiffReport()
+
+    frame = ld._format_evaluation_diff_rows(report)
+
+    assert not frame.empty
+    assert set(frame["status"].unique()) == {"improved", "regressed"}
+    assert "Q added" not in set(frame["query"].tolist())
+
+
+def test_reinforcement_dashboard_shows_evaluation_diff_section(monkeypatch):
+    fake_st = _FakeStreamlit()
+    monkeypatch.setattr(ld, "st", fake_st)
+    monkeypatch.setattr(ld, "VALUE_TUNING_AVAILABLE", False)
+    monkeypatch.setattr(ld, "RLHF_GUARD_AVAILABLE", True)
+    monkeypatch.setattr(ld, "REGRESSION_GATE_AVAILABLE", True)
+    monkeypatch.setattr(ld, "RegressionGate", _DummyRegressionGate)
+    monkeypatch.setattr(ld, "EVALUATION_DIFF_AVAILABLE", True)
+    monkeypatch.setattr(ld, "EvaluationDiffViewer", _DummyEvaluationDiffViewer)
+    monkeypatch.setattr(ld, "TraceEvidenceViewer", _DummyTraceViewer)
+    monkeypatch.setattr(ld, "_find_recent_benchmark_results", lambda limit=2: ["current.json", "baseline.json"])
+    monkeypatch.setattr(
+        ld,
+        "_read_regression_gate_reports",
+        lambda limit=30: [
+            {
+                "status": "pass",
+                "current_timestamp": "2026-06-01T10:00:00",
+                "summary": {
+                    "comparable_benchmarks": 1,
+                    "regressed_benchmarks": 0,
+                    "improved_benchmarks": 1,
+                },
+                "notes": ["all clear"],
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        ld,
+        "_read_rag_evaluation_reports",
+        lambda limit=30: [
+            {
+                "timestamp": "2026-06-01T12:00:00",
+                "summary": {
+                    "total_samples": 3,
+                    "average_metrics": {
+                        "end_to_end_score": 0.76,
+                        "factual_consistency": 0.81,
+                        "rouge": 0.69,
+                        "bleu": 0.58,
+                    },
+                },
+                "_path": "/tmp/rag_evaluation_20260601_120000.json",
+            },
+            {
+                "timestamp": "2026-06-01T11:00:00",
+                "summary": {
+                    "total_samples": 3,
+                    "average_metrics": {
+                        "end_to_end_score": 0.70,
+                        "factual_consistency": 0.78,
+                        "rouge": 0.65,
+                        "bleu": 0.54,
+                    },
+                },
+                "_path": "/tmp/rag_evaluation_20260601_110000.json",
+            },
+        ],
+    )
+
+    manager = SimpleNamespace(
+        rl_manager=SimpleNamespace(decisions=[], policies=[], experience_replay=[])
+    )
+    dashboard = ld.LearningDashboard(manager=manager)
+
+    dashboard._render_reinforcement_learning()
+
+    labels = [label for label, _ in fake_st.metrics]
+    assert "shared" in labels
+    assert "improved" in labels
+    assert "regressed" in labels
+    assert any(
+        isinstance(df, pd.DataFrame) and "Δend_to_end" in df.columns and "status" in df.columns
+        for df in fake_st.dataframes
+    )
+
+
 def test_style_gate_history_rows_colors_delta_columns():
     frame = ld._format_gate_history_rows(
         [
@@ -600,3 +757,64 @@ def test_reinforcement_dashboard_renders_gate_history_with_deltas(monkeypatch):
     assert any("Δcsat" in df.columns for df in fake_st.dataframes)
     assert any("Δnps" in df.columns for df in fake_st.dataframes)
     assert any("Δadoption" in df.columns for df in fake_st.dataframes)
+
+
+def test_value_tuning_displays_latest_feedback_detail_with_rating_and_tags(monkeypatch):
+    """Test that Value Tuning section shows latest feedback with query, rating, and tags in detail format."""
+    fake_st = _FakeStreamlit()
+
+    monkeypatch.setattr(ld, "st", fake_st)
+    monkeypatch.setattr(ld, "VALUE_TUNING_AVAILABLE", True)
+    monkeypatch.setattr(ld, "RLHF_GUARD_AVAILABLE", False)
+    monkeypatch.setattr(ld, "FeedbackManager", _DummyFeedbackManager)
+
+    manager = SimpleNamespace(
+        rl_manager=SimpleNamespace(decisions=[], policies=[], experience_replay=[])
+    )
+    dashboard = ld.LearningDashboard(manager=manager)
+
+    dashboard._render_reinforcement_learning()
+
+    # Verify latest feedback detail is displayed
+    metrics = dict(fake_st.metrics)
+    assert metrics["Feedback Items"] == 216
+    assert metrics["Latest Feedback"] == "2026-05-31T16:45:29.916267"
+
+    # Check for detailed feedback display components in captions and success/info/warning messages
+    captions_str = " ".join(fake_st.captions)
+    messages_str = " ".join(fake_st.success_messages)
+    
+    # Verify query text appears
+    assert "アンソロピック社の概要を簡潔に説明して" in captions_str
+    
+    # Verify rating appears (either in success, info messages or captions)
+    # Rating 0.9 should show ⭐ emoji in success message
+    combined_str = captions_str + " " + messages_str
+    assert "⭐" in combined_str or "0.9" in combined_str or "0.90" in combined_str
+    
+    # Verify tags appear
+    assert "正確性" in captions_str or "有用性" in captions_str
+
+
+def test_value_tuning_handles_missing_feedback_gracefully(monkeypatch):
+    """Test that Value Tuning section handles missing/empty recent feedback gracefully."""
+    fake_st = _FakeStreamlit()
+
+    monkeypatch.setattr(ld, "st", fake_st)
+    monkeypatch.setattr(ld, "VALUE_TUNING_AVAILABLE", True)
+    monkeypatch.setattr(ld, "RLHF_GUARD_AVAILABLE", False)
+    monkeypatch.setattr(ld, "FeedbackManager", _DummyNoValueTuningFeedbackManager)
+
+    manager = SimpleNamespace(
+        rl_manager=SimpleNamespace(decisions=[], policies=[], experience_replay=[])
+    )
+    dashboard = ld.LearningDashboard(manager=manager)
+
+    dashboard._render_reinforcement_learning()
+
+    metrics = dict(fake_st.metrics)
+    assert metrics["Feedback Items"] == 0
+    
+    # Should not crash and should display appropriate message
+    captions_str = " ".join(fake_st.captions)
+    assert "価値軸シグナルはまだありません" in captions_str

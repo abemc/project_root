@@ -44,6 +44,20 @@ except Exception:
     RegressionGate = None
     REGRESSION_GATE_AVAILABLE = False
 
+try:
+    from src.evaluation.evaluation_diff_viewer import EvaluationDiffViewer
+    EVALUATION_DIFF_AVAILABLE = True
+except Exception:
+    EvaluationDiffViewer = None
+    EVALUATION_DIFF_AVAILABLE = False
+
+try:
+    from src.evaluation.trace_evidence_viewer import TraceEvidenceViewer
+    TRACE_EVIDENCE_AVAILABLE = True
+except Exception:
+    TraceEvidenceViewer = None
+    TRACE_EVIDENCE_AVAILABLE = False
+
 
 def _read_gate_logs(limit: int = 50) -> List[Dict[str, Any]]:
     """Read latest RLHF gate decisions from JSONL log."""
@@ -292,6 +306,43 @@ def _format_rag_evaluation_rows(records: List[Dict[str, Any]]) -> pd.DataFrame:
         )
 
     return pd.DataFrame(rows)
+
+
+def _format_evaluation_diff_rows(report: Any) -> pd.DataFrame:
+    """Format sample-level diff report for Streamlit display."""
+    sample_diffs = getattr(report, "sample_diffs", None) or []
+    if not sample_diffs:
+        return pd.DataFrame()
+
+    rows: List[Dict[str, Any]] = []
+    for item in sample_diffs:
+        status = getattr(item, "status", "")
+        if status not in {"improved", "regressed"}:
+            continue
+
+        rows.append(
+            {
+                "status": status,
+                "query": getattr(item, "query", "") or getattr(item, "sample_key", ""),
+                "Δend_to_end": getattr(item, "delta_end_to_end", None),
+                "Δfactual": getattr(item, "delta_factual_consistency", None),
+                "Δrouge": getattr(item, "delta_rouge", None),
+                "Δbleu": getattr(item, "delta_bleu", None),
+            }
+        )
+
+    if not rows:
+        return pd.DataFrame()
+
+    frame = pd.DataFrame(rows)
+    frame["abs_delta"] = (
+        frame["Δend_to_end"].fillna(0.0).abs()
+        + frame["Δfactual"].fillna(0.0).abs()
+        + frame["Δrouge"].fillna(0.0).abs()
+        + frame["Δbleu"].fillna(0.0).abs()
+    )
+    frame = frame.sort_values(["status", "abs_delta"], ascending=[True, False])
+    return frame.drop(columns=["abs_delta"])
 
 
 class LearningDashboard:
@@ -566,7 +617,37 @@ class LearningDashboard:
                 tags = getattr(latest, "tags", None) or []
                 rating_text = f"{float(rating):.2f}" if isinstance(rating, (int, float)) else "-"
                 tag_text = ", ".join(tags) if tags else "-"
-                st.caption(f"Latest Feedback Summary: query={query} | rating={rating_text} | tags={tag_text}")
+                
+                # Display latest feedback in detail card format
+                st.divider()
+                st.subheader("最新フィードバック詳細")
+                
+                latest_detail_col1, latest_detail_col2, latest_detail_col3 = st.columns(3)
+                with latest_detail_col1:
+                    st.write("**Query**")
+                    st.caption(query if len(query) <= 60 else query[:60] + "...")
+                
+                with latest_detail_col2:
+                    st.write("**Rating**")
+                    # Use color-coded rating display
+                    if isinstance(rating, (int, float)):
+                        rating_float = float(rating)
+                        if rating_float >= 0.8:
+                            st.success(f"⭐ {rating_text}")
+                        elif rating_float >= 0.6:
+                            st.info(f"👍 {rating_text}")
+                        else:
+                            st.warning(f"👎 {rating_text}")
+                    else:
+                        st.caption("-")
+                
+                with latest_detail_col3:
+                    st.write("**Tags**")
+                    if tags:
+                        for tag in tags:
+                            st.caption(f"🏷️ {tag}")
+                    else:
+                        st.caption("-")
 
             if not signal_means:
                 st.caption("価値軸シグナルはまだありません。フィードバックタグやコメントが蓄積されると表示されます。")
@@ -880,6 +961,92 @@ class LearningDashboard:
                     yaxis_title="score",
                 )
                 st.plotly_chart(fig_rag, use_container_width=True)
+
+        st.divider()
+        st.subheader("🔍 評価差分ビュー（ケース単位）")
+
+        if not EVALUATION_DIFF_AVAILABLE:
+            st.caption("評価差分ビューアが利用できません。")
+        elif len(rag_reports) < 2:
+            st.caption("比較対象のRAG評価レポートが2件以上あると、ケース単位の差分を表示します。")
+        else:
+            baseline_record = rag_reports[1]
+            current_record = rag_reports[0]
+            baseline_path = baseline_record.get("_path")
+            current_path = current_record.get("_path")
+
+            if not baseline_path or not current_path:
+                st.caption("比較対象レポートのパス情報が不足しています。")
+            else:
+                st.caption(f"baseline: {os.path.basename(baseline_path)}")
+                st.caption(f"current: {os.path.basename(current_path)}")
+                try:
+                    diff_report = EvaluationDiffViewer().compare(baseline_path, current_path)
+                except Exception as exc:
+                    st.error(f"評価差分の比較に失敗しました: {exc}")
+                    diff_report = None
+
+                if diff_report is not None:
+                    c1, c2, c3, c4, c5 = st.columns(5)
+                    with c1:
+                        st.metric("shared", getattr(diff_report, "shared_samples", 0))
+                    with c2:
+                        st.metric("improved", getattr(diff_report, "improved_samples", 0))
+                    with c3:
+                        st.metric("regressed", getattr(diff_report, "regressed_samples", 0))
+                    with c4:
+                        st.metric("added", getattr(diff_report, "added_samples", 0))
+                    with c5:
+                        st.metric("removed", getattr(diff_report, "removed_samples", 0))
+
+                    diff_rows = _format_evaluation_diff_rows(diff_report)
+                    if diff_rows.empty:
+                        st.caption("共有ケースの改善/悪化は検出されませんでした。")
+                    else:
+                        st.dataframe(diff_rows.head(20), use_container_width=True)
+                        # Allow user to select a case and show trace/evidence
+                        try:
+                            options = diff_rows["query"].fillna("").tolist()
+                        except Exception:
+                            options = [str(x) for x in diff_rows.index.tolist()]
+
+                        if options:
+                            sel = st.selectbox("表示するケースを選択してください", options)
+                            if sel:
+                                with st.expander("ケース詳細を表示"):
+                                    baseline_path = baseline_record.get("_path")
+                                    current_path = current_record.get("_path")
+                                    try:
+                                        viewer = TraceEvidenceViewer()
+                                        baseline_case = None
+                                        current_case = None
+                                        if TRACE_EVIDENCE_AVAILABLE and baseline_path:
+                                            try:
+                                                baseline_case = viewer.build_case_trace(baseline_path, query=sel)
+                                            except Exception:
+                                                baseline_case = None
+                                        if TRACE_EVIDENCE_AVAILABLE and current_path:
+                                            try:
+                                                current_case = viewer.build_case_trace(current_path, query=sel)
+                                            except Exception:
+                                                current_case = None
+
+                                        col_a, col_b = st.columns(2)
+                                        with col_a:
+                                            st.markdown("**baseline**")
+                                            if baseline_case is None:
+                                                st.caption("baseline のケースが見つかりませんでした。")
+                                            else:
+                                                st.text(viewer.format_case(baseline_case))
+
+                                        with col_b:
+                                            st.markdown("**current**")
+                                            if current_case is None:
+                                                st.caption("current のケースが見つかりませんでした。")
+                                            else:
+                                                st.text(viewer.format_case(current_case))
+                                    except Exception as exc:
+                                        st.error(f"ケース詳細の表示に失敗しました: {exc}")
     
     def _render_memory_management(self):
         """Render Memory Management dashboard."""
