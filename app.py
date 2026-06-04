@@ -3631,20 +3631,45 @@ def _generate_assistant_response(query: str) -> None:
                                     _store_assistant_message(message)
                                     st.session_state.attached_file_contents = []
                                     return
+                # 応答傾向（詳細要求等）を前倒しで推論
+                inferred_profile = {
+                    "verbosity": "balanced",
+                    "format": "paragraph",
+                    "focus": "balanced",
+                    "validation": "normal",
+                }
+                try:
+                    inferred_profile = infer_response_preferences(st.session_state.get("messages") or [])
+                    st.session_state.response_preference_profile = inferred_profile
+                except Exception as e:
+                    _append_run_log(f"response_style_profile_failed_early: {e}")
+
                 if pre:
-                    directive_lines = [
-                        "【注意：検索結果を参照して簡潔に答えること】以下は自動で取得した検索結果（ローカル文書を含む）です。回答を作る際、必ずこれらを参照してください。出力形式に厳密に従ってください：",
-                        "1) 結論（Qに対する答え）を最初に1〜2行で簡潔に述べる。",
-                        "2) 根拠を箇条書きで最大3件示す。各項目は必ず出典IDを `[source_id]` の形式で明記し、根拠文を短く引用する。",
-                        "2.1) 重要: 本文中に生のURLを貼り付けないでください。本文では必ず出典ID（[source_id]）のみを使い、URLは文末の注釈としてまとめてください。",
-                        "2.2) 重要: 組織名とモデル名は明確に区別してください。例えば 'Anthropic' は組織名であり、'Claude' や 'Claude Mythos' は同組織が提供するモデル名です。回答中で混同しないこと。組織に関する記述とモデルに関する記述は別段落で記載してください。",
-                        "3) 補足は1〜2文に留める。不要な背景説明は避ける。",
-                        "4) すべて日本語で答えること。",
-                        "5) 質問が『このPDF』『このファイル』のような参照表現を含む場合、直近追加ドキュメントの内容を最優先して要約・回答すること。",
-                    ]
-                    # Few-shot examples to guide the LLM output format
-                    directive_lines.append("\n【例（良い出力）】\n結論: 日本ハムは昨日の試合に勝利しました（スコア 4-3）。\n- [web_3] 西武 vs 日本ハ 試合記事（速報）: 8回にレイエスの本塁打で勝ち越し\n補足: 公式サイトの成績ページで詳細を確認してください。")
-                    directive_lines.append("\n【例（悪い出力）】\n昨日の試合について長い歴史や選手のプロフィールを詳述する（結論が不明瞭）。出典を示さない。")
+                    is_detailed = inferred_profile.get("verbosity") == "detailed"
+                    if is_detailed:
+                        directive_lines = [
+                            "【注意：検索結果を参照して詳細にわかりやすく答えること】以下は自動で取得した検索結果（ローカル文書を含む）です。回答を作る際、必ずこれらを参照してください。出力形式に厳密に従ってください：",
+                            "1) 結論（Qに対する答え）を最初にわかりやすく述べる。",
+                            "2) 結論に至る理由や技術的詳細、背景情報を詳しく解説する。段落や見出し（Markdown）を適切に使い、詳細に構成してください。",
+                            "3) 根拠となる箇所は必ず出典ID `[source_id]` を明記してください。",
+                            "3.1) 重要: 本文中に生のURLを貼り付けないでください。本文では必ず出典ID（[source_id]）のみを使い、URLは文末 of注釈としてまとめてください。",
+                            "3.2) 重要: 組織名とモデル名は明確に区別してください。混同しないこと。",
+                            "4) すべて日本語で答えること。",
+                        ]
+                    else:
+                        directive_lines = [
+                            "【注意：検索結果を参照して簡潔に答えること】以下は自動で取得した検索結果（ローカル文書を含む）です。回答を作る際、必ずこれらを参照してください。出力形式に厳密に従ってください：",
+                            "1) 結論（Qに対する答え）を最初に1〜2行で簡潔に述べる。",
+                            "2) 根拠を箇条書きで最大3件示す。各項目は必ず出典IDを `[source_id]` の形式で明記し、根拠文を短く引用する。",
+                            "2.1) 重要: 本文中に生のURLを貼り付けないでください。本文では必ず出典ID（[source_id]）のみを使い、URLは文末の注釈としてまとめてください。",
+                            "2.2) 重要: 組織名とモデル名は明確に区別してください。例えば 'Anthropic' は組織名であり、'Claude' や 'Claude Mythos' は同組織が提供するモデル名です。回答中で混同しないこと。組織に関する記述とモデルに関する記述は別段落で記載してください。",
+                            "3) 補足は1〜2文に留める。不要な背景説明は避ける。",
+                            "4) すべて日本語で答えること。",
+                            "5) 質問が『このPDF』『このファイル』のような参照表現を含む場合、直近追加ドキュメントの内容を最優先して要約・回答すること。",
+                        ]
+                        # Few-shot examples to guide the LLM output format
+                        directive_lines.append("\n【例（良い出力）】\n結論: 日本ハムは昨日の試合に勝利しました（スコア 4-3）。\n- [web_3] 西武 vs 日本ハ 試合記事（速報）: 8回にレイエスの本塁打で勝ち越し\n補足: 公式サイトの成績ページで詳細を確認してください。")
+                        directive_lines.append("\n【例（悪い出力）】\n昨日の試合について長い歴史や選手のプロフィールを詳述する（結論が不明瞭）。出典を示さない。")
                     import re as _re
                     def _short_info(d):
                         tid = d.get("id") or "-"
@@ -3796,8 +3821,8 @@ def _generate_assistant_response(query: str) -> None:
 
             # 会話履歴から推定したユーザー志向を反映（セッション内のみ）
             try:
-                inferred_profile = infer_response_preferences(st.session_state.get("messages") or [])
-                st.session_state.response_preference_profile = inferred_profile
+                # 前倒しで推論済みの st.session_state.response_preference_profile または inferred_profile を使用
+                inferred_profile = st.session_state.get("response_preference_profile") or inferred_profile
                 style_directive = build_response_style_directive(inferred_profile)
                 if style_directive:
                     prompt = style_directive + prompt
@@ -4669,8 +4694,6 @@ def display_app():
                                 title_display = title
                             src_lines.append(f"- [URL{url_to_note.get(url, 0)}]: {title}{retrieved_text}" if url else f"- [{cid}]: {title}{retrieved_text}")
 
-                        if footnotes:
-                            st.markdown("**出典URL:**\n" + "\n".join([f"- URL{n}: [リンク]({u})" for n,u in footnotes]))
                     # provide full raw content in an expander for context
                     if message.get("content"):
                         # also show a normalized view of the raw content when helpful
@@ -4698,6 +4721,8 @@ def display_app():
                         except Exception:
                             norm_raw = raw
                         with st.expander("詳細表示（元の応答）", expanded=False):
+                            if footnotes:
+                                st.markdown("**出典URL:**\n" + "\n".join([f"- URL{n}: [リンク]({u})" for n,u in footnotes]))
                             detail_text = _normalize_mermaid_blocks(norm_raw)
                             detail_text = re.sub(r"\[web_(\d+)\]", r"[URL\1]", detail_text)
 
