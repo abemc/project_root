@@ -270,32 +270,33 @@ def _render_inline_feedback_panel() -> None:
         st.caption("この回答へのフィードバックは送信済みです。")
         return
 
-    feedback_data = StreamlitIntegration.render_feedback_ui(session_state_key=f"feedback_{response_key}")
-    if not feedback_data.get("submitted"):
-        return
+    with st.expander("📝 回答へのフィードバックを送る", expanded=False):
+        feedback_data = StreamlitIntegration.render_feedback_ui(session_state_key=f"feedback_{response_key}")
+        if not feedback_data.get("submitted"):
+            return
 
-    feedback_manager = _get_feedback_manager()
-    if not feedback_manager:
-        st.error("フィードバック保存機能を初期化できませんでした。")
-        return
+        feedback_manager = _get_feedback_manager()
+        if not feedback_manager:
+            st.error("フィードバック保存機能を初期化できませんでした。")
+            return
 
-    try:
-        feedback_manager.record_feedback(
-            user_query=target["user_query"],
-            model_response=target["response_text"],
-            rating=float(feedback_data.get("rating") or 0.0),
-            feedback_text=feedback_data.get("feedback_text"),
-            tags=feedback_data.get("tags") or [],
-            suggestions=feedback_data.get("suggestions"),
-            response_id=response_key,
-            model_name=st.session_state.get("llm_model"),
-            metadata=feedback_data.get("metadata") or {},
-        )
-        st.session_state.feedback_submitted_response_keys = submitted_keys + [response_key]
-        st.success("フィードバックを保存しました。")
-    except Exception as e:
-        logger.error(f"feedback_record_failed: {e}")
-        st.error(f"フィードバック保存に失敗しました: {e}")
+        try:
+            feedback_manager.record_feedback(
+                user_query=target["user_query"],
+                model_response=target["response_text"],
+                rating=float(feedback_data.get("rating") or 0.0),
+                feedback_text=feedback_data.get("feedback_text"),
+                tags=feedback_data.get("tags") or [],
+                suggestions=feedback_data.get("suggestions"),
+                response_id=response_key,
+                model_name=st.session_state.get("llm_model"),
+                metadata=feedback_data.get("metadata") or {},
+            )
+            st.session_state.feedback_submitted_response_keys = submitted_keys + [response_key]
+            st.success("フィードバックを保存しました。")
+        except Exception as e:
+            logger.error(f"feedback_record_failed: {e}")
+            st.error(f"フィードバック保存に失敗しました: {e}")
 
 
 def _query_requests_diagram(query: str) -> bool:
@@ -4249,10 +4250,53 @@ def display_app():
         """
         <style>
             /* チャット画面の情報密度を上げる（表題・余白を縮小） */
-            .stApp [data-testid="stAppViewContainer"] .main .block-container {
-                padding-top: 0.65rem;
-                padding-bottom: 0.8rem;
-                max-width: 96%;
+            .stApp [data-testid="stAppViewContainer"] .main .block-container,
+            .stApp [data-testid="stAppViewContainer"] [data-testid="stMain"] .block-container,
+            .stApp [data-testid="stAppViewContainer"] section:not([data-testid="stSidebar"]) .block-container,
+            .stApp .main .block-container {
+                padding-top: 0.65rem !important;
+                padding-bottom: 3.5rem !important; /* メイン領域の底余白をさらに削って会話エリアを下限まで伸ばす */
+                max-width: 96% !important;
+            }
+
+            /* チャットメッセージのコンテナ（回答エリア）の高さを広げる */
+            /* 浅い階層（メイン領域の直下）にあるメインチャットコンテナのみをターゲットとし、ネストされたアコーディオンやフォームを排除 */
+            [data-testid="stAppViewContainer"] [data-testid="stMain"] .block-container > div > div > [data-testid="element-container"] > [data-testid="stVScrollTable"],
+            [data-testid="stAppViewContainer"] [data-testid="stMain"] .block-container > div > div > [data-testid="element-container"] > div.stVerticalBlockBorderWrapper,
+            [data-testid="stAppViewContainer"] [data-testid="stMain"] .block-container > div > div > [data-testid="element-container"] > div > [data-testid="stVScrollTable"],
+            [data-testid="stAppViewContainer"] [data-testid="stMain"] .block-container > div > div > [data-testid="element-container"] > div > div.stVerticalBlockBorderWrapper,
+            div[style*="650px"],
+            div[style*="height: 650px"],
+            div[style*="height:650px"] {
+                height: 68vh !important; /* 画面高さに収まるように68vhに固定 */
+                max-height: 68vh !important;
+                overflow-y: auto !important; /* 独立したスクロール窓として上下できるように強制指定 */
+            }
+
+            /* クエリ入力エリアをコンパクトにし、余白を削って回答エリアを広げる */
+            div[data-testid="stChatInput"],
+            .stChatInput {
+                bottom: 8px !important; /* 最下部寄りに固定 */
+                padding: 0px !important;
+            }
+            div[data-testid="stChatInput"] > div,
+            .stChatInput > div {
+                padding: 0px !important;
+                border-radius: 8px !important;
+            }
+            div[data-testid="stChatInput"] textarea,
+            .stChatInput textarea {
+                padding-top: 6px !important;
+                padding-bottom: 6px !important;
+                height: 40px !important;
+                min-height: 40px !important;
+                max-height: 100px !important;
+            }
+            /* 入力コンテナ自体の余白調整 */
+            [data-testid="stChatInputContainer"],
+            .stChatInputContainer {
+                padding: 2px 0px !important;
+                margin-bottom: 0px !important;
             }
 
             .stApp h1 {
