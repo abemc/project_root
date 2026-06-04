@@ -657,6 +657,23 @@ def _append_run_log(msg: str) -> None:
         logger.exception("failed to write run log")
 
 
+def _get_git_revision_info() -> str:
+    """Git のコミットハッシュ（短縮）とコミット日付を取得する"""
+    import subprocess
+    try:
+        # コミットハッシュ取得 (7桁短縮)
+        hash_cmd = ["git", "rev-parse", "--short", "HEAD"]
+        commit_hash = subprocess.check_output(hash_cmd, stderr=subprocess.DEVNULL).decode("utf-8").strip()
+
+        # コミット日付取得 (YYYY-MM-DD)
+        date_cmd = ["git", "show", "-s", "--format=%cd", "--date=short", "HEAD"]
+        commit_date = subprocess.check_output(date_cmd, stderr=subprocess.DEVNULL).decode("utf-8").strip()
+
+        return f"Revision: {commit_hash} ({commit_date})"
+    except Exception:
+        return "Revision: unknown"
+
+
 def _load_chat_history() -> list:
     """チャット履歴ファイル（JSONL）から過去のメッセージを読み込む。
     セッション初期化時に使用して、昨日以前のやり取りを復元する。"""
@@ -2487,6 +2504,11 @@ def setup_sidebar():
         except Exception as e:
             logger.error(f"バックアップセクション エラー: {e}")
             st.sidebar.error(f"⚠️ {str(e)[:50]}")
+        
+        # ===== リビジョン情報の表示 =====
+        st.sidebar.markdown("---")
+        rev_info = _get_git_revision_info()
+        st.sidebar.caption(rev_info)
         
         logger.info("サイドバーの設定が完了しました")
     
