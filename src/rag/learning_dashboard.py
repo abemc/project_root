@@ -107,87 +107,110 @@ def _read_gate_logs(limit: int = 50) -> List[Dict[str, Any]]:
 def _build_gate_history_rows(logs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Build gate history rows with delta values versus the previous run."""
     rows: List[Dict[str, Any]] = []
-    for i, log in enumerate(logs):
-        status = log.get("status") or ""
-        source = log.get("source") or ""
-        
-        status_disp = "✅ 適用 (OK)" if status == "ok" else "⚠️ スキップ"
-        source_disp = "人間のみ" if source == "human_only" else "人間+AI" if source == "human_ai_blended" else source
-        
-        reasons = log.get("reasons") or []
-        reason_disp = "; ".join(reasons) if reasons else "-"
-        
-        weights = log.get("weights") or {}
-        csat_w = weights.get("csat")
-        nps_w = weights.get("nps")
-        adoption_w = weights.get("adoption")
-        
-        delta_csat_str = ""
-        delta_nps_str = ""
-        delta_adoption_str = ""
-        
-        if i + 1 < len(logs):
-            prev_log = logs[i + 1]
-            prev_weights = prev_log.get("weights") or {}
-            prev_csat = prev_weights.get("csat")
-            prev_nps = prev_weights.get("nps")
-            prev_adoption = prev_weights.get("adoption")
-            
-            if csat_w is not None and prev_csat is not None:
-                d = csat_w - prev_csat
-                delta_csat_str = f" (↑ +{d:.3f})" if d > 0.0001 else f" (↓ {d:.3f})" if d < -0.0001 else " (→)"
-            if nps_w is not None and prev_nps is not None:
-                d = nps_w - prev_nps
-                delta_nps_str = f" (↑ +{d:.3f})" if d > 0.0001 else f" (↓ {d:.3f})" if d < -0.0001 else " (→)"
-            if adoption_w is not None and prev_adoption is not None:
-                d = adoption_w - prev_adoption
-                delta_adoption_str = f" (↑ +{d:.3f})" if d > 0.0001 else f" (↓ {d:.3f})" if d < -0.0001 else " (→)"
-        
-        csat_disp = f"{csat_w:.3f}{delta_csat_str}" if csat_w is not None else "-"
-        nps_disp = f"{nps_w:.3f}{delta_nps_str}" if nps_w is not None else "-"
-        adoption_disp = f"{adoption_w:.3f}{delta_adoption_str}" if adoption_w is not None else "-"
-        
+
+    for idx, item in enumerate(logs):
+        summary = item.get("summary") or {}
+        prev_summary = (logs[idx + 1].get("summary") or {}) if idx + 1 < len(logs) else {}
+
+        entries = summary.get("total_entries") if isinstance(summary.get("total_entries"), (int, float)) else None
+        csat = summary.get("csat_mean") if isinstance(summary.get("csat_mean"), (int, float)) else None
+        nps = summary.get("nps_mean") if isinstance(summary.get("nps_mean"), (int, float)) else None
+        adoption = summary.get("adoption_rate") if isinstance(summary.get("adoption_rate"), (int, float)) else None
+
+        prev_entries = prev_summary.get("total_entries") if isinstance(prev_summary.get("total_entries"), (int, float)) else None
+        prev_csat = prev_summary.get("csat_mean") if isinstance(prev_summary.get("csat_mean"), (int, float)) else None
+        prev_nps = prev_summary.get("nps_mean") if isinstance(prev_summary.get("nps_mean"), (int, float)) else None
+        prev_adoption = prev_summary.get("adoption_rate") if isinstance(prev_summary.get("adoption_rate"), (int, float)) else None
+
         rows.append(
             {
-                "日時": log.get("timestamp") or "",
-                "状態": status_disp,
-                "データソース": source_disp,
-                "CSAT重み": csat_disp,
-                "NPS重み": nps_disp,
-                "Adoption重み": adoption_disp,
-                "判定理由/スキップ原因": reason_disp,
+                "timestamp": item.get("timestamp", ""),
+                "status": item.get("status", ""),
+                "source": item.get("source", "human_only"),
+                "reasons": ", ".join(item.get("reasons") or []),
+                "entries": entries,
+                "csat": csat,
+                "nps": nps,
+                "adoption": adoption,
+                "Δentries": None if entries is None or prev_entries is None else entries - prev_entries,
+                "Δcsat": None if csat is None or prev_csat is None else csat - prev_csat,
+                "Δnps": None if nps is None or prev_nps is None else nps - prev_nps,
+                "Δadoption": None if adoption is None or prev_adoption is None else adoption - prev_adoption,
             }
         )
 
     return rows
 
 
-def _format_gate_history_rows(rows: List[Dict[str, Any]]) -> Any:
-    """Format gate history rows for display."""
+def _format_gate_history_rows(rows: List[Dict[str, Any]]) -> pd.DataFrame:
+    """Format gate history rows for display in Streamlit."""
     if not rows:
         return pd.DataFrame()
-    df = pd.DataFrame(rows)
-    try:
-        style_obj = df.style
-        if hasattr(style_obj, "map"):
-            return style_obj.map(_delta_style)
-        elif hasattr(style_obj, "applymap"):
-            return style_obj.applymap(_delta_style)
-        return df
-    except Exception:
-        return df
+
+    frame = pd.DataFrame(rows)
+
+    def _format_number(value: Any) -> Any:
+        if isinstance(value, (int, float)):
+            return f"{value:.2f}"
+        return value
+
+    def _format_delta(value: Any) -> Any:
+        if value is None or not isinstance(value, (int, float)):
+            return None
+        if value > 0:
+            return f"↑ {value:+.2f}"
+        if value < 0:
+            return f"↓ {value:+.2f}"
+        return "→ +0.00"
+
+    for column in ["csat", "nps", "adoption"]:
+        if column in frame.columns:
+            frame[column] = frame[column].apply(_format_number)
+
+    for column in ["Δentries", "Δcsat", "Δnps", "Δadoption"]:
+        if column in frame.columns:
+            frame[column] = frame[column].apply(_format_delta)
+
+    return frame
 
 
-def _delta_style(value: Any) -> str:
-    if not isinstance(value, str):
+def _style_gate_history_rows(frame: pd.DataFrame):
+    """Apply emphasis to delta columns in the gate history table."""
+    if frame.empty:
+        return frame.style
+
+    def _is_strong_delta(value: Any) -> bool:
+        if not isinstance(value, str):
+            return False
+        try:
+            parts = value.split()
+            if len(parts) < 2:
+                return False
+            return abs(float(parts[1])) >= 0.10
+        except Exception:
+            return False
+
+    def _delta_style(value: Any) -> str:
+        if isinstance(value, str) and value.startswith("↑"):
+            base = "background-color: #e8f5e9; color: #1b5e20; font-weight: 600;"
+            return base + " font-weight: 700;" if _is_strong_delta(value) else base
+        if isinstance(value, str) and value.startswith("↓"):
+            base = "background-color: #ffebee; color: #b71c1c; font-weight: 600;"
+            return base + " font-weight: 700;" if _is_strong_delta(value) else base
+        if value == "→ +0.00":
+            return "background-color: #f5f5f5; color: #616161;"
         return ""
-    if "↑" in value:
-        return "background-color: #e8f5e9; color: #1b5e20; font-weight: 600;"
-    if "↓" in value:
-        return "background-color: #ffebee; color: #b71c1c; font-weight: 600;"
-    if "→" in value:
-        return "background-color: #f5f5f5; color: #616161;"
-    return ""
+
+    try:
+        style_obj = frame.style
+        subset_cols = [col for col in ["Δcsat", "Δnps", "Δadoption"] if col in frame.columns]
+        if hasattr(style_obj, "map"):
+            return style_obj.map(_delta_style, subset=subset_cols)
+        elif hasattr(style_obj, "applymap"):
+            return style_obj.applymap(_delta_style, subset=subset_cols)
+        return style_obj
+    except Exception:
+        return frame.style
 
 
 def _find_recent_benchmark_results(limit: int = 2) -> List[str]:
@@ -1205,7 +1228,7 @@ class LearningDashboard:
                 st.caption("Δ列は1つ前の実行結果との差分です。")
                 rows = _build_gate_history_rows(logs)
                 frame = _format_gate_history_rows(rows)
-                st.dataframe(frame, use_container_width=True)
+                st.dataframe(_style_gate_history_rows(frame), use_container_width=True)
 
         st.divider()
         st.subheader("🧪 ベンチマーク回帰ゲート")

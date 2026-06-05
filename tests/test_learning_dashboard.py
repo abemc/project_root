@@ -24,14 +24,22 @@ class _FakeStreamlit:
         self.button_values = {}
         self.json_payloads = []
         self.success_messages = []
+        self.info_messages = []
+        self.writes = []
 
     def subheader(self, *args, **kwargs):
+        if args:
+            self.writes.append(args[0])
         return None
 
     def write(self, *args, **kwargs):
+        if args:
+            self.writes.append(str(args[0]))
         return None
 
     def columns(self, n):
+        if isinstance(n, list):
+            n = len(n)
         return [_DummyColumn() for _ in range(n)]
 
     def metric(self, label, value, **kwargs):
@@ -47,6 +55,11 @@ class _FakeStreamlit:
         self.dataframes.append(df)
 
     def plotly_chart(self, *args, **kwargs):
+        return None
+
+    def bar_chart(self, *args, **kwargs):
+        if args:
+            self.dataframes.append(args[0])
         return None
 
     def button(self, *args, **kwargs):
@@ -70,6 +83,8 @@ class _FakeStreamlit:
         self.captions.append(str(txt))
 
     def info(self, *args, **kwargs):
+        if args:
+            self.info_messages.append(args[0])
         return None
 
     def success(self, *args, **kwargs):
@@ -81,6 +96,9 @@ class _FakeStreamlit:
         return None
 
     def error(self, *args, **kwargs):
+        return None
+
+    def progress(self, *args, **kwargs):
         return None
 
     def json(self, *args, **kwargs):
@@ -818,3 +836,240 @@ def test_value_tuning_handles_missing_feedback_gracefully(monkeypatch):
     # Should not crash and should display appropriate message
     captions_str = " ".join(fake_st.captions)
     assert "価値軸シグナルはまだありません" in captions_str
+
+
+def test_failure_case_dashboard_displays_statistics(monkeypatch, tmp_path):
+    """Test that Failure Case section displays statistics correctly."""
+    # Create a mock failure case collector with test data
+    from src.evaluation.failure_case_collector import FailureCaseCollector, FailureCategory
+
+    fake_st = _FakeStreamlit()
+    monkeypatch.setattr(ld, "st", fake_st)
+    monkeypatch.setattr(ld, "FAILURE_CASE_AVAILABLE", True)
+
+    # Create temporary storage directory with test cases
+    storage_dir = str(tmp_path / "failure_cases")
+
+    # Create a collector and add test cases
+    collector = FailureCaseCollector(storage_dir=storage_dir)
+    for i in range(3):
+        collector.add_case(
+            query=f"Test query {i}",
+            expected_answer=f"Expected {i}",
+            actual_answer=f"Wrong answer {i}",
+            category=FailureCategory.HALLUCINATION,
+            severity=0.5 + (i * 0.1),
+            tags=["test"],
+        )
+    collector.save()
+
+    # Mock FailureCaseCollector initialization
+    monkeypatch.setattr(
+        ld,
+        "FailureCaseCollector",
+        lambda storage_dir=None: collector,
+    )
+
+    manager = SimpleNamespace()
+    dashboard = ld.LearningDashboard(manager=manager)
+
+    dashboard._render_failure_cases()
+
+    metrics = dict(fake_st.metrics)
+    assert metrics["Total Cases"] == 3
+    assert metrics["Critical"] >= 0
+    assert metrics["Categories"] > 0
+
+    # Check that dashboard was rendered (subheader or write called)
+    all_output = " ".join(fake_st.writes + fake_st.captions)
+    assert "Case" in all_output or "Failure" in all_output
+
+
+def test_failure_case_dashboard_handles_empty_storage(monkeypatch):
+    """Test that Failure Case section handles empty storage gracefully."""
+    from src.evaluation.failure_case_collector import FailureCaseCollector
+
+    fake_st = _FakeStreamlit()
+    monkeypatch.setattr(ld, "st", fake_st)
+    monkeypatch.setattr(ld, "FAILURE_CASE_AVAILABLE", True)
+
+    # Create an empty collector
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        collector = FailureCaseCollector(storage_dir=tmp_dir)
+
+        monkeypatch.setattr(
+            ld,
+            "FailureCaseCollector",
+            lambda storage_dir=None: collector,
+        )
+
+        manager = SimpleNamespace()
+        dashboard = ld.LearningDashboard(manager=manager)
+
+        dashboard._render_failure_cases()
+
+        # Should display info message about no cases
+        info_msgs = " ".join(fake_st.info_messages)
+        assert "No failure cases" in info_msgs or "failure cases collected" in info_msgs
+
+
+def test_model_architecture_renders_gpt(monkeypatch, tmp_path):
+    """Test rendering the model architecture tab in GPT mode and saving configuration."""
+    fake_st = _FakeStreamlit()
+    
+    # Add missing methods to fake Streamlit
+    fake_st.slider_values = {}
+    fake_st.select_slider_values = {}
+    fake_st.codes = []
+    fake_st.errors = []
+    
+    def mock_slider(label, min_value, max_value, value, step=1, help=None):
+        return fake_st.slider_values.get(label, value)
+        
+    def mock_select_slider(label, options, value, help=None):
+        return fake_st.select_slider_values.get(label, value)
+        
+    def mock_code(body, language=None):
+        fake_st.codes.append((body, language))
+        
+    def mock_error(msg):
+        fake_st.errors.append(msg)
+
+    monkeypatch.setattr(fake_st, "slider", mock_slider, raising=False)
+    monkeypatch.setattr(fake_st, "select_slider", mock_select_slider, raising=False)
+    monkeypatch.setattr(fake_st, "code", mock_code, raising=False)
+    monkeypatch.setattr(fake_st, "error", mock_error, raising=False)
+    
+    monkeypatch.setattr(ld, "st", fake_st)
+    
+    # Mock current working directory to isolated temp path
+    import os
+    monkeypatch.setattr(os, "getcwd", lambda: str(tmp_path))
+    
+    # Create the config file
+    config_dir = tmp_path / "config"
+    config_dir.mkdir()
+    config_path = config_dir / "model_config.json"
+    
+    initial_config = {
+        "model_type": "gpt",
+        "batch_size": 16,
+        "block_size": 256,
+        "n_layer": 4,
+        "n_embd": 128,
+        "n_head": 4,
+        "d_state": 16,
+        "d_conv": 4,
+        "expand": 2
+    }
+    with open(config_path, "w", encoding="utf-8") as f:
+        json.dump(initial_config, f)
+        
+    dashboard = ld.LearningDashboard()
+    
+    # Simulate selectbox returning "gpt"
+    def mock_selectbox(label, options, index=0, help=None):
+        return options[index]
+    monkeypatch.setattr(fake_st, "selectbox", mock_selectbox)
+    
+    # Simulate clicking save button
+    fake_st.button_values["💾 設定を保存して反映"] = True
+    
+    dashboard._render_model_architecture()
+    
+    # Verify subheader is written
+    assert any("モデルアーキテクチャ" in w for w in fake_st.writes)
+    
+    # Verify success message after saving
+    assert any("保存しました" in s for s in fake_st.success_messages)
+    
+    # Verify the contents of saved JSON
+    with open(config_path, "r", encoding="utf-8") as f:
+        saved_config = json.load(f)
+    assert saved_config["model_type"] == "gpt"
+    assert saved_config["batch_size"] == 16
+    assert saved_config["n_layer"] == 4
+    assert saved_config["n_head"] == 4
+
+
+def test_model_architecture_renders_mamba(monkeypatch, tmp_path):
+    """Test rendering the model architecture tab in Mamba mode and saving configuration."""
+    fake_st = _FakeStreamlit()
+    
+    # Add missing methods to fake Streamlit
+    fake_st.slider_values = {}
+    fake_st.select_slider_values = {}
+    fake_st.codes = []
+    fake_st.errors = []
+    
+    def mock_slider(label, min_value, max_value, value, step=1, help=None):
+        return fake_st.slider_values.get(label, value)
+        
+    def mock_select_slider(label, options, value, help=None):
+        return fake_st.select_slider_values.get(label, value)
+        
+    def mock_code(body, language=None):
+        fake_st.codes.append((body, language))
+        
+    def mock_error(msg):
+        fake_st.errors.append(msg)
+
+    monkeypatch.setattr(fake_st, "slider", mock_slider, raising=False)
+    monkeypatch.setattr(fake_st, "select_slider", mock_select_slider, raising=False)
+    monkeypatch.setattr(fake_st, "code", mock_code, raising=False)
+    monkeypatch.setattr(fake_st, "error", mock_error, raising=False)
+    
+    monkeypatch.setattr(ld, "st", fake_st)
+    
+    # Mock current working directory to isolated temp path
+    import os
+    monkeypatch.setattr(os, "getcwd", lambda: str(tmp_path))
+    
+    # Create the config directory
+    config_dir = tmp_path / "config"
+    config_dir.mkdir()
+    config_path = config_dir / "model_config.json"
+    
+    initial_config = {
+        "model_type": "mamba",
+        "batch_size": 8,
+        "block_size": 128,
+        "n_layer": 3,
+        "n_embd": 64,
+        "n_head": 4,
+        "d_state": 32,
+        "d_conv": 3,
+        "expand": 3
+    }
+    with open(config_path, "w", encoding="utf-8") as f:
+        json.dump(initial_config, f)
+        
+    dashboard = ld.LearningDashboard()
+    
+    # Simulate selectbox returning "mamba"
+    def mock_selectbox(label, options, index=0, help=None):
+        return "mamba"
+    monkeypatch.setattr(fake_st, "selectbox", mock_selectbox)
+    
+    # Simulate clicking save button
+    fake_st.button_values["💾 設定を保存して反映"] = True
+    
+    dashboard._render_model_architecture()
+    
+    # Verify subheader is written
+    assert any("モデルアーキテクチャ" in w for w in fake_st.writes)
+    
+    # Verify success message after saving
+    assert any("保存しました" in s for s in fake_st.success_messages)
+    
+    # Verify the contents of saved JSON
+    with open(config_path, "r", encoding="utf-8") as f:
+        saved_config = json.load(f)
+    assert saved_config["model_type"] == "mamba"
+    assert saved_config["batch_size"] == 8
+    assert saved_config["n_layer"] == 3
+    assert saved_config["d_state"] == 32
+    assert saved_config["d_conv"] == 3
+    assert saved_config["expand"] == 3
+

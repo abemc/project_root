@@ -3,7 +3,10 @@ import json
 import logging
 import time
 from typing import Any, Optional, Dict
-import redis
+try:
+    import redis
+except ImportError:
+    redis = None
 from functools import lru_cache
 from dotenv import load_dotenv
 
@@ -28,21 +31,25 @@ class CacheOptimizer:
         
         self.redis_client = None
         if self.enabled:
-            try:
-                self.redis_client = redis.Redis(
-                    host=self.redis_host,
-                    port=self.redis_port,
-                    password=self.redis_password,
-                    db=self.redis_db,
-                    decode_responses=True,
-                    socket_timeout=2
-                )
-                # 接続テスト
-                self.redis_client.ping()
-                logger.info(f"Connected to Redis at {self.redis_host}:{self.redis_port}")
-            except Exception as e:
-                logger.warning(f"Failed to connect to Redis: {e}. L2 Cache will be disabled.")
-                self.redis_client = None
+            if redis is None:
+                logger.warning("redis-py module is not installed. L2 Cache will be disabled.")
+                self.enabled = False
+            else:
+                try:
+                    self.redis_client = redis.Redis(
+                        host=self.redis_host,
+                        port=self.redis_port,
+                        password=self.redis_password,
+                        db=self.redis_db,
+                        decode_responses=True,
+                        socket_timeout=2
+                    )
+                    # 接続テスト
+                    self.redis_client.ping()
+                    logger.info(f"Connected to Redis at {self.redis_host}:{self.redis_port}")
+                except Exception as e:
+                    logger.warning(f"Failed to connect to Redis: {e}. L2 Cache will be disabled.")
+                    self.redis_client = None
 
     def get(self, key: str, namespace: str = "default") -> Optional[Any]:
         """キャッシュから値を取得する。"""
