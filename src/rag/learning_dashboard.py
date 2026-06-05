@@ -174,32 +174,34 @@ def _format_gate_history_rows(rows: List[Dict[str, Any]]) -> pd.DataFrame:
     return frame
 
 
+def _is_strong_delta(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        parts = value.split()
+        if len(parts) < 2:
+            return False
+        return abs(float(parts[1])) >= 0.10
+    except Exception:
+        return False
+
+
+def _delta_style(value: Any) -> str:
+    if isinstance(value, str) and value.startswith("↑"):
+        base = "background-color: #e8f5e9; color: #1b5e20; font-weight: 600;"
+        return base + " font-weight: 700;" if _is_strong_delta(value) else base
+    if isinstance(value, str) and value.startswith("↓"):
+        base = "background-color: #ffebee; color: #b71c1c; font-weight: 600;"
+        return base + " font-weight: 700;" if _is_strong_delta(value) else base
+    if value == "→ +0.00":
+        return "background-color: #f5f5f5; color: #616161;"
+    return ""
+
+
 def _style_gate_history_rows(frame: pd.DataFrame):
     """Apply emphasis to delta columns in the gate history table."""
     if frame.empty:
         return frame.style
-
-    def _is_strong_delta(value: Any) -> bool:
-        if not isinstance(value, str):
-            return False
-        try:
-            parts = value.split()
-            if len(parts) < 2:
-                return False
-            return abs(float(parts[1])) >= 0.10
-        except Exception:
-            return False
-
-    def _delta_style(value: Any) -> str:
-        if isinstance(value, str) and value.startswith("↑"):
-            base = "background-color: #e8f5e9; color: #1b5e20; font-weight: 600;"
-            return base + " font-weight: 700;" if _is_strong_delta(value) else base
-        if isinstance(value, str) and value.startswith("↓"):
-            base = "background-color: #ffebee; color: #b71c1c; font-weight: 600;"
-            return base + " font-weight: 700;" if _is_strong_delta(value) else base
-        if value == "→ +0.00":
-            return "background-color: #f5f5f5; color: #616161;"
-        return ""
 
     try:
         style_obj = frame.style
