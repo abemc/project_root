@@ -21,6 +21,7 @@ from src.utils.text_utils import (
     _extract_urls,
     _parse_chapter_no,
     _extract_page_number,
+    _is_chitchat_query,
 )
 from src.audio.audio_utils import (
     transcribe_audio_bytes,
@@ -1256,6 +1257,11 @@ def _generate_assistant_response(query: str, container=None) -> None:
                 _append_run_log(f"reasoning_math_bypass: skipping web search for reasoning/math query='{query}'")
                 do_auto = False
             
+            is_chitchat = _is_chitchat_query(query)
+            if is_chitchat:
+                _append_run_log(f"chitchat_bypass: skipping web search for chitchat query='{query}'")
+                do_auto = False
+            
             # Web 検索実行条件：auto_search が有効
             if do_auto:
                 simple_date_tokens = ["今日", "昨日", "明日", "一昨日"]
@@ -2136,7 +2142,10 @@ def _generate_assistant_response(query: str, container=None) -> None:
             
             auto_enabled = st.session_state.get("ui_auto_search", True)
             # 優先順位: Web検索結果（ローカル変数presearch_docs） > session presearch_results > ローカル検索
-            if presearch_docs and isinstance(presearch_docs, list):
+            if is_chitchat:
+                pre = []
+                _append_run_log("DEBUG: Chitchat query detected, bypassing RAG presearch docs")
+            elif presearch_docs and isinstance(presearch_docs, list):
                 pre = presearch_docs
                 _append_run_log(f"DEBUG: Using presearch_docs (Web search): len={len(pre)}")
             else:
@@ -2145,7 +2154,7 @@ def _generate_assistant_response(query: str, container=None) -> None:
             
             # If no presearch results are present, run a local retrieval against the corpus
             try:
-                if not pre and retriever_available:
+                if not pre and retriever_available and not is_chitchat:
                     retriever = get_retriever()
                     if retriever:
                         top_k = st.session_state.get('retrieval_top_k', 10)
