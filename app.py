@@ -1464,7 +1464,7 @@ def _generate_assistant_response(query: str, container=None) -> None:
 
             # LLM呼び出し前に、毎回ローカルコーパス検索を実行して結果を最新化する
             try:
-                if retriever_available and not _is_reasoning_or_math_query(query):
+                if retriever_available and not _is_reasoning_or_math_query(query) and not is_chitchat:
                     retriever = get_retriever()
                     _append_run_log(f"DEBUG: retriever_available={retriever_available} retriever={'exists' if retriever else 'None'}")
                     if retriever:
