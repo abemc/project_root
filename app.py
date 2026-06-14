@@ -2569,7 +2569,12 @@ def display_app():
     st.markdown(
         f"""
         <style>
-            .stApp, .stChatMessage, .chat-scroll-host, .chat-scroll-host p, .chat-scroll-host li {{
+            [data-testid="stMain"] div[data-testid="stMarkdownContainer"] p,
+            [data-testid="stMain"] div[data-testid="stMarkdownContainer"] li,
+            [data-testid="stMain"] div[data-testid="stMarkdownContainer"] span,
+            [data-testid="stMain"] div[data-testid="stMarkdownContainer"] strong,
+            [data-testid="stMain"] div[data-testid="stMarkdownContainer"] code,
+            [data-testid="stMain"] div[data-testid="stMarkdownContainer"] pre {{
                 font-size: {font_size}px !important;
             }}
         </style>
