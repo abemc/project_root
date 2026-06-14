@@ -2569,12 +2569,8 @@ def display_app():
     st.markdown(
         f"""
         <style>
-            [data-testid="stMain"] div[data-testid="stMarkdownContainer"] p,
-            [data-testid="stMain"] div[data-testid="stMarkdownContainer"] li,
-            [data-testid="stMain"] div[data-testid="stMarkdownContainer"] span,
-            [data-testid="stMain"] div[data-testid="stMarkdownContainer"] strong,
-            [data-testid="stMain"] div[data-testid="stMarkdownContainer"] code,
-            [data-testid="stMain"] div[data-testid="stMarkdownContainer"] pre {{
+            section:not([data-testid="stSidebar"]) div[data-testid="stMarkdownContainer"] *,
+            section:not([data-testid="stSidebar"]) div.stMarkdown * {{
                 font-size: {font_size}px !important;
             }}
         </style>
