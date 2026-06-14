@@ -58,7 +58,7 @@ class RAGAgent:
         retriever,
         reranker,
         max_steps=10,
-        llm_model="qwen2.5:7b",
+        llm_model="qwen2.5-coder:7b",
         retrieval_top_k=10,
         rerank_top_k=5,
         system_prompt=None,

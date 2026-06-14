@@ -23,7 +23,7 @@ DEFAULT_CORPUS_PATH = PROJECT_ROOT / "corpus"
 
 class Retriever:
     def __init__(self, index_path: Union[str, Path] = DEFAULT_CORPUS_PATH / "corpus.index", meta_path: Union[str, Path] = DEFAULT_CORPUS_PATH / "corpus_meta.json"):
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = os.environ.get("EMBEDDING_DEVICE", "cuda" if torch.cuda.is_available() else "cpu")
         print(f"Retriever is using device: {self.device}")
         print("Loading local embedding model (bge-m3, safetensors)...")
 
@@ -193,7 +193,7 @@ class Retriever:
     # -----------------------------
     # ハイブリッド検索 (RRF: Reciprocal Rank Fusion)
     # -----------------------------
-    def hybrid_search(self, query: str, top_k: int = 5, source_filter: str = None):
+    def hybrid_search(self, query: str, top_k: int = 5, source_filter: str = None, min_score: float = -1.0):
         # ベクトル検索とキーワード検索をそれぞれ実行 (マージ用に多めに取得)
         candidates_k = top_k * 5
         vec_results = self.search(query, top_k=candidates_k, source_filter=source_filter)
@@ -231,10 +231,15 @@ class Retriever:
         sorted_ids = sorted(doc_scores.keys(), key=lambda x: doc_scores[x], reverse=True)
         
         final_results = []
-        for doc_id in sorted_ids[:top_k]:
+        for doc_id in sorted_ids:
+            if doc_scores[doc_id] < min_score:
+                continue
             doc = docs_map[doc_id]
             doc["score"] = doc_scores[doc_id]  # RRFスコアで上書き
             final_results.append(doc)
+            
+            if len(final_results) >= top_k:
+                break
             
         return final_results
 

@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 # OneNote 日記モジュール
 try:
-    import onenote_diary as _onenote
+    from src.onenote import onenote_diary as _onenote
     onenote_available = True
 except ImportError:
     onenote_available = False

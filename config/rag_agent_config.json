@@ -1,0 +1,10 @@
+{
+  "confidence_threshold": 0.45,
+  "crag_confidence_threshold": 0.45,
+  "last_modified": "2026-06-10T21:33:45.312465",
+  "reward_weights": {
+    "csat": 1.405,
+    "nps": 7.5,
+    "adoption": 1.48
+  }
+}

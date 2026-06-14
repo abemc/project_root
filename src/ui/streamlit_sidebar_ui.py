@@ -80,7 +80,7 @@ class StreamlitSidebarUI:
             with col1:
                 llm_model = st.text_input(
                     "LLM Model Name",
-                    value=basic_config.get("llm_model", "qwen2.5:7b"),
+                    value=basic_config.get("llm_model", "qwen2.5-coder:7b"),
                     help="利用可能なモデル名を指定してください（例: qwen2.5:7b）。軽量モデルを指定することで、推論速度が向上します。"
                 )
             

@@ -14,12 +14,12 @@ from pathlib import Path
 from src.utils.path_utils import get_corpus_path, get_embeddings_path
 
 # --- Path definitions ---
-ROOT = Path(__file__).resolve().parents[2]
-CORPUS_ROOT = get_corpus_path()
-DATASET_PATH = CORPUS_ROOT / "dataset.jsonl"
-EMB_DIR = get_embeddings_path()
-INDEX_PATH = CORPUS_ROOT / "corpus.index"
-META_PATH = CORPUS_ROOT / "corpus_meta.json"
+ROOT = Path(__file__).resolve().parents[2]      # プロジェクトのルートディレクトリ
+CORPUS_ROOT = get_corpus_path()                 # CORPUS_ROOT = ROOT / "corpus"
+DATASET_PATH = CORPUS_ROOT / "dataset.jsonl"    # dataset.jsonl のパス
+EMB_DIR = get_embeddings_path()                 # 埋め込みの保存ディレクトリ
+INDEX_PATH = CORPUS_ROOT / "corpus.index"       # FAISSインデックスのパス
+META_PATH = CORPUS_ROOT / "corpus_meta.json"    # メタデータのパス
  
 # GPUを使用する
 DEVICE = "cuda"
@@ -36,9 +36,9 @@ def load_bge_m3():
     tokenizer = AutoTokenizer.from_pretrained(
         model_name,
         trust_remote_code=True
-    )
+    )#.to(DEVICE)               # トークナイザーはGPUに移動できないため、ここでは移動しない
 
-    model = AutoModel.from_pretrained(
+    model = AutoModel.from_pretrained( # ← ここも正しいモデル名
         model_name,
         trust_remote_code=True,
         use_safetensors=True
@@ -99,15 +99,18 @@ def encode_texts(tokenizer, model, texts, batch_size=BATCH_SIZE):
 # メイン処理
 # ============================================================
 def generate_embeddings():
+                                                        # Step 1: 出力ディレクトリの作成と初期化
     EMB_DIR.mkdir(exist_ok=True)
 
-    # GPUメモリのキャッシュをクリア
+                                                            # GPUメモリのキャッシュをクリア
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
 
+                                                        # Step 2: 埋め込みモデルとトークナイザーのロード
     print("Loading model (bge-m3)...")
     tokenizer, model = load_bge_m3()
 
+                                                        # Step 3: 対象となるチャンクデータ（テキスト）の読み込み
     print("Loading chunks...")
     chunks = load_chunks()
     if not chunks:
@@ -115,25 +118,28 @@ def generate_embeddings():
         return
     texts = [c["text"] for c in chunks]
 
+                                                        # Step 4: テキストのベクトル化（埋め込み生成）
     print(f"Encoding {len(texts)} chunks...")
     embeddings = encode_texts(tokenizer, model, texts, batch_size=BATCH_SIZE)
 
-    # --- FAISS インデックスの作成 ---
+                                                        # Step 5: FAISSを用いたインデックスの作成と保存
+                                                            # --- FAISS インデックスの作成 ---
     print("Building FAISS index...")
     dim = embeddings.shape[1]
     index = faiss.IndexFlatIP(dim)
     index.add(embeddings.astype(np.float32))
 
-    # INDEX_PATH を明示的に文字列型に変換
+                                                            # INDEX_PATH を明示的に文字列型に変換
     faiss.write_index(index, str(INDEX_PATH))
     print(f"Saved FAISS index to {INDEX_PATH}")
 
-    # --- メタデータの保存 ---
-    # 必要に応じてIDを付与
+                                                        # Step 6: チャンクへのID付与とメタデータの保存
+                                                            # --- メタデータの保存 ---
+                                                            # 必要に応じてIDを付与
     print("Saving metadata...")
     for i, chunk in enumerate(chunks):
         if "id" not in chunk:
-            # 'doc_' + index という形式でIDを振る
+                                                            # 'doc_' + index という形式でIDを振る
             chunk["id"] = f"doc_{i}"
     
     with open(META_PATH, "w", encoding="utf-8") as f:

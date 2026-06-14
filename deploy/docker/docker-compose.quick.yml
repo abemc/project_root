@@ -7,7 +7,7 @@ services:
     ports:
       - "8501:8501"
     volumes:
-      - .:/app
+      - ../..:/app
       - /app/.venv
     working_dir: /app
     environment:
@@ -58,7 +58,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../../config/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'

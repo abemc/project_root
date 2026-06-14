@@ -14,6 +14,8 @@ import json
 
 from .agent_engine import ExecutionPlan, SubTask, TaskStatus, Tool, ToolResult, AutonomyLevel
 from ..reasoning_chain.reasoning_engine import ChainOfThoughtResult, ReasoningType
+from ..audit.audit_logger import AuditLogger, AuditEventType
+from ..feedback.feedback_handler import FeedbackHandler
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +66,8 @@ class ReActExecutor:
         autonomy_level: AutonomyLevel = AutonomyLevel.SEMI_AUTONOMOUS,
         max_iterations: int = 10,
         enable_logging: bool = True,
+        audit_logger: Optional[AuditLogger] = None,
+        feedback_handler: Optional[FeedbackHandler] = None,
     ):
         """
         初期化
@@ -74,6 +78,8 @@ class ReActExecutor:
             autonomy_level: 自律レベル（ガードレール決定に使用）
             max_iterations: ReAct ループの最大反復回数
             enable_logging: トレース記録の有効化
+            audit_logger: 監査ロガー
+            feedback_handler: フィードバックハンドラー
         """
         self.reasoning_engine = reasoning_engine
         self.tool_registry = tool_registry
@@ -81,6 +87,8 @@ class ReActExecutor:
         self.max_iterations = max_iterations
         self.enable_logging = enable_logging
         self.traces: List[ReActTrace] = []
+        self.audit_logger = audit_logger
+        self.feedback_handler = feedback_handler
     
     async def execute_task(
         self,
@@ -101,8 +109,48 @@ class ReActExecutor:
         """
         trace = ReActTrace(task_id=task.task_id, goal=task.description, max_iterations=self.max_iterations)
         step_num = 0
+
+        # フィードバックの適用
+        if self.feedback_handler:
+            unapplied_fbs = [
+                fb for fb in self.feedback_handler.feedbacks
+                if fb.task_id == task.task_id and not fb.applied
+            ]
+            for fb in unapplied_fbs:
+                if fb.feedback_type.value == "tool_correction":
+                    if fb.suggested_action and fb.suggested_action in self.tool_registry:
+                        logger.info(f"[ReAct] Feedback applied - Tool correction: {fb.suggested_action}")
+                        task.required_tools = [fb.suggested_action]
+                elif fb.feedback_type.value == "parameter_adjustment":
+                    if fb.suggested_action:
+                        try:
+                            suggested_params = json.loads(fb.suggested_action)
+                            if isinstance(suggested_params, dict):
+                                if "tool_params" not in context:
+                                    context["tool_params"] = {}
+                                context["tool_params"].update(suggested_params)
+                                logger.info(f"[ReAct] Feedback applied - Param adjustment: {suggested_params}")
+                        except Exception:
+                            pass
+                fb.applied = True
+                fb.applied_timestamp = datetime.now()
+            
+            if unapplied_fbs:
+                try:
+                    self.feedback_handler._save_feedbacks()
+                except Exception as e:
+                    logger.warning(f"Failed to auto-save feedbacks after applying: {e}")
         
         logger.info(f"[ReAct] Task '{task.task_id}' 開始: {task.description}")
+        if self.audit_logger:
+            self.audit_logger.log_task_start(
+                task.task_id,
+                task.description,
+                self.autonomy_level.value if hasattr(self.autonomy_level, 'value') else str(self.autonomy_level)
+            )
+        
+        import time
+        start_time = time.time()
         
         while step_num < self.max_iterations:
             step_num += 1
@@ -129,7 +177,7 @@ class ReActExecutor:
             trace.steps.append(act_step)
             
             # アクション失敗チェック
-            if act_step.tool_result is None or act_step.tool_result.error:
+            if act_step.tool_result is None or act_step.tool_result.error_message:
                 logger.warning(f"[ReAct] Tool '{next_tool.name}' 実行失敗")
                 # 再推論へ（次のループで THINK フェーズ）
                 continue
@@ -157,9 +205,21 @@ class ReActExecutor:
             self.traces.append(trace)
         
         # 最終結果の構築
-        final_result = trace.final_answer or (
-            trace.steps[-1].tool_result.output if trace.steps and trace.steps[-1].tool_result else None
-        )
+        final_result = trace.final_answer
+        if not final_result and trace.steps:
+            for s in reversed(trace.steps):
+                if s.tool_result is not None:
+                    final_result = s.tool_result.result
+                    break
+        
+        if self.audit_logger:
+            duration = time.time() - start_time
+            self.audit_logger.log_task_end(
+                task.task_id,
+                trace.success,
+                str(final_result)[:200],
+                duration
+            )
         
         return trace.success, final_result, trace
     
@@ -195,6 +255,14 @@ What should be the next action? Analyze step-by-step.
             confidence=reasoning_result.confidence_score,
         )
         
+        if self.audit_logger:
+            self.audit_logger.log_thinking_step(
+                task.task_id,
+                step_num,
+                think_step.content,
+                think_step.confidence
+            )
+        
         return think_step
     
     async def _select_tool(self, think_step: ReActStep, task: SubTask) -> Optional[Tool]:
@@ -206,6 +274,12 @@ What should be the next action? Analyze step-by-step.
         # それ以外は required_tools の中から最初のツールを選択
         if task.required_tools:
             tool_name = task.required_tools[0]
+            if self.audit_logger:
+                self.audit_logger.log_tool_selected(
+                    task.task_id,
+                    tool_name,
+                    "ReAct THINK selection"
+                )
             return self.tool_registry.get(tool_name)
         
         return None
@@ -249,6 +323,18 @@ What should be the next action? Analyze step-by-step.
             metadata={"error": error} if error else {},
         )
         
+        if self.audit_logger:
+            duration = tool_result.execution_time if tool_result else 0.0
+            self.audit_logger.log_tool_execution(
+                task.task_id,
+                tool.name,
+                tool_params,
+                success=not error,
+                output=tool_result.result if tool_result else None,
+                error=error,
+                duration_seconds=duration
+            )
+        
         return act_step
     
     async def _phase_observe(
@@ -262,7 +348,7 @@ What should be the next action? Analyze step-by-step.
         
         result_summary = ""
         if act_step.tool_result:
-            result_summary = f"Output: {str(act_step.tool_result.output)[:200]}"
+            result_summary = f"Output: {str(act_step.tool_result.result)[:200]}"
         
         observe_step = ReActStep(
             step_number=step_num,

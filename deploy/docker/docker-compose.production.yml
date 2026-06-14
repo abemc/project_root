@@ -4,7 +4,7 @@ services:
   # RAG Agent アプリケーション
   app:
     build:
-      context: .
+      context: ../..
       dockerfile: Dockerfile.production
     container_name: rag-agent-app
     ports:
@@ -43,10 +43,10 @@ services:
     
     volumes:
       # データ永続化
-      - ./corpus:/app/corpus
-      - ./checkpoints:/app/checkpoints
-      - ./logs:/app/logs
-      - ./config:/app/config
+      - ../../corpus:/app/corpus
+      - ../../checkpoints:/app/checkpoints
+      - ../../logs:/app/logs
+      - ../../config:/app/config
     
     depends_on:
       ollama:
@@ -120,7 +120,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../../config/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'

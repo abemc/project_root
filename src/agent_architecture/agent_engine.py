@@ -602,6 +602,22 @@ class AgentEngine:
         self.autonomy_level = autonomy_level
         self._experience_count = 0
         self.logger = logging.getLogger(__name__)
+        # dynamic tool loader and creator initialization
+        try:
+            from src.agent_architecture.dynamic_tool_loader import DynamicToolLoader
+            from src.self_improvement.tool_creator import ToolCreator
+            from src.feedback.interactive_clarifier import InteractiveClarifier
+            from src.agent_architecture.multi_agent_coordinator import MultiAgentCoordinator
+            self.dynamic_tool_loader = DynamicToolLoader()
+            self.tool_creator = ToolCreator()
+            self.clarifier = InteractiveClarifier()
+            self.multi_agent_coordinator = MultiAgentCoordinator()
+        except Exception as e:
+            self.logger.warning(f"Failed to initialize dynamic tool loader/creator/clarifier/coordinator: {e}")
+            self.dynamic_tool_loader = None
+            self.tool_creator = None
+            self.clarifier = None
+            self.multi_agent_coordinator = None
         # Attempt to load a RAG FaissStore if present
         try:
             from src.rag.embed_store import FaissStore
@@ -616,7 +632,8 @@ class AgentEngine:
     
     def execute_goal(self, goal: str, context: Dict[str, Any],
                     user_approvals: Optional[Dict[str, bool]] = None,
-                    use_dynamic_manager: bool = False) -> Dict[str, Any]:
+                    use_dynamic_manager: bool = False,
+                    use_multi_agent: bool = False) -> Dict[str, Any]:
         """
         ゴール達成の自律実行
         
@@ -624,10 +641,29 @@ class AgentEngine:
             goal: 達成ゴール
             context: 実行コンテキスト
             user_approvals: ユーザー承認マップ
+            use_dynamic_manager: 動的タスクマネージャーを使用するか
+            use_multi_agent: マルチエージェント協調を使用するか
         
         Returns:
             実行結果
         """
+        # Check for HITL clarification requirement
+        confidence = context.get("confidence", 1.0) if isinstance(context, dict) else 1.0
+        # Only clarify if we haven't already resolved it in this context
+        has_resolutions = isinstance(context, dict) and "clarification_resolutions" in context
+        if self.clarifier and self.clarifier.should_clarify(goal, confidence) and not has_resolutions:
+            clarification_data = self.clarifier.generate_clarification_options(goal, context)
+            return {
+                "goal": goal,
+                "status": "pending_clarification",
+                "clarification": clarification_data,
+                "context": context
+            }
+
+        # Check for multi-agent delegation requirement
+        if use_multi_agent and self.multi_agent_coordinator:
+            return self.multi_agent_coordinator.coordinate_task(goal, context)
+
         # 1. タスク計画
         # If RAG store available, run a quick retrieval for the goal and pass docs into planning context
         try:
@@ -755,3 +791,30 @@ class AgentEngine:
             pass
 
         return status
+
+    def create_and_register_dynamic_tool(self, requirement: str) -> Tuple[bool, str]:
+        """Generate, validate, and register a custom tool dynamically."""
+        if not self.tool_creator or not self.dynamic_tool_loader:
+            return False, "Dynamic tool system not initialized"
+
+        try:
+            tool_code, test_code, metadata = self.tool_creator.generate_tool(requirement)
+            is_safe, error_msg = self.tool_creator.validate_code_safety(tool_code)
+            if not is_safe:
+                return False, f"Security validation failed: {error_msg}"
+
+            # Save generated tool code to temporary file
+            file_path = os.path.join(os.getcwd(), f"{metadata['name']}.py")
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(tool_code)
+
+            # Load tool from file
+            tool = self.dynamic_tool_loader.load_tool_from_file(file_path, metadata)
+            
+            # Register in executor
+            self.executor.register_tool(tool)
+            return True, metadata["name"]
+
+        except Exception as e:
+            self.logger.error(f"Failed to create and register dynamic tool: {e}")
+            return False, str(e)

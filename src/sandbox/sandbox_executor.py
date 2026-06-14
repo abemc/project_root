@@ -236,7 +236,6 @@ class SandboxExecutor:
                 stderr=subprocess.PIPE,
                 cwd=working_dir,
                 env=env,
-                timeout=policy.timeout_seconds,
             )
             
             stdout, stderr = process.communicate(timeout=policy.timeout_seconds)
@@ -429,3 +428,96 @@ class SandboxExecutor:
             'average_execution_time': avg_time,
             'average_safety_score': avg_safety,
         }
+
+    def execute_python_code(
+        self,
+        code_text: str,
+        timeout_seconds: float = 15.0,
+    ) -> SandboxResult:
+        """
+        Pythonコードを隔離されたサンドボックス環境で実行します。
+        
+        Args:
+            code_text: 実行するPythonプログラムの文字列
+            timeout_seconds: タイムアウト（秒）
+            
+        Returns:
+            SandboxResult
+        """
+        import tempfile
+        import os
+        
+        execution_id = f"exec_py_{datetime.now().timestamp()}"
+        policy = ExecutionPolicy(timeout_seconds=timeout_seconds, allow_filesystem_write=True)
+        
+        # 1. 簡易セキュリティチェック (モジュールインポートや特定キーワードの簡易検査)
+        blocked_keywords = ["__subclasses__", "globals()", "eval(", "exec("]
+        for kw in blocked_keywords:
+            if kw in code_text:
+                result = SandboxResult(
+                    execution_id=execution_id,
+                    status=ExecutionStatus.SECURITY_BLOCKED,
+                    output="",
+                    error_output=f"Security Block: Dangerous keyword detected: '{kw}'",
+                    return_code=-1,
+                    execution_time=0.0,
+                    resource_usage={},
+                    timestamp=datetime.now(),
+                    validation_passed=False,
+                    safety_score=0.0,
+                )
+                self.execution_history.append(result)
+                logger.warning(f"Python code execution blocked: {kw}")
+                return result
+
+        # 2. 一時ファイルを作成してコードを書き込む
+        temp_file_path = None
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False, encoding="utf-8") as temp_file:
+                temp_file.write(code_text)
+                temp_file_path = temp_file.name
+                
+            start_time = datetime.now()
+            
+            # 3. python3 <temp_file> で実行
+            result = self._execute_sandboxed(
+                command="python3",
+                args=[temp_file_path],
+                policy=policy,
+                working_dir=None,
+                environment={"PYTHONUNBUFFERED": "1"}, # stdoutバッファリング無効化
+            )
+            
+            end_time = datetime.now()
+            result.execution_time = (end_time - start_time).total_seconds()
+            result.execution_id = execution_id
+            result.timestamp = datetime.now()
+            
+        except Exception as e:
+            logger.error(f"Python code sandbox execution failed: {e}")
+            result = SandboxResult(
+                execution_id=execution_id,
+                status=ExecutionStatus.FAILED,
+                output="",
+                error_output=str(e),
+                return_code=-1,
+                execution_time=0.0,
+                resource_usage={},
+                timestamp=datetime.now(),
+            )
+        finally:
+            # 4. 一時ファイルのクリーンアップ
+            if temp_file_path and os.path.exists(temp_file_path):
+                try:
+                    os.unlink(temp_file_path)
+                except Exception as e:
+                    logger.warning(f"Failed to cleanup sandbox temp file {temp_file_path}: {e}")
+                    
+        # 結果検証
+        validation_result = self._validate_result(result, policy)
+        result.validation_passed = validation_result['passed']
+        result.safety_score = validation_result['safety_score']
+        
+        # 履歴記録
+        self.execution_history.append(result)
+        return result

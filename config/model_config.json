@@ -1,0 +1,11 @@
+{
+    "model_type": "gpt",
+    "batch_size": 12,
+    "block_size": 512,
+    "n_layer": 6,
+    "n_embd": 384,
+    "n_head": 6,
+    "d_state": 16,
+    "d_conv": 4,
+    "expand": 2
+}

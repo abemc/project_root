@@ -5,7 +5,7 @@ services:
     ports:
       - "8502:8501"
     volumes:
-      - .:/app
+      - ../..:/app
     working_dir: /app
     environment:
       - APP_ENV=production

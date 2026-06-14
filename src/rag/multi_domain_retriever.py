@@ -192,7 +192,7 @@ class MultiDomainRetriever:
         # allow injecting a custom embed function for tests or light-weight environments
         self._embed_fn = embed_fn
         if self._embed_fn is None:
-            self.device = "cuda" if torch.cuda.is_available() else "cpu"
+            self.device = os.environ.get("EMBEDDING_DEVICE", "cuda" if torch.cuda.is_available() else "cpu")
             logger.info(f"MultiDomainRetriever is using device: {self.device}")
             # 埋め込みモデルをロード
             logger.info("Loading local embedding model (bge-m3, safetensors)...")

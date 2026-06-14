@@ -290,3 +290,53 @@ def _extract_page_number(text: str) -> int | None:
         except (ValueError, TypeError):
             pass
     return None
+
+
+def _is_chitchat_query(query: str) -> bool:
+    """ユーザーのクエリが挨拶、自己紹介、名前の問いかけ、感謝、雑談などのRAG不要な会話であるか判定します。"""
+    if not query:
+        return False
+    q = re.sub(r"\s+", "", query).lower()
+    
+    # 挨拶・自己紹介・感謝・相槌のキーワードパターン
+    chitchat_patterns = [
+        r"^こんにちは",
+        r"^おはよう",
+        r"^こんばんは",
+        r"^はじめまして",
+        r"^自己紹介",
+        r"^お疲れ様",
+        r"^ありがとう",
+        r"さようなら",
+        r"バイバイ",
+        r"元気ですか",
+        r"元気？",
+        # 名前・自己定義の問いかけ
+        r"名前は",
+        r"お名前",
+        r"名前を教えて",
+        r"名前は何",
+        r"あなたは誰",
+        r"だれですか",
+        r"誰ですか",
+        r"何者ですか",
+        # 英語の一般的な挨拶や自己紹介
+        r"^hello\b",
+        r"^hi\b",
+        r"^hey\b",
+        r"\bwho\s*are\s*you\b",
+        r"\bwhat\s*is\s*your\s*name\b",
+        r"\bhow\s*are\s*you\b",
+        r"^good\s*morning\b",
+        r"^good\s*evening\b",
+        r"^thank\s*you\b",
+        r"^thanks\b",
+    ]
+    
+    # 単に「挨拶」「名前」という言葉が含まれるだけの事実・定義質問（RAG対象になり得るもの）は除外する
+    factual_keywords = ["意味", "定義", "語源", "歴史", "違い", "由来", "理由", "仕組み", "解説", "調べる"]
+    if any(k in q for k in factual_keywords):
+        return False
+        
+    return any(re.search(p, q) for p in chitchat_patterns)
+

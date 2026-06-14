@@ -145,6 +145,9 @@ class TaskGraph:
             raise ValueError(f"Task {depends_on_id} not found")
         
         self.tasks[task_id].dependencies.append(depends_on_id)
+        if self.has_circular_dependency():
+            self.tasks[task_id].dependencies.remove(depends_on_id)
+            raise ValueError("Circular dependency in task graph")
     
     def get_executable_tasks(self) -> List[Task]:
         """実行可能なタスク（全依存完了済み）を取得"""

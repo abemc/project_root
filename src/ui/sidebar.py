@@ -1,4 +1,6 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
 import json
 import time
 import re
@@ -30,6 +32,19 @@ try:
     rag_config_available = True
 except ImportError:
     rag_config_available = False
+
+from src.utils.git_utils import (
+    get_git_status,
+    get_git_diff,
+    git_add_and_commit,
+    git_restore,
+    get_git_history
+)
+
+from src.utils.editor_utils import (
+    get_document_full_text,
+    save_and_reindex_document
+)
 
 try:
     from src.ui.streamlit_sidebar_ui import StreamlitSidebarUI
@@ -96,6 +111,12 @@ def _save_chat_message(message: dict) -> None:
 def _get_git_revision_info() -> str:
     """Git のコミットハッシュ（短縮）とコミット日付を取得する"""
     try:
+        # Dockerコンテナ内での所有権エラーを回避するための設定追加を試みる
+        try:
+            subprocess.run(["git", "config", "--global", "--add", "safe.directory", "/app"], stderr=subprocess.DEVNULL)
+        except Exception:
+            pass
+
         # コミットハッシュ取得 (7桁短縮)
         hash_cmd = ["git", "rev-parse", "--short", "HEAD"]
         commit_hash = subprocess.check_output(hash_cmd, stderr=subprocess.DEVNULL).decode("utf-8").strip()
@@ -142,6 +163,140 @@ def _save_sidebar_history_days(days: int) -> None:
     with open(SIDEBAR_CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
+_default_sidebar_model = "gpt-4o" if (os.environ.get("OPENAI_API_KEY") or os.environ.get("USE_OPENAI_API", "").lower() == "true") else "qwen2.5-coder:7b"
+
+SIDEBAR_SETTINGS_KEYS = {
+    "font_size": 16,
+    "sidebar_width": 350,
+    "llm_model": _default_sidebar_model,
+    "max_steps": 5,
+    "depth": "標準",
+    "diagram_render_mode": "mermaid",
+    "use_web_search": False,
+    "use_autonomous_rag": False,
+    "include_reasoning": True,
+    "stream_output": True,
+    "retrieval_top_k": 5,
+    "reranker_model": "BAAI/bge-reranker-base",
+    "rerank_top_k": 3,
+    "rerank_threshold": 0.1,
+    "enable_multimodal": True,
+    "vision_model": "clip",
+    "enable_ocr": True,
+    "audio_model": "whisper-small",
+    "tts_engine": "edge-tts",
+    "supported_languages": ["ja", "en"],
+    "show_history": False,
+    "show_logs": True,
+    "show_debug": False,
+    "show_memories": True,
+    "show_pref_profile": False,
+    "auto_train_enabled": False,
+    "rlhf_gate_min_entries": 20,
+    "rlhf_gate_min_csat": 3.2,
+    "rlhf_gate_min_adoption_rate": 0.30,
+    "rlhf_gate_min_nps": 0.0,
+    "rlaif_ai_weight": 0.35,
+    "rlaif_min_ai_entries": 30,
+    "rlaif_min_ai_confidence": 0.60,
+    "rlaif_auto_aggregate_ai": True,
+    "rlaif_enable_delta_cap": True,
+    "rlaif_max_weight_delta": 0.25,
+    "value_tuning_bias_enabled": True,
+    "value_tuning_min_items": 5,
+    "value_tuning_max_bias": 0.12,
+    "rlhf_show_gate_logs": True,
+    "sidebar_history_days": 5,
+}
+
+def _load_all_sidebar_settings() -> None:
+    """Load settings from JSON to session_state."""
+    # Apply defaults if not already in session_state
+    for k, v in SIDEBAR_SETTINGS_KEYS.items():
+        if k not in st.session_state:
+            st.session_state[k] = v
+        # Also populate Streamlit widget keys to match
+        wkey = f"sidebar_{k}" if k != "font_size" and k != "sidebar_history_days" else k
+        if wkey not in st.session_state:
+            st.session_state[wkey] = v
+
+    if SIDEBAR_CONFIG_PATH.exists():
+        try:
+            with open(SIDEBAR_CONFIG_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, dict):
+                settings = data.get("settings", {})
+                for k in SIDEBAR_SETTINGS_KEYS:
+                    if k in settings:
+                        st.session_state[k] = settings[k]
+                        # Also set widget key to loaded value
+                        wkey = f"sidebar_{k}" if k != "font_size" and k != "sidebar_history_days" else k
+                        st.session_state[wkey] = settings[k]
+                
+                # Load history_days if present (for backward compatibility)
+                history_days = data.get("history", {}).get("history_days")
+                if history_days is not None:
+                    st.session_state["sidebar_history_days"] = int(history_days)
+        except Exception as e:
+            logger.warning(f"Failed to load sidebar settings: {e}")
+
+def _save_all_sidebar_settings(create_backup: bool = False) -> None:
+    """Save all settings from session_state to JSON."""
+    payload = {}
+    if SIDEBAR_CONFIG_PATH.exists():
+        try:
+            with open(SIDEBAR_CONFIG_PATH, "r", encoding="utf-8") as f:
+                payload = json.load(f)
+            if not isinstance(payload, dict):
+                payload = {}
+        except Exception:
+            payload = {}
+
+    settings = {}
+    for k in SIDEBAR_SETTINGS_KEYS:
+        # Check widget key first, then target key
+        wkey = f"sidebar_{k}" if k != "font_size" and k != "sidebar_history_days" else k
+        if wkey in st.session_state:
+            settings[k] = st.session_state[wkey]
+        elif k in st.session_state:
+            settings[k] = st.session_state[k]
+        else:
+            settings[k] = SIDEBAR_SETTINGS_KEYS[k]
+
+    payload["settings"] = settings
+
+    # synchronize history days
+    history_days = st.session_state.get("sidebar_history_days")
+    if history_days is not None:
+        if "history" not in payload or not isinstance(payload["history"], dict):
+            payload["history"] = {}
+        payload["history"]["history_days"] = int(history_days)
+
+    # metadata
+    now = datetime.now().isoformat()
+    if "metadata" not in payload or not isinstance(payload["metadata"], dict):
+        payload["metadata"] = {}
+    if not payload["metadata"].get("created_at"):
+        payload["metadata"]["created_at"] = now
+    payload["metadata"]["updated_at"] = now
+    payload["metadata"]["version"] = "1.0"
+
+    try:
+        SIDEBAR_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        # Create backup if requested
+        if create_backup:
+            backup_dir = SIDEBAR_CONFIG_PATH.parent / "backups"
+            backup_dir.mkdir(parents=True, exist_ok=True)
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_path = backup_dir / f"sidebar_config_{timestamp}.json"
+            if SIDEBAR_CONFIG_PATH.exists():
+                shutil.copy2(SIDEBAR_CONFIG_PATH, backup_path)
+
+        with open(SIDEBAR_CONFIG_PATH, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.error(f"Failed to save sidebar settings: {e}")
+
 @st.cache_resource
 def get_retriever():
     """Retrieverをキャッシュ付きで初期化（重いモデルは一度だけロード）"""
@@ -158,11 +313,10 @@ def get_retriever():
 
 def setup_sidebar():
     """サイドバーの設定を行う関数"""
-    if "sidebar_history_days" not in st.session_state:
-        loaded_days = _load_sidebar_history_days(default=5)
-        st.session_state.sidebar_history_days = loaded_days
-        st.session_state._last_saved_sidebar_history_days = loaded_days
-        _save_sidebar_history_days(loaded_days)
+    if "sidebar_settings_loaded" not in st.session_state:
+        _load_all_sidebar_settings()
+        st.session_state.sidebar_settings_loaded = True
+        st.session_state._last_saved_sidebar_history_days = int(st.session_state.sidebar_history_days)
 
     # --- 開発者向けユーティリティ ---
     def _append_dev_log(action: str, result: str) -> None:
@@ -261,6 +415,89 @@ def setup_sidebar():
             return res
 
     try:
+        # ===== 可変サイドバーのCSSおよびJavaScriptインジェクション =====
+        current_width = st.session_state.get("sidebar_width", 350)
+        st.markdown(
+            f"""
+            <style>
+            [data-testid="stSidebar"] {{
+                width: {current_width}px !important;
+                min-width: {current_width}px !important;
+                max-width: {current_width}px !important;
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        js_code = f"""
+        <script>
+            const parentDoc = window.parent.document;
+            const sidebar = parentDoc.querySelector('[data-testid="stSidebar"]');
+            
+            if (sidebar && !parentDoc.getElementById('sidebar-resizer')) {{
+                const resizer = parentDoc.createElement('div');
+                resizer.id = 'sidebar-resizer';
+                resizer.style.position = 'absolute';
+                resizer.style.top = '0';
+                resizer.style.right = '0';
+                resizer.style.width = '8px';
+                resizer.style.height = '100%';
+                resizer.style.cursor = 'col-resize';
+                resizer.style.zIndex = '99999';
+                resizer.style.backgroundColor = 'transparent';
+                resizer.style.transition = 'background-color 0.15s';
+                
+                resizer.addEventListener('mouseenter', () => {{
+                    resizer.style.backgroundColor = 'rgba(38, 139, 210, 0.4)';
+                }});
+                resizer.addEventListener('mouseleave', () => {{
+                    resizer.style.backgroundColor = 'transparent';
+                }});
+                
+                sidebar.appendChild(resizer);
+                
+                let isResizing = false;
+                resizer.addEventListener('mousedown', (e) => {{
+                    isResizing = true;
+                    parentDoc.body.style.cursor = 'col-resize';
+                    parentDoc.body.style.userSelect = 'none';
+                    e.preventDefault();
+                }});
+                
+                parentDoc.addEventListener('mousemove', (e) => {{
+                    if (!isResizing) return;
+                    const newWidth = e.clientX;
+                    if (newWidth >= 280 && newWidth <= 600) {{
+                        sidebar.style.width = newWidth + 'px';
+                        sidebar.style.minWidth = newWidth + 'px';
+                        sidebar.style.maxWidth = newWidth + 'px';
+                        
+                        const sliderInput = parentDoc.querySelector('input[aria-label="サイドバーの幅 (px)"]');
+                        if (sliderInput) {{
+                            sliderInput.value = newWidth;
+                            sliderInput.dispatchEvent(new Event('input', {{ bubbles: true }}));
+                        }}
+                    }}
+                }});
+                
+                parentDoc.addEventListener('mouseup', () => {{
+                    if (isResizing) {{
+                        isResizing = false;
+                        parentDoc.body.style.cursor = 'default';
+                        parentDoc.body.style.userSelect = 'auto';
+                        
+                        const sliderInput = parentDoc.querySelector('input[aria-label="サイドバーの幅 (px)"]');
+                        if (sliderInput) {{
+                            sliderInput.dispatchEvent(new Event('change', {{ bubbles: true }}));
+                        }}
+                    }}
+                }});
+            }}
+        </script>
+        """
+        st.components.v1.html(js_code, height=0, width=0)
+
         st.sidebar.title("🤖 RAGエージェント")
 
         # Phase 5: Learning Systems Panel (render BEFORE page radio so button can set app_page)
@@ -273,7 +510,7 @@ def setup_sidebar():
         # ===== ページナビゲーション =====
         if "app_page" not in st.session_state:
             st.session_state.app_page = "RAGエージェント"
-        _page_options = ["RAGエージェント", "📔 OneNote日記", "🛡️ エンタープライズ統合", "🧠 Learning Dashboard"]
+        _page_options = ["RAGエージェント", "📔 OneNote日記", "🛡️ エンタープライズ統合", "🧠 Learning Dashboard", "💻 コード・インタープリタ", "🎨 Mermaidデザイナー", "💻 ターミナル"]
         try:
             _current = st.session_state.get("app_page", _page_options[0])
             _index = _page_options.index(_current) if _current in _page_options else 0
@@ -572,7 +809,7 @@ def setup_sidebar():
         with st.sidebar.expander("🗂️ コーパス管理"):
             corpus_action = st.selectbox(
                 "アクション",
-                ["ドキュメント一覧", "チャンク内容確認", "検索テスト", "キャッシュクリア", "バックアップ取得", "復元"],
+                ["ドキュメント一覧", "ドキュメント編集", "チャンク内容確認", "検索テスト", "キャッシュクリア", "バックアップ取得", "復元"],
                 key="corpus_action"
             )
 
@@ -612,6 +849,75 @@ def setup_sidebar():
                                     st.error(f"削除エラー: {e}")
                     else:
                         st.sidebar.info("📊 登録ドキュメント: 0個")
+
+            elif corpus_action == "ドキュメント編集":
+                retriever = get_retriever()
+                if retriever:
+                    meta_path = PROJECT_ROOT / "corpus" / "corpus_meta.json"
+                    docs_stats = {}
+                    if meta_path.exists():
+                        try:
+                            with open(meta_path, 'r', encoding='utf-8', errors='replace') as f:
+                                chunks = json.load(f)
+                                if isinstance(chunks, list):
+                                    for chunk in chunks:
+                                        meta_info = chunk.get("meta", {})
+                                        src = meta_info.get("source") or chunk.get("source", "unknown")
+                                        docs_stats[src] = docs_stats.get(src, 0) + 1
+                        except Exception as e:
+                            logger.error(f"メタデータ読み込みエラー: {e}")
+
+                    if docs_stats:
+                        sources = sorted(docs_stats.keys())
+                        
+                        # 選択状態の初期化
+                        if "edit_selected_doc" not in st.session_state:
+                            st.session_state.edit_selected_doc = sources[0]
+                            st.session_state.edit_text_content = get_document_full_text(sources[0])
+                        
+                        # ドキュメント選択selectbox
+                        selected_doc = st.selectbox(
+                            "編集するドキュメント",
+                            sources,
+                            key="edit_doc_select_widget"
+                        )
+                        
+                        # 選択が変わったらテキストを再取得
+                        if selected_doc != st.session_state.edit_selected_doc:
+                            st.session_state.edit_selected_doc = selected_doc
+                            st.session_state.edit_text_content = get_document_full_text(selected_doc)
+                        
+                        tab_edit, tab_preview = st.tabs(["📝 編集", "📖 プレビュー"])
+                        with tab_edit:
+                            edited_text = st.text_area(
+                                "ドキュメント内容",
+                                value=st.session_state.edit_text_content,
+                                height=350,
+                                key="edit_text_area_widget"
+                            )
+                        with tab_preview:
+                            st.markdown(st.session_state.edit_text_content)
+                        
+                        # 一時セッションステートの同期
+                        st.session_state.edit_text_content = edited_text
+                        
+                        st.caption("※ 物理ファイルが存在する場合は自動的に上書き保存されます。")
+                        
+                        if st.button("💾 保存して再インデックス", key="save_reindex_btn", use_container_width=True):
+                            with st.spinner("物理ファイルの保存とコーパスの再インデックスを実行中..."):
+                                res = save_and_reindex_document(retriever, selected_doc, edited_text)
+                                if res.get("success"):
+                                    st.success(f"成功: {res.get('deleted_chunks')} チャンク削除、{res.get('added_chunks')} チャンク追加登録しました。")
+                                    if res.get("physical_updated"):
+                                        st.caption(f"物理ファイルも更新されました: {res.get('physical_path')}")
+                                    time.sleep(1)
+                                    st.rerun()
+                                else:
+                                    st.error(f"エラー: {res.get('error')}")
+                    else:
+                        st.sidebar.info("📊 登録ドキュメント: 0個")
+                else:
+                    st.error("❌ Retrieverが初期化できませんでした")
 
             elif corpus_action == "チャンク内容確認":
                 meta_path = PROJECT_ROOT / "corpus" / "corpus_meta.json"
@@ -767,369 +1073,539 @@ def setup_sidebar():
                 except Exception as e:
                     st.sidebar.error(f"復元エラー: {e}")
 
-        # ===== 基本設定セクション =====
+        # ===== 各種設定セクション =====
         st.sidebar.markdown("---")
-        with st.sidebar.expander("⚙️ 基本設定", expanded=False):
-            llm_model = st.selectbox(
-                "LLMモデル",
-                ["qwen2.5:7b", "qwen2.5:14b", "llama2:7b"],
-                index=0,
-                key="sidebar_llm_model"
-            )
-            st.session_state.llm_model = llm_model
+        with st.sidebar.expander("⚙️ 各種設定", expanded=False):
+            tab_basic, tab_search, tab_multimodal, tab_debug, tab_manage = st.tabs([
+                "⚙️ 基本・会話・クエリ", "🔍 検索設定", "🎨 マルチモーダル", "🧠 デバッグ・学習", "💾 設定管理"
+            ])
 
-            max_steps = st.number_input(
-                "最大ステップ数",
-                min_value=1,
-                max_value=50,
-                value=5,
-                key="sidebar_max_steps"
-            )
-            st.session_state.max_steps = max_steps
-
-            # 深掘り設定
-            depth = st.radio(
-                "回答の深掘りレベル",
-                ["簡潔", "標準", "深掘り"],
-                index=1,
-                horizontal=True,
-                key="sidebar_depth"
-            )
-            st.session_state.depth = depth
-            
-            from src.ui.diagram_settings import normalize_diagram_mode, diagram_mode_options, diagram_mode_to_label, diagram_mode_from_label
-            current_diagram_mode = normalize_diagram_mode(st.session_state.get("diagram_render_mode", "stable"))
-            diagram_label = st.selectbox(
-                "図解表示モード",
-                options=diagram_mode_options(),
-                index=diagram_mode_options().index(diagram_mode_to_label(current_diagram_mode)),
-                key="sidebar_diagram_mode"
-            )
-            st.session_state.diagram_render_mode = diagram_mode_from_label(diagram_label)
-            if depth == "簡潔":
-                st.session_state.temperature = 0.0
-                st.session_state.max_tokens = 256
-            elif depth == "標準":
-                st.session_state.max_tokens = 1024
-            else:
-                st.session_state.temperature = 0.2
-                st.session_state.max_tokens = 4096
-
-        with st.sidebar.expander("📝 クエリ設定", expanded=False):
-            use_web_search_sidebar = st.checkbox(
-                "🌐 ウェブ検索",
-                value=bool(st.session_state.get("use_web_search", False)),
-                key="sidebar_query_use_web_search",
-            )
-            st.session_state.use_web_search = use_web_search_sidebar
-
-            use_autonomous_rag_sidebar = st.checkbox(
-                "🤖 自律RAGモード",
-                value=bool(st.session_state.get("use_autonomous_rag", False)),
-                key="sidebar_query_use_autonomous_rag",
-            )
-            st.session_state.use_autonomous_rag = use_autonomous_rag_sidebar
-
-            include_reasoning_sidebar = st.checkbox(
-                "🧠 推論詳細",
-                value=bool(st.session_state.get("include_reasoning", True)),
-                key="sidebar_query_include_reasoning",
-            )
-            st.session_state.include_reasoning = include_reasoning_sidebar
-
-            stream_output_sidebar = st.checkbox(
-                "⚡ ストリーム",
-                value=bool(st.session_state.get("stream_output", True)),
-                key="sidebar_query_stream_output",
-            )
-            st.session_state.stream_output = stream_output_sidebar
-
-        # ===== 検索・再ランク設定セクション =====
-        with st.sidebar.expander("🔍 検索設定", expanded=False):
-            retrieval_top_k = st.number_input(
-                "検索結果数",
-                min_value=1,
-                max_value=50,
-                value=5,
-                key="sidebar_retrieval_top_k"
-            )
-            st.session_state.retrieval_top_k = retrieval_top_k
-
-            reranker_model = st.selectbox(
-                "再ランカーモデル",
-                ["BAAI/bge-reranker-base", "BAAI/bge-reranker-large"],
-                index=0,
-                key="sidebar_reranker_model"
-            )
-            st.session_state.reranker_model = reranker_model
-
-            rerank_top_k = st.number_input(
-                "再ランク対象数",
-                min_value=1,
-                max_value=20,
-                value=3,
-                key="sidebar_rerank_top_k"
-            )
-            st.session_state.rerank_top_k = rerank_top_k
-
-            rerank_threshold = st.slider(
-                "再ランクスコア閾値",
-                min_value=0.0,
-                max_value=1.0,
-                value=0.1,
-                step=0.05,
-                key="sidebar_rerank_threshold"
-            )
-            st.session_state.rerank_threshold = rerank_threshold
-
-        # ===== マルチモーダル設定セクション =====
-        with st.sidebar.expander("🎨 マルチモーダル設定", expanded=False):
-            enable_multimodal = st.checkbox("マルチモーダル機能を有効化", value=True, key="sidebar_enable_multimodal")
-            st.session_state.enable_multimodal = enable_multimodal
-
-            if enable_multimodal:
-                vision_model = st.selectbox("ビジョンモデル", ["clip", "blip"], key="sidebar_vision_model")
-                st.session_state.vision_model = vision_model
-
-                enable_ocr = st.checkbox("OCR有効化", value=True, key="sidebar_enable_ocr")
-                st.session_state.enable_ocr = enable_ocr
-
-                audio_model = st.selectbox(
-                    "音声認識",
-                    ["whisper-tiny", "whisper-small", "whisper-base"],
-                    key="sidebar_audio_model"
+            with tab_basic:
+                st.slider(
+                    "会話フォントサイズ (px)",
+                    min_value=12,
+                    max_value=24,
+                    value=int(st.session_state.get("font_size", 16)),
+                    step=1,
+                    key="font_size"
                 )
-                st.session_state.audio_model = audio_model
 
-                tts_engine = st.selectbox("音声合成", ["edge-tts", "gtts"], key="sidebar_tts_engine")
-                st.session_state.tts_engine = tts_engine
-
-                supported_languages = st.multiselect(
-                    "サポート言語",
-                    ["ja", "en", "zh", "es", "fr", "de", "ko"],
-                    default=["ja", "en"],
-                    key="sidebar_supported_languages"
+                sidebar_width = st.slider(
+                    "サイドバーの幅 (px)",
+                    min_value=280,
+                    max_value=600,
+                    value=int(st.session_state.get("sidebar_width", 350)),
+                    step=10,
+                    key="sidebar_sidebar_width"
                 )
-                st.session_state.supported_languages = supported_languages
+                st.session_state.sidebar_width = sidebar_width
 
-                show_history = st.checkbox("インタラクション履歴を表示", value=False, key="sidebar_show_history")
-                st.session_state.show_history = show_history
+                model_list = ["qwen2.5-coder:7b", "qwen3-coder:30b", "qwen2.5:1.5b", "qwen2.5:7b", "llama3:8b", "gemma:7b"]
+                if os.environ.get("OPENAI_API_KEY") or os.environ.get("USE_OPENAI_API", "").lower() == "true":
+                    model_list = ["gpt-4o", "gpt-4o-mini", "gpt-5.4-mini"] + model_list
+                current_model = st.session_state.get("llm_model", "qwen2.5:1.5b")
+                model_idx = model_list.index(current_model) if current_model in model_list else (2 if "gpt-4o" not in model_list else 0)
+                llm_model = st.selectbox(
+                    "LLMモデル",
+                    model_list,
+                    index=model_idx,
+                    key="sidebar_llm_model"
+                )
+                st.session_state.llm_model = llm_model
 
-        # ===== デバッグ・学習設定セクション =====
-        with st.sidebar.expander("🧠 デバッグ・学習設定", expanded=False):
-            show_logs = st.checkbox("思考ログを表示", value=True, key="sidebar_show_logs")
-            st.session_state.show_logs = show_logs
+                max_steps = st.number_input(
+                    "最大ステップ数",
+                    min_value=1,
+                    max_value=50,
+                    value=int(st.session_state.get("max_steps", 5)),
+                    key="sidebar_max_steps"
+                )
+                st.session_state.max_steps = max_steps
 
-            show_debug = st.checkbox("🛠️ デバッグ情報を表示", value=False, key="sidebar_show_debug")
-            st.session_state.show_debug = show_debug
-
-            show_memories = st.checkbox("関連する記憶を表示", value=True, key="sidebar_show_memories")
-            st.session_state.show_memories = show_memories
-
-            show_pref_profile = st.checkbox("🧭 推定プロファイルを表示", value=False, key="sidebar_show_pref_profile")
-            st.session_state.show_pref_profile = show_pref_profile
-
-            if show_pref_profile:
-                profile = st.session_state.get("response_preference_profile") or {}
-                if profile:
-                    st.caption("会話履歴から推定した応答スタイル（セッション内）")
-                    st.json(profile)
+                # 深掘り設定
+                depth_list = ["簡潔", "標準", "深掘り"]
+                current_depth = st.session_state.get("depth", "標準")
+                depth_idx = depth_list.index(current_depth) if current_depth in depth_list else 1
+                depth = st.radio(
+                    "回答の深掘りレベル",
+                    depth_list,
+                    index=depth_idx,
+                    horizontal=True,
+                    key="sidebar_depth"
+                )
+                st.session_state.depth = depth
+                
+                from src.ui.diagram_settings import normalize_diagram_mode, diagram_mode_options, diagram_mode_to_label, diagram_mode_from_label
+                current_diagram_mode = normalize_diagram_mode(st.session_state.get("diagram_render_mode", "mermaid"))
+                diagram_label = st.selectbox(
+                    "図解表示モード",
+                    options=diagram_mode_options(),
+                    index=diagram_mode_options().index(diagram_mode_to_label(current_diagram_mode)),
+                    key="sidebar_diagram_mode"
+                )
+                st.session_state.diagram_render_mode = diagram_mode_from_label(diagram_label)
+                if depth == "簡潔":
+                    st.session_state.temperature = 0.0
+                    st.session_state.max_tokens = 256
+                elif depth == "標準":
+                    st.session_state.max_tokens = 1024
                 else:
-                    st.info("推定プロファイルはまだありません。1回以上対話すると表示されます。")
+                    st.session_state.temperature = 0.2
+                    st.session_state.max_tokens = 4096
 
-            auto_train_enabled = st.checkbox("自動トレーニングを有効化", value=False, key="sidebar_auto_train")
-            st.session_state.auto_train_enabled = auto_train_enabled
-
-            st.markdown("---")
-            st.caption("RLHF適用ゲート閾値")
-
-            rlhf_gate_min_entries = st.number_input(
-                "最小サンプル数 (min_entries)",
-                min_value=1,
-                max_value=10000,
-                value=int(st.session_state.get("rlhf_gate_min_entries", 20)),
-                step=1,
-                key="sidebar_rlhf_gate_min_entries",
-                help="この件数未満ではRLHF重み更新をスキップします。",
-            )
-            st.session_state.rlhf_gate_min_entries = int(rlhf_gate_min_entries)
-
-            rlhf_gate_min_csat = st.slider(
-                "最小CSAT (min_csat)",
-                min_value=1.0,
-                max_value=5.0,
-                value=float(st.session_state.get("rlhf_gate_min_csat", 3.2)),
-                step=0.1,
-                key="sidebar_rlhf_gate_min_csat",
-                help="平均CSATがこの値未満の場合は更新をスキップします。",
-            )
-            st.session_state.rlhf_gate_min_csat = float(rlhf_gate_min_csat)
-
-            rlhf_gate_min_adoption_rate = st.slider(
-                "最小採用率 (min_adoption_rate)",
-                min_value=0.0,
-                max_value=1.0,
-                value=float(st.session_state.get("rlhf_gate_min_adoption_rate", 0.30)),
-                step=0.05,
-                key="sidebar_rlhf_gate_min_adoption_rate",
-                help="採用率がこの値未満の場合は更新をスキップします。",
-            )
-            st.session_state.rlhf_gate_min_adoption_rate = float(rlhf_gate_min_adoption_rate)
-
-            rlhf_gate_min_nps = st.slider(
-                "最小NPS (min_nps)",
-                min_value=-10.0,
-                max_value=10.0,
-                value=float(st.session_state.get("rlhf_gate_min_nps", 0.0)),
-                step=0.5,
-                key="sidebar_rlhf_gate_min_nps",
-                help="平均NPSがこの値未満の場合は更新をスキップします。",
-            )
-            st.session_state.rlhf_gate_min_nps = float(rlhf_gate_min_nps)
-
-            st.caption("RLAIF（AIフィードバック統合）")
-            rlaif_ai_weight = st.slider(
-                "AI評価の重み (ai_weight)",
-                min_value=0.0,
-                max_value=1.0,
-                value=float(st.session_state.get("rlaif_ai_weight", 0.35)),
-                step=0.05,
-                key="sidebar_rlaif_ai_weight",
-                help="人手指標に対するAI評価の統合重みです。乖離が大きい場合は内部で自動減衰します。",
-            )
-            st.session_state.rlaif_ai_weight = float(rlaif_ai_weight)
-
-            rlaif_min_ai_entries = st.number_input(
-                "AI評価の最小件数 (min_ai_entries)",
-                min_value=1,
-                max_value=100000,
-                value=int(st.session_state.get("rlaif_min_ai_entries", 30)),
-                step=1,
-                key="sidebar_rlaif_min_ai_entries",
-                help="この件数未満のAI評価は統合に使いません。",
-            )
-            st.session_state.rlaif_min_ai_entries = int(rlaif_min_ai_entries)
-
-            rlaif_min_ai_confidence = st.slider(
-                "AI評価の最小信頼度 (min_ai_confidence)",
-                min_value=0.0,
-                max_value=1.0,
-                value=float(st.session_state.get("rlaif_min_ai_confidence", 0.60)),
-                step=0.05,
-                key="sidebar_rlaif_min_ai_confidence",
-                help="AI評価の平均信頼度がこの値未満の場合は統合をスキップします。",
-            )
-            st.session_state.rlaif_min_ai_confidence = float(rlaif_min_ai_confidence)
-
-            rlaif_auto_aggregate_ai = st.checkbox(
-                "AI評価集計を自動実行（ai_feedback_aggregated.jsonを生成）",
-                value=bool(st.session_state.get("rlaif_auto_aggregate_ai", True)),
-                key="sidebar_rlaif_auto_aggregate_ai",
-            )
-            st.session_state.rlaif_auto_aggregate_ai = bool(rlaif_auto_aggregate_ai)
-
-            rlaif_enable_delta_cap = st.checkbox(
-                "RLAIF重み変動キャップを有効化",
-                value=bool(st.session_state.get("rlaif_enable_delta_cap", True)),
-                key="sidebar_rlaif_enable_delta_cap",
-                help="human+ai ブレンド時に重み変動幅を制限し、急激な変化を防ぎます。",
-            )
-            st.session_state.rlaif_enable_delta_cap = bool(rlaif_enable_delta_cap)
-
-            rlaif_max_weight_delta = st.slider(
-                "重み変動の上限 (rlaif_max_weight_delta)",
-                min_value=0.0,
-                max_value=1.0,
-                value=float(st.session_state.get("rlaif_max_weight_delta", 0.25)),
-                step=0.05,
-                key="sidebar_rlaif_max_weight_delta",
-                help="各重みの1回の更新で許容する最大変動幅です。",
-            )
-            st.session_state.rlaif_max_weight_delta = float(rlaif_max_weight_delta)
-
-            st.caption("Value Tuning バイアス")
-            value_tuning_bias_enabled = st.checkbox(
-                "Value Tuningバイアスを重み更新へ反映",
-                value=bool(st.session_state.get("value_tuning_bias_enabled", True)),
-                key="sidebar_value_tuning_bias_enabled",
-                help="価値軸シグナルを小さな補助バイアスとして reward_weights に反映します。",
-            )
-            st.session_state.value_tuning_bias_enabled = bool(value_tuning_bias_enabled)
-
-            value_tuning_min_items = st.number_input(
-                "Value Tuning最小件数 (value_tuning_min_items)",
-                min_value=1,
-                max_value=10000,
-                value=int(st.session_state.get("value_tuning_min_items", 5)),
-                step=1,
-                key="sidebar_value_tuning_min_items",
-            )
-            st.session_state.value_tuning_min_items = int(value_tuning_min_items)
-
-            value_tuning_max_bias = st.slider(
-                "Value Tuning最大バイアス (value_tuning_max_bias)",
-                min_value=0.0,
-                max_value=0.5,
-                value=float(st.session_state.get("value_tuning_max_bias", 0.12)),
-                step=0.01,
-                key="sidebar_value_tuning_max_bias",
-                help="各重みに与える価値軸補助バイアスの最大幅です。",
-            )
-            st.session_state.value_tuning_max_bias = float(value_tuning_max_bias)
-
-            rlhf_show_gate_logs = st.checkbox(
-                "RLHFゲートログをLearning Dashboardで表示",
-                value=bool(st.session_state.get("rlhf_show_gate_logs", True)),
-                key="sidebar_rlhf_show_gate_logs",
-            )
-            st.session_state.rlhf_show_gate_logs = bool(rlhf_show_gate_logs)
-
-        # ===== 設定の管理セクション =====
-        with st.sidebar.expander("💾 設定の管理", expanded=False):
-            st.subheader("設定の保存・復元")
-
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                if st.button("💾 保存", use_container_width=True):
-                    st.sidebar.success("✅ 設定を保存しました")
-            with col2:
-                if st.button("🔄 リセット", use_container_width=True):
-                    st.sidebar.success("✅ 設定をリセットしました")
-            with col3:
-                if st.button("🗑️ 古いバックアップ削除", use_container_width=True):
-                    st.sidebar.success("✅ 5個以上前のバックアップを削除しました")
-
-            st.subheader("バックアップから復元")
-            backup_list = ["backup_2026-04-18_19-40", "backup_2026-04-18_18-30"]
-            selected_backup = st.selectbox("復元するバックアップを選択", backup_list)
-            if st.button("復元する", use_container_width=True):
-                st.sidebar.success(f"✅ {selected_backup} から復元しました")
-
-            st.divider()
-            st.subheader("エクスポート・インポート")
-
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("📤 設定をエクスポート", use_container_width=True):
-                    st.sidebar.info("設定ファイルをダウンロード中...")
-
-            with col2:
-                uploaded_config = st.file_uploader(
-                    "📥 設定をインポート",
-                    type=["json"],
-                    key="config_import"
+                st.markdown("---")
+                use_web_search_sidebar = st.checkbox(
+                    "🌐 ウェブ検索",
+                    value=bool(st.session_state.get("use_web_search", False)),
+                    key="sidebar_query_use_web_search",
                 )
-                if uploaded_config:
-                    if st.button("インポート", use_container_width=True):
-                        st.sidebar.success("✅ 設定をインポートしました")
+                st.session_state.use_web_search = use_web_search_sidebar
 
-            st.divider()
-            st.subheader("現在の設定")
-            col1, col2 = st.columns(2)
-            with col1:
-                st.caption("📅 作成日時: 2026-04-18 19:40:00")
-            with col2:
-                st.caption("📅 更新日時: 2026-04-18 19:45:00")
+                use_autonomous_rag_sidebar = st.checkbox(
+                    "🤖 自律RAGモード",
+                    value=bool(st.session_state.get("use_autonomous_rag", False)),
+                    key="sidebar_query_use_autonomous_rag",
+                )
+                st.session_state.use_autonomous_rag = use_autonomous_rag_sidebar
+
+                include_reasoning_sidebar = st.checkbox(
+                    "🧠 推論詳細",
+                    value=bool(st.session_state.get("include_reasoning", True)),
+                    key="sidebar_query_include_reasoning",
+                )
+                st.session_state.include_reasoning = include_reasoning_sidebar
+
+                stream_output_sidebar = st.checkbox(
+                    "⚡ ストリーム",
+                    value=bool(st.session_state.get("stream_output", True)),
+                    key="sidebar_query_stream_output",
+                )
+                st.session_state.stream_output = stream_output_sidebar
+
+            with tab_search:
+                retrieval_top_k = st.number_input(
+                    "検索結果数",
+                    min_value=1,
+                    max_value=50,
+                    value=int(st.session_state.get("retrieval_top_k", 5)),
+                    key="sidebar_retrieval_top_k"
+                )
+                st.session_state.retrieval_top_k = retrieval_top_k
+
+                reranker_list = ["BAAI/bge-reranker-base", "BAAI/bge-reranker-large"]
+                current_reranker = st.session_state.get("reranker_model", "BAAI/bge-reranker-base")
+                reranker_idx = reranker_list.index(current_reranker) if current_reranker in reranker_list else 0
+                reranker_model = st.selectbox(
+                    "再ランカーモデル",
+                    reranker_list,
+                    index=reranker_idx,
+                    key="sidebar_reranker_model"
+                )
+                st.session_state.reranker_model = reranker_model
+
+                rerank_top_k = st.number_input(
+                    "再ランク対象数",
+                    min_value=1,
+                    max_value=20,
+                    value=int(st.session_state.get("rerank_top_k", 3)),
+                    key="sidebar_rerank_top_k"
+                )
+                st.session_state.rerank_top_k = rerank_top_k
+
+                rerank_threshold = st.slider(
+                    "再ランクスコア閾値",
+                    min_value=0.0,
+                    max_value=1.0,
+                    value=float(st.session_state.get("rerank_threshold", 0.1)),
+                    step=0.05,
+                    key="sidebar_rerank_threshold"
+                )
+                st.session_state.rerank_threshold = rerank_threshold
+
+            with tab_multimodal:
+                enable_multimodal = st.checkbox(
+                    "マルチモーダル機能を有効化",
+                    value=bool(st.session_state.get("enable_multimodal", True)),
+                    key="sidebar_enable_multimodal"
+                )
+                st.session_state.enable_multimodal = enable_multimodal
+
+                if enable_multimodal:
+                    vision_list = ["clip", "blip"]
+                    current_vision = st.session_state.get("vision_model", "clip")
+                    vision_idx = vision_list.index(current_vision) if current_vision in vision_list else 0
+                    vision_model = st.selectbox(
+                        "ビジョンモデル",
+                        vision_list,
+                        index=vision_idx,
+                        key="sidebar_vision_model"
+                    )
+                    st.session_state.vision_model = vision_model
+
+                    enable_ocr = st.checkbox(
+                        "OCR有効化",
+                        value=bool(st.session_state.get("enable_ocr", True)),
+                        key="sidebar_enable_ocr"
+                    )
+                    st.session_state.enable_ocr = enable_ocr
+
+                    audio_list = ["whisper-tiny", "whisper-small", "whisper-base"]
+                    current_audio = st.session_state.get("audio_model", "whisper-small")
+                    audio_idx = audio_list.index(current_audio) if current_audio in audio_list else 1
+                    audio_model = st.selectbox(
+                        "音声認識",
+                        audio_list,
+                        index=audio_idx,
+                        key="sidebar_audio_model"
+                    )
+                    st.session_state.audio_model = audio_model
+
+                    tts_list = ["edge-tts", "gtts"]
+                    current_tts = st.session_state.get("tts_engine", "edge-tts")
+                    tts_idx = tts_list.index(current_tts) if current_tts in tts_list else 0
+                    tts_engine = st.selectbox(
+                        "音声合成",
+                        tts_list,
+                        index=tts_idx,
+                        key="sidebar_tts_engine"
+                    )
+                    st.session_state.tts_engine = tts_engine
+
+                    supported_languages = st.multiselect(
+                        "サポート言語",
+                        ["ja", "en", "zh", "es", "fr", "de", "ko"],
+                        default=st.session_state.get("supported_languages", ["ja", "en"]),
+                        key="sidebar_supported_languages"
+                    )
+                    st.session_state.supported_languages = supported_languages
+
+                    show_history = st.checkbox(
+                        "インタラクション履歴を表示",
+                        value=bool(st.session_state.get("show_history", False)),
+                        key="sidebar_show_history"
+                    )
+                    st.session_state.show_history = show_history
+
+            with tab_debug:
+                show_logs = st.checkbox(
+                    "思考ログを表示",
+                    value=bool(st.session_state.get("show_logs", True)),
+                    key="sidebar_show_logs"
+                )
+                st.session_state.show_logs = show_logs
+
+                show_debug = st.checkbox(
+                    "🛠️ デバッグ情報を表示",
+                    value=bool(st.session_state.get("show_debug", False)),
+                    key="sidebar_show_debug"
+                )
+                st.session_state.show_debug = show_debug
+
+                show_memories = st.checkbox(
+                    "関連する記憶を表示",
+                    value=bool(st.session_state.get("show_memories", True)),
+                    key="sidebar_show_memories"
+                )
+                st.session_state.show_memories = show_memories
+
+                show_pref_profile = st.checkbox(
+                    "🧭 推定プロファイルを表示",
+                    value=bool(st.session_state.get("show_pref_profile", False)),
+                    key="sidebar_show_pref_profile"
+                )
+                st.session_state.show_pref_profile = show_pref_profile
+
+                if show_pref_profile:
+                    profile = st.session_state.get("response_preference_profile") or {}
+                    if profile:
+                        st.caption("会話履歴から推定した応答スタイル（セッション内）")
+                        st.json(profile)
+                    else:
+                        st.info("推定プロファイルはまだありません。1回以上対話すると表示されます。")
+
+                auto_train_enabled = st.checkbox(
+                    "自動トレーニングを有効化",
+                    value=bool(st.session_state.get("auto_train_enabled", False)),
+                    key="sidebar_auto_train"
+                )
+                st.session_state.auto_train_enabled = auto_train_enabled
+
+                st.markdown("---")
+                st.caption("RLHF適用ゲート閾値")
+
+                rlhf_gate_min_entries = st.number_input(
+                    "最小サンプル数 (min_entries)",
+                    min_value=1,
+                    max_value=10000,
+                    value=int(st.session_state.get("rlhf_gate_min_entries", 20)),
+                    step=1,
+                    key="sidebar_rlhf_gate_min_entries",
+                    help="この件数未満ではRLHF重み更新をスキップします。",
+                )
+                st.session_state.rlhf_gate_min_entries = int(rlhf_gate_min_entries)
+
+                rlhf_gate_min_csat = st.slider(
+                    "最小CSAT (min_csat)",
+                    min_value=1.0,
+                    max_value=5.0,
+                    value=float(st.session_state.get("rlhf_gate_min_csat", 3.2)),
+                    step=0.1,
+                    key="sidebar_rlhf_gate_min_csat",
+                    help="平均CSATがこの値未満の場合は更新をスキップします。",
+                )
+                st.session_state.rlhf_gate_min_csat = float(rlhf_gate_min_csat)
+
+                rlhf_gate_min_adoption_rate = st.slider(
+                    "最小採用率 (min_adoption_rate)",
+                    min_value=0.0,
+                    max_value=1.0,
+                    value=float(st.session_state.get("rlhf_gate_min_adoption_rate", 0.30)),
+                    step=0.05,
+                    key="sidebar_rlhf_gate_min_adoption_rate",
+                    help="採用率がこの値未満の場合は更新をスキップします。",
+                )
+                st.session_state.rlhf_gate_min_adoption_rate = float(rlhf_gate_min_adoption_rate)
+
+                rlhf_gate_min_nps = st.slider(
+                    "最小NPS (min_nps)",
+                    min_value=-10.0,
+                    max_value=10.0,
+                    value=float(st.session_state.get("rlhf_gate_min_nps", 0.0)),
+                    step=0.5,
+                    key="sidebar_rlhf_gate_min_nps",
+                    help="平均NPSがこの値未満の場合は更新をスキップします。",
+                )
+                st.session_state.rlhf_gate_min_nps = float(rlhf_gate_min_nps)
+
+                st.caption("RLAIF（AIフィードバック統合）")
+                rlaif_ai_weight = st.slider(
+                    "AI評価の重み (ai_weight)",
+                    min_value=0.0,
+                    max_value=1.0,
+                    value=float(st.session_state.get("rlaif_ai_weight", 0.35)),
+                    step=0.05,
+                    key="sidebar_rlaif_ai_weight",
+                    help="人手指標に対するAI評価の統合重みです。乖離が大きい場合は内部で自動減衰します。",
+                )
+                st.session_state.rlaif_ai_weight = float(rlaif_ai_weight)
+
+                rlaif_min_ai_entries = st.number_input(
+                    "AI評価の最小件数 (min_ai_entries)",
+                    min_value=1,
+                    max_value=100000,
+                    value=int(st.session_state.get("rlaif_min_ai_entries", 30)),
+                    step=1,
+                    key="sidebar_rlaif_min_ai_entries",
+                    help="この件数未満のAI評価は統合に使いません。",
+                )
+                st.session_state.rlaif_min_ai_entries = int(rlaif_min_ai_entries)
+
+                rlaif_min_ai_confidence = st.slider(
+                    "AI評価の最小信頼度 (min_ai_confidence)",
+                    min_value=0.0,
+                    max_value=1.0,
+                    value=float(st.session_state.get("rlaif_min_ai_confidence", 0.60)),
+                    step=0.05,
+                    key="sidebar_rlaif_min_ai_confidence",
+                    help="AI評価の平均信頼度がこの値未満の場合は統合をスキップします。",
+                )
+                st.session_state.rlaif_min_ai_confidence = float(rlaif_min_ai_confidence)
+
+                rlaif_auto_aggregate_ai = st.checkbox(
+                    "AI評価集計を自動実行（ai_feedback_aggregated.jsonを生成）",
+                    value=bool(st.session_state.get("rlaif_auto_aggregate_ai", True)),
+                    key="sidebar_rlaif_auto_aggregate_ai",
+                )
+                st.session_state.rlaif_auto_aggregate_ai = bool(rlaif_auto_aggregate_ai)
+
+                rlaif_enable_delta_cap = st.checkbox(
+                    "RLAIF重み変動キャップを有効化",
+                    value=bool(st.session_state.get("rlaif_enable_delta_cap", True)),
+                    key="sidebar_rlaif_enable_delta_cap",
+                    help="human+ai ブレンド時に重み変動幅を制限し、急激な変化を防ぎます。",
+                )
+                st.session_state.rlaif_enable_delta_cap = bool(rlaif_enable_delta_cap)
+
+                rlaif_max_weight_delta = st.slider(
+                    "重み変動の上限 (rlaif_max_weight_delta)",
+                    min_value=0.0,
+                    max_value=1.0,
+                    value=float(st.session_state.get("rlaif_max_weight_delta", 0.25)),
+                    step=0.05,
+                    key="sidebar_rlaif_max_weight_delta",
+                    help="各重みの1回の更新で許容する最大変動幅です。",
+                )
+                st.session_state.rlaif_max_weight_delta = float(rlaif_max_weight_delta)
+
+                st.caption("Value Tuning バイアス")
+                value_tuning_bias_enabled = st.checkbox(
+                    "Value Tuningバイアスを重み更新へ反映",
+                    value=bool(st.session_state.get("value_tuning_bias_enabled", True)),
+                    key="sidebar_value_tuning_bias_enabled",
+                    help="価値軸シグナルを小さな補助バイアスとして reward_weights に反映します。",
+                )
+                st.session_state.value_tuning_bias_enabled = bool(value_tuning_bias_enabled)
+
+                value_tuning_min_items = st.number_input(
+                    "Value Tuning最小件数 (value_tuning_min_items)",
+                    min_value=1,
+                    max_value=10000,
+                    value=int(st.session_state.get("value_tuning_min_items", 5)),
+                    step=1,
+                    key="sidebar_value_tuning_min_items",
+                )
+                st.session_state.value_tuning_min_items = int(value_tuning_min_items)
+
+                value_tuning_max_bias = st.slider(
+                    "Value Tuning最大バイアス (value_tuning_max_bias)",
+                    min_value=0.0,
+                    max_value=0.5,
+                    value=float(st.session_state.get("value_tuning_max_bias", 0.12)),
+                    step=0.01,
+                    key="sidebar_value_tuning_max_bias",
+                    help="各重みに与える価値軸補助バイアスの最大幅です。",
+                )
+                st.session_state.value_tuning_max_bias = float(value_tuning_max_bias)
+
+                rlhf_show_gate_logs = st.checkbox(
+                    "RLHFゲートログをLearning Dashboardで表示",
+                    value=bool(st.session_state.get("rlhf_show_gate_logs", True)),
+                    key="sidebar_rlhf_show_gate_logs",
+                )
+                st.session_state.rlhf_show_gate_logs = bool(rlhf_show_gate_logs)
+
+            with tab_manage:
+                st.subheader("設定の保存・復元")
+
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    if st.button("💾 保存", use_container_width=True):
+                        _save_all_sidebar_settings(create_backup=True)
+                        st.sidebar.success("✅ 設定を保存しました (バックアップ作成)")
+                with col2:
+                    if st.button("🔄 リセット", use_container_width=True):
+                        if SIDEBAR_CONFIG_PATH.exists():
+                            try:
+                                SIDEBAR_CONFIG_PATH.unlink()
+                            except Exception:
+                                pass
+                        for k in SIDEBAR_SETTINGS_KEYS:
+                            if k in st.session_state:
+                                del st.session_state[k]
+                            wkey = f"sidebar_{k}" if k != "font_size" and k != "sidebar_history_days" else k
+                            if wkey in st.session_state:
+                                del st.session_state[wkey]
+                        if "sidebar_settings_loaded" in st.session_state:
+                            del st.session_state["sidebar_settings_loaded"]
+                        st.sidebar.success("✅ 設定をリセットしました")
+                        time.sleep(0.5)
+                        st.rerun()
+                with col3:
+                    if st.button("🗑️ 古いバックアップ削除", use_container_width=True):
+                        backup_dir = SIDEBAR_CONFIG_PATH.parent / "backups"
+                        deleted_count = 0
+                        if backup_dir.exists():
+                            backups = sorted(
+                                backup_dir.glob("sidebar_config_*.json"),
+                                key=lambda x: x.stat().st_mtime,
+                                reverse=True
+                            )
+                            if len(backups) > 5:
+                                for b in backups[5:]:
+                                    try:
+                                        b.unlink()
+                                        deleted_count += 1
+                                    except Exception:
+                                        pass
+                        st.sidebar.success(f"✅ 古いバックアップを削除しました（{deleted_count}件）")
+
+                st.subheader("バックアップから復元")
+                backup_dir = SIDEBAR_CONFIG_PATH.parent / "backups"
+                backup_files = []
+                if backup_dir.exists():
+                    backup_files = sorted(
+                        [f.name for f in backup_dir.glob("sidebar_config_*.json")],
+                        reverse=True
+                    )
+                if backup_files:
+                    selected_backup = st.selectbox("復元するバックアップを選択", backup_files)
+                    if st.button("復元する", use_container_width=True):
+                        try:
+                            backup_path = backup_dir / selected_backup
+                            if backup_path.exists():
+                                shutil.copy2(backup_path, SIDEBAR_CONFIG_PATH)
+                                if "sidebar_settings_loaded" in st.session_state:
+                                    del st.session_state["sidebar_settings_loaded"]
+                                st.sidebar.success(f"✅ {selected_backup} から復元しました")
+                                time.sleep(0.5)
+                                st.rerun()
+                        except Exception as e:
+                            st.sidebar.error(f"❌ 復元エラー: {e}")
+                else:
+                    st.info("利用可能なバックアップはありません")
+
+                st.divider()
+                st.subheader("エクスポート・インポート")
+
+                col1, col2 = st.columns(2)
+                with col1:
+                    export_data = ""
+                    if SIDEBAR_CONFIG_PATH.exists():
+                        try:
+                            export_data = SIDEBAR_CONFIG_PATH.read_text(encoding="utf-8")
+                        except Exception:
+                            pass
+                    if export_data:
+                        st.download_button(
+                            "📤 設定をエクスポート",
+                            data=export_data,
+                            file_name="sidebar_config.json",
+                            mime="application/json",
+                            use_container_width=True
+                        )
+                    else:
+                        st.button("📤 設定をエクスポート", use_container_width=True, disabled=True)
+
+                with col2:
+                    uploaded_config = st.file_uploader(
+                        "📥 設定をインポート",
+                        type=["json"],
+                        key="config_import"
+                    )
+                    if uploaded_config:
+                        if st.button("インポート", use_container_width=True):
+                            try:
+                                import_data = json.load(uploaded_config)
+                                if isinstance(import_data, dict):
+                                    with open(SIDEBAR_CONFIG_PATH, "w", encoding="utf-8") as f:
+                                        json.dump(import_data, f, ensure_ascii=False, indent=2)
+                                    if "sidebar_settings_loaded" in st.session_state:
+                                        del st.session_state["sidebar_settings_loaded"]
+                                    st.sidebar.success("✅ 設定をインポートしました")
+                                    time.sleep(0.5)
+                                    st.rerun()
+                                else:
+                                    st.sidebar.error("❌ 無効な設定ファイル形式です")
+                            except Exception as e:
+                                st.sidebar.error(f"❌ インポート失敗: {e}")
+
+                st.divider()
+                st.subheader("現在の設定")
+                metadata = {}
+                if SIDEBAR_CONFIG_PATH.exists():
+                    try:
+                        with open(SIDEBAR_CONFIG_PATH, "r", encoding="utf-8") as f:
+                            meta_data = json.load(f)
+                            metadata = meta_data.get("metadata", {})
+                    except Exception:
+                        pass
+                col_m1, col_m2 = st.columns(2)
+                created_at = metadata.get("created_at", "N/A")[:19].replace("T", " ")
+                updated_at = metadata.get("updated_at", "N/A")[:19].replace("T", " ")
+                with col_m1:
+                    st.caption(f"📅 作成日時: {created_at}")
+                with col_m2:
+                    st.caption(f"📅 更新日時: {updated_at}")
 
         # ===== 実行履歴セクション =====
         st.sidebar.markdown("---")
@@ -1365,6 +1841,137 @@ def setup_sidebar():
         except Exception as e:
             logger.error(f"バックアップセクション エラー: {e}")
             st.sidebar.error(f"⚠️ {str(e)[:50]}")
+
+        # Auto-save changes to file
+        _save_all_sidebar_settings(create_backup=False)
+
+        # ===== Git バージョン管理セクション =====
+        st.sidebar.markdown("---")
+        with st.sidebar.expander("📁 Git バージョン管理", expanded=False):
+            # 1. 状態の取得
+            try:
+                git_status = get_git_status()
+            except Exception as e:
+                git_status = []
+                st.error(f"Git情報の取得に失敗: {e}")
+            
+            if not git_status:
+                st.success("✅ 変更されたファイルはありません (Clean)")
+            else:
+                st.caption(f"📊 {len(git_status)} 個の変更ファイル")
+                
+                # 各ファイルのステージング選択用のチェックボックス辞書
+                selected_files = []
+                
+                for idx, item in enumerate(git_status):
+                    # 状態アイコン
+                    icon = "📝"  # Modified
+                    if "??" in item["code"]:
+                        icon = "🆕"  # Untracked
+                    elif "D" in item["code"]:
+                        icon = "🗑️"  # Deleted
+                    elif "A" in item["code"]:
+                        icon = "➕"  # Added
+                        
+                    file_path = item["path"]
+                    
+                    # チェックボックスで行を表示
+                    c1, c2, c3 = st.columns([0.64, 0.18, 0.18])
+                    
+                    # コミット対象として選択
+                    is_selected = c1.checkbox(
+                        f"{icon} {Path(file_path).name}", 
+                        value=True, 
+                        key=f"git_chk_{file_path}_{idx}",
+                        help=file_path
+                    )
+                    if is_selected:
+                        selected_files.append(file_path)
+                        
+                    # 🔍 差分表示ボタン
+                    if "??" in item["code"] or "M" in item["code"]:
+                        if c2.button("🔍", key=f"git_diff_btn_{file_path}_{idx}", help="差分を表示"):
+                            st.session_state[f"git_diff_show_{file_path}"] = not st.session_state.get(f"git_diff_show_{file_path}", False)
+                    
+                    # ↩️ 変更破棄ボタン
+                    if c3.button("↩️", key=f"git_restore_btn_{file_path}_{idx}", help="変更を破棄して元に戻す"):
+                        st.session_state[f"git_confirm_restore_{file_path}"] = True
+                
+                # 差分表示のレンダリング
+                for item in git_status:
+                    file_path = item["path"]
+                    if st.session_state.get(f"git_diff_show_{file_path}", False):
+                        try:
+                            diff_text = get_git_diff(file_path)
+                            st.markdown(f"**`{file_path}` の差分:**")
+                            st.code(diff_text, language="diff")
+                        except Exception as e:
+                            st.error(f"Diffエラー: {e}")
+                
+                # 変更破棄確認のダイアログ/インライン表示
+                for item in git_status:
+                    file_path = item["path"]
+                    if st.session_state.get(f"git_confirm_restore_{file_path}", False):
+                        st.warning(f"⚠️ `{Path(file_path).name}` の変更を破棄してよろしいですか？（未保存の変更は失われます）")
+                        col_y, col_n = st.columns(2)
+                        if col_y.button("はい、破棄します", key=f"git_restore_y_{file_path}"):
+                            try:
+                                res = git_restore(file_path)
+                                if res["success"]:
+                                    st.success("✅ 変更を破棄しました。")
+                                    if f"git_confirm_restore_{file_path}" in st.session_state:
+                                        del st.session_state[f"git_confirm_restore_{file_path}"]
+                                    if f"git_diff_show_{file_path}" in st.session_state:
+                                        del st.session_state[f"git_diff_show_{file_path}"]
+                                    time.sleep(0.5)
+                                    st.rerun()
+                                else:
+                                    st.error(f"❌ 失敗: {res.get('error')}")
+                            except Exception as e:
+                                st.error(f"エラー: {e}")
+                        if col_n.button("キャンセル", key=f"git_restore_n_{file_path}"):
+                            if f"git_confirm_restore_{file_path}" in st.session_state:
+                                del st.session_state[f"git_confirm_restore_{file_path}"]
+                            st.rerun()
+                
+                # コミット操作フォーム
+                st.markdown("**📤 コミットの実行**")
+                commit_msg = st.text_input(
+                    "コミットメッセージ", 
+                    value="", 
+                    placeholder="例: ナレッジベースの更新",
+                    key="git_commit_message_input"
+                )
+                
+                if st.button("✨ 選択したファイルをコミット", use_container_width=True, key="git_commit_btn"):
+                    if not selected_files:
+                        st.error("❌ コミット対象のファイルが選択されていません。")
+                    elif not commit_msg.strip():
+                        st.error("❌ コミットメッセージを入力してください。")
+                    else:
+                        with st.spinner("コミット実行中..."):
+                            try:
+                                res = git_add_and_commit(selected_files, commit_msg)
+                                if res["success"]:
+                                    st.success(f"✅ コミット完了！ (Hash: {res['commit_hash']})")
+                                    time.sleep(1.0)
+                                    st.rerun()
+                                else:
+                                    st.error(f"❌ コミットエラー: {res.get('error')}")
+                            except Exception as e:
+                                st.error(f"例外発生: {e}")
+
+            # 2. 履歴の表示
+            st.markdown("**📜 最近のコミット履歴**")
+            try:
+                history = get_git_history(limit=5)
+                if history:
+                    for commit in history:
+                        st.caption(f"`{commit['hash']}` {commit['date']} - {commit['subject']} ({commit['author']})")
+                else:
+                    st.caption("履歴がありません。")
+            except Exception as e:
+                st.caption(f"履歴取得失敗: {e}")
 
         # ===== リビジョン情報の表示 =====
         st.sidebar.markdown("---")

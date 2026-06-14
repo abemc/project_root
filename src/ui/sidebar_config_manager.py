@@ -22,7 +22,7 @@ class SidebarConfigManager:
     # デフォルト設定
     DEFAULT_CONFIG = {
         "basic": {
-            "llm_model": "qwen2.5:7b",
+            "llm_model": "qwen2.5-coder:7b",
             "max_steps": 5,
         },
         "search": {

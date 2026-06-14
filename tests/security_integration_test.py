@@ -16,7 +16,7 @@ from typing import Dict, Any, Optional
 
 sys.path.insert(0, '/home/abemc/project_root')
 
-from security_hardening import (
+from src.security_core.security_hardening import (
     InputValidator,
     AccessController,
     AuditLogger,

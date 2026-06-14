@@ -87,7 +87,7 @@ services:
       - "26379:26379"
     command: redis-sentinel /etc/sentinel/sentinel-1.conf
     volumes:
-      - ./config/sentinel-1.conf:/etc/sentinel/sentinel-1.conf
+      - ../../config/sentinel-1.conf:/etc/sentinel/sentinel-1.conf
       - sentinel-1-data:/data
     networks:
       - esp-network
@@ -103,7 +103,7 @@ services:
       - "26380:26379"
     command: redis-sentinel /etc/sentinel/sentinel-2.conf
     volumes:
-      - ./config/sentinel-2.conf:/etc/sentinel/sentinel-2.conf
+      - ../../config/sentinel-2.conf:/etc/sentinel/sentinel-2.conf
       - sentinel-2-data:/data
     networks:
       - esp-network
@@ -119,7 +119,7 @@ services:
       - "26381:26379"
     command: redis-sentinel /etc/sentinel/sentinel-3.conf
     volumes:
-      - ./config/sentinel-3.conf:/etc/sentinel/sentinel-3.conf
+      - ../../config/sentinel-3.conf:/etc/sentinel/sentinel-3.conf
       - sentinel-3-data:/data
     networks:
       - esp-network

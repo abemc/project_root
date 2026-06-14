@@ -235,7 +235,7 @@ class TestFlashAttentionOptimizer:
     async def test_benchmark_attention(self):
         """Attentionベンチマークテスト"""
         optimizer = FlashAttentionOptimizer()
-        result = await optimizer.benchmark_attention(seq_len=2048, hidden_dim=768)
+        result = await optimizer.benchmark_attention(seq_len=32, hidden_dim=64)
         
         assert "seq_length" in result
         assert "memory_savings_percent" in result

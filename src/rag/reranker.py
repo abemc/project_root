@@ -21,7 +21,7 @@ class Reranker:
             model_name,
             use_safetensors=True
         )
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = os.environ.get("RERANKER_DEVICE", "cuda" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
         self.score_threshold = 0.0 # GUIから動的に設定されるスコア閾値
 

@@ -33,3 +33,11 @@ rag_corpus/
 backups/
 docs.backup_local/
 local_backups/
+
+# Developer scratch files, caches and local logs
+scratch/
+corpus/ocr_cache/
+.streamlit/
+logs/*.log
+logs/*.jsonl
+

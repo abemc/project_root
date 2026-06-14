@@ -76,6 +76,7 @@ def render_rag_sidebar():
         # モデル選択
         model_options = [
             "GPT-4o",
+            "GPT-5.4-mini",
             "Claude-3.5-Sonnet",
             "Llama-2-70B",
             "Mistral-7B",

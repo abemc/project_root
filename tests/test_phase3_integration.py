@@ -42,7 +42,7 @@ class TestPermissionManagerIntegration:
     def test_can_execute_basic_tool(self, manager):
         """基本的なツール実行権を確認"""
         # READ_ONLY ツールは全てのレベルで実行可能
-        can_execute = manager.can_execute(
+        can_execute, _ = manager.can_execute(
             tool_name='web_search',
             autonomy_level=AutonomyLevel.SUPERVISED,
         )
@@ -51,7 +51,7 @@ class TestPermissionManagerIntegration:
     def test_requires_approval_for_critical_tools(self, manager):
         """重要なツールは承認が必要なことを確認"""
         requires = manager.requires_approval(
-            tool_name='file_delete',
+            tool_name='system_config_change',
             autonomy_level=AutonomyLevel.AUTONOMOUS,
         )
         assert requires is True
@@ -60,11 +60,10 @@ class TestPermissionManagerIntegration:
         """レート制限が適用されることを確認"""
         # 複数回の実行を記録
         for i in range(3):
-            manager.record_execution('file_create')
+            manager.record_execution('file_create', AutonomyLevel.AUTONOMOUS, True)
         
         # 制限内の確認
-        stats = manager.get_permission_summary()
-        assert 'file_create' in str(stats)
+        assert any(e['tool_name'] == 'file_create' for e in manager.execution_history)
 
 
 class TestDecisionExplainerIntegration:

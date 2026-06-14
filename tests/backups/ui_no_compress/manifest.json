@@ -1,8 +1,8 @@
 {
   "backup_id": "ui_no_compress",
-  "timestamp": "2026-05-18T10:52:33.020576",
+  "timestamp": "2026-06-07T08:34:38.759242",
   "version": "unknown",
-  "total_size": 34198,
+  "total_size": 34701,
   "items": [
     {
       "source_path": ".env",
@@ -24,7 +24,7 @@
       "source_path": "pyproject.toml",
       "relative_path": "pyproject.toml",
       "file_count": 1,
-      "total_size": 1157,
+      "total_size": 1301,
       "excluded": 0,
       "item_type": "file"
     },
@@ -48,15 +48,15 @@
       "source_path": "docker-compose.yml",
       "relative_path": "docker-compose.yml",
       "file_count": 1,
-      "total_size": 505,
+      "total_size": 918,
       "excluded": 0,
       "item_type": "file"
     },
     {
       "source_path": ".streamlit",
       "relative_path": ".streamlit",
-      "file_count": 2,
-      "total_size": 79,
+      "file_count": 1,
+      "total_size": 25,
       "excluded": 0,
       "item_type": "folder"
     }

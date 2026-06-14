@@ -70,9 +70,6 @@ def _render_markdown_with_mermaid(markdown_text: str) -> None:
                 st.markdown(chunk, unsafe_allow_html=True)
             continue
 
-        if not chunk:
-            continue
-
         block_id = f"mermaid-{uuid.uuid4().hex}"
         escaped_code = html.escape(chunk)
         est_height = max(260, min(1200, 180 + (chunk.count("\n") + 1) * 26))
@@ -110,7 +107,7 @@ def _render_markdown_with_mermaid(markdown_text: str) -> None:
     const el = document.getElementById('{block_id}');
     if (el) {{
             try {{
-                const src = (el.textContent || '').strip();
+                const src = (el.textContent || '').trim();
                 // まずパース検証し、文法エラー時は Mermaid エラーカードを出さずにコード表示へフォールバック
                 await mermaid.parse(src);
                 const renderId = '{block_id}-svg';
@@ -125,7 +122,7 @@ def _render_markdown_with_mermaid(markdown_text: str) -> None:
                 fallback.style.padding = '8px';
                 fallback.style.whiteSpace = 'pre-wrap';
                 fallback.style.wordBreak = 'break-word';
-                fallback.textContent = (el.textContent || '').strip();
+                fallback.textContent = (el.textContent || '').trim();
                 el.replaceWith(fallback);
             }}
     }}
@@ -271,4 +268,23 @@ def _render_safe_flow_diagram(title: str, steps: list[str]) -> None:
     </div>
 </div>
 """
-    components.html(html_body, height=est_height, scrolling=False)
+    st.markdown(html_body, unsafe_allow_html=True)
+
+
+def _parse_mermaid_steps(mermaid_code: str) -> list[str]:
+    """Mermaidのコードからノードのラベル（ステップ）を抽出する。"""
+    if not mermaid_code:
+        return []
+    # [...]、(...)、{...} の中身を抽出する正規表現
+    matches = re.findall(r"(?:\[|\(|\{)\s*(.*?)\s*(?:\]|\)|\})", mermaid_code)
+    steps = []
+    seen = set()
+    for m in matches:
+        m_clean = m.strip(" '\"`").strip()
+        # 方向定義（TD, LRなど）はノードではないため除外
+        if m_clean and m_clean not in seen and not re.search(r"^(flowchart|graph|direction|TD|LR|TB|BT)\b", m_clean, re.IGNORECASE):
+            # サブグラフ名などの特殊キーワードも除外
+            if len(m_clean) < 50 and not m_clean.startswith("note over"):
+                seen.add(m_clean)
+                steps.append(m_clean)
+    return steps

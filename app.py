@@ -1,5 +1,7 @@
 import os
 import sys
+from dotenv import load_dotenv
+load_dotenv()
 import tempfile
 from pathlib import Path
 from datetime import datetime
@@ -45,6 +47,8 @@ from src.ui.diagram_renderer import (
     _render_mermaid_blocks_only,
     _safe_render_mermaid_blocks,
     _render_safe_flow_diagram,
+    _parse_mermaid_steps,
+    _MERMAID_BLOCK_RE,
 )
 from src.ui.sidebar import (
     _load_sidebar_history_days,
@@ -96,13 +100,15 @@ except Exception:
 try:
     from autonomous_rag_agent import AutonomousRAGAgent
     rag_agent_available = True
+    agent = AutonomousRAGAgent()
 except Exception:
     AutonomousRAGAgent = None
     rag_agent_available = False
+    agent = None
 
 # OneNote 日記モジュール
 try:
-    import onenote_diary as _onenote
+    from src.onenote import onenote_diary as _onenote
     onenote_available = True
 except ImportError:
     onenote_available = False
@@ -293,6 +299,13 @@ def _query_is_beginner_learning_request(query: str) -> bool:
     return beginner_hit and topic_hit
 
 
+def _query_requests_counting(query: str) -> bool:
+    if not query:
+        return False
+    return bool(re.search(r"何回|何文字|数えて|合計|計算|足して|算出して|カウント|文字数|単語数|個数", query))
+
+
+
 
 
 
@@ -366,6 +379,12 @@ def _get_git_revision_info() -> str:
     """Git のコミットハッシュ（短縮）とコミット日付を取得する"""
     import subprocess
     try:
+        # Dockerコンテナ内での所有権エラーを回避するための設定追加を試みる
+        try:
+            subprocess.run(["git", "config", "--global", "--add", "safe.directory", "/app"], stderr=subprocess.DEVNULL)
+        except Exception:
+            pass
+
         # コミットハッシュ取得 (7桁短縮)
         hash_cmd = ["git", "rev-parse", "--short", "HEAD"]
         commit_hash = subprocess.check_output(hash_cmd, stderr=subprocess.DEVNULL).decode("utf-8").strip()
@@ -520,9 +539,12 @@ def confirm_rebuild():
     return False
 def _init_display_session_state() -> None:
     """display_appで使うセッション状態を初期化する。"""
+    default_model = "qwen2.5-coder:7b"
+    if os.environ.get("OPENAI_API_KEY") or os.environ.get("USE_OPENAI_API", "").lower() == "true":
+        default_model = "gpt-4o"
     defaults = {
         "messages": _load_chat_history(),  # 昨日以前のチャット履歴を読み込む
-        "llm_model": "qwen2.5:7b",
+        "llm_model": default_model,
         "temperature": 0.5,
         "max_tokens": 2048,
         "attached_file_contents": [],
@@ -668,7 +690,7 @@ def _translate_summary_to_japanese_if_needed(text: str, force: bool = False) -> 
         )
         translated = call_llm(
             prompt=translate_prompt,
-            model=st.session_state.get("llm_model", "qwen2.5:7b"),
+            model=st.session_state.get("llm_model", "qwen2.5:1.5b"),
             system_prompt="あなたは翻訳専用アシスタントです。入力文を日本語として自然になるよう整えてください。英語混じりなら正確に日本語へ翻訳し、出典IDや構造は維持し、説明を追加しないでください。",
             chat_history=None,
             temperature=0.0,
@@ -1026,9 +1048,11 @@ def _build_query_with_context(query: str) -> str:
 
     if url_context or weather_context or page_context:
         base_prompt = (
-            f"{query}{url_context}{weather_context}{page_context}\n\n"
-            "【重要】上記の実際のページ内容のみに基づいて日本語で回答してください。"
-            "ページ内容や天気データに書かれていないことは推測・創作せず、『提供データには記載がありません』と答えてください。"
+            f"{query}\n\n"
+            "【提供された情報】\n"
+            f"{url_context}{weather_context}{page_context}\n\n"
+            "指示：提供された情報のみに基づいて回答してください。"
+            "情報に記載がない場合は、推測で答えずに「提供データには記載がありません」と答えてください。"
         )
         # ページ指定で翻訳要求の場合は、翻訳指示を明示的に追加
         if page_no and ('翻訳' in query or 'translation' in query.lower()):
@@ -1039,7 +1063,43 @@ def _build_query_with_context(query: str) -> str:
     return base_prompt
 
 
-def _generate_assistant_response(query: str) -> None:
+def _is_reasoning_or_math_query(query: str) -> bool:
+    """Detect logic, math, character counting, coding, translation, or riddle queries."""
+    q = query.strip().lower()
+    patterns = [
+        r"何回使われて",
+        r"何回含まれて",
+        r"何文字",
+        r"文字数",
+        r"カウント",
+        r"足してください",
+        r"引いてください",
+        r"計算して",
+        r"計算しなさい",
+        r"合計",
+        r"総数",
+        r"なぞなぞ",
+        r"トンチ",
+        r"クイズ",
+        r"解いて",
+        r"アルファベットの数",
+        r"英訳",
+        r"英語にした時の",
+        r"英単語の数",
+        r"アルファベット数",
+        r"算数",
+        r"数学",
+        r"方程式",
+        r"コードを書いて",
+        r"プログラム",
+        r"実装してください",
+        r"アルゴリズム",
+    ]
+    import re
+    return any(re.search(p, q) for p in patterns)
+
+
+def _generate_assistant_response(query: str, container=None) -> None:
     """クエリに対する回答を生成し、会話履歴へ追加する。"""
     if not llm_available:
         _store_assistant_message("LLMモジュールが利用できません。設定を確認してください。")
@@ -1056,12 +1116,12 @@ def _generate_assistant_response(query: str) -> None:
 - ユーザーが日付に関する質問をした場合は、この日付を基準に答えてください
 
 【最重要ルール - 絶対に破らないこと】
-- 回答は必ず100%日本語で書いてください
-- 英語・中国語・その他の言語を一切使用しないでください
-- ユーザーから英語のURLや英語の記事を渡された場合でも、あなたの回答は日本語のみです
-- 英語の固有名詞・サービス名はカタカナに変換してください（例: newsletter → ニュースレター）
-- 途中で英語に切り替えることは絶対に禁止です
-- 英語のテキストを引用する場合も、必ず日本語訳または日本語の説明を添えてください
+- 回答は原則として100%日本語で書いてください（ただし、ユーザーが英単語のスペル、アルファベット、英会話表現、英語翻訳などを明示的に出力するよう求めている場合を除きます）。
+- ユーザーからの英語のスペル確認や翻訳の要求がない限り、英語・中国語・その他の言語を回答に使用しないでください。
+- ユーザーから英語のURLや英語の記事を渡された場合でも、ユーザーが翻訳を求めていない限り、あなたの解説や回答は日本語で行います。
+- 英語の固有名詞・サービス名は原則としてカタカナに変換してください（例: newsletter → ニュースレター）。
+- 理由なく途中で英語に切り替えることは絶対に禁止です。
+- 英語のテキストを引用する場合も、原則として日本語訳または日本語の説明を添えてください。
 - URLが与えられた場合、【URLから取得したページ内容】として実際の内容が提供されます。その内容のみに基づいて回答してください。内容が提供されていないURLについては、内容を推測・創作しないでください。
 
 【出力形式】
@@ -1179,6 +1239,23 @@ def _generate_assistant_response(query: str) -> None:
             except Exception:
                 do_auto = os.getenv("RAG_ENABLE_DATE_PRESEARCH", "true").lower() == "true"
             
+            # 💡 スマートWeb検索バイパスロジック
+            # 添付ファイルが存在するか、直近のPDFソース情報がロードされている場合は、遅延の大きい外部Web検索をスキップする
+            has_attached_file = bool(st.session_state.get("attached_file_contents"))
+            has_recent_source = bool(st.session_state.get("last_uploaded_file_source") or st.session_state.get("last_added_source"))
+            
+            # ユーザーが明示的にWeb検索を指定しているキーワード
+            explicit_search_keywords = ["検索", "調べる", "web", "ウェブ", "最新", "ニュース", "速報", "今日", "昨日", "今週", "先週", "天気"]
+            wants_explicit_search = any(kw in query.lower() for kw in explicit_search_keywords)
+            
+            if (has_attached_file or has_recent_source) and not wants_explicit_search:
+                _append_run_log(f"smart_web_search_bypass: skipping web search because file/source context is loaded and query has no explicit search keywords. query='{query}'")
+                do_auto = False
+            
+            if _is_reasoning_or_math_query(query):
+                _append_run_log(f"reasoning_math_bypass: skipping web search for reasoning/math query='{query}'")
+                do_auto = False
+            
             # Web 検索実行条件：auto_search が有効
             if do_auto:
                 simple_date_tokens = ["今日", "昨日", "明日", "一昨日"]
@@ -1220,7 +1297,14 @@ def _generate_assistant_response(query: str) -> None:
             _append_run_log(f"DEBUG: presearch_docs type={type(presearch_docs)} len={len(presearch_docs) if isinstance(presearch_docs, list) else 'N/A'}")
             if presearch_docs and isinstance(presearch_docs, list):
                 _append_run_log(f"DEBUG: Entering web search result integration block")
-                preview_lines = [f"\n【🔍 Web自動検索結果 {len(presearch_docs)}件 (解釈日: {interpreted_date})】\n以下のWeb検索結果を参考に、ユーザーの質問に答えてください。この情報が重要です。"]
+                preview_lines = [
+                    f"\n【🔍 Web自動検索結果 {len(presearch_docs)}件 (解釈日: {interpreted_date})】",
+                    "【最重要ルール: ハルシネーションの厳禁】",
+                    "- 以下のWeb検索結果を参考に回答してください。回答の根拠となる箇所には必ず [web_1] のような出典IDを明記してください。",
+                    "- もしユーザーの質問の前提（例：『昨日、日本の総理大臣が円からドルに変更すると発表した』等の主張や決定事項）が、提示された以下のWeb検索結果の抜粋に一切記載されていない、または矛盾する場合は、その前提が確認できないことを結論（回答の冒頭）で明確に指摘してください。",
+                    "- 提供された検索結果に存在しない事実を認めて『発表されたが影響は書かれていない』などとでっち上げて回答したり、ありもしない根拠（出典ID）を付与することは絶対に禁止します（ハルシネーションの厳禁）。",
+                    "---"
+                ]
                 for i, d in enumerate(presearch_docs[:5], 1):
                     tid = d.get("id") or d.get("url") or f"web_{i}"
                     text = str(d.get("text", ""))
@@ -1232,6 +1316,15 @@ def _generate_assistant_response(query: str) -> None:
             else:
                 _append_run_log(f"DEBUG: SKIPPED web search integration - presearch_docs empty or wrong type")
             # ==========================================
+            
+            # 推論・計算・なぞなぞクエリ用の指示を追加
+            if _is_reasoning_or_math_query(query):
+                prompt = (
+                    "【注意：推論・論理的思考・数学・数え上げ問題】\n"
+                    "この質問は、論理的思考、数学的計算、文字の正確なカウント、英訳およびその文字数カウント、またはプログラミングなどの推論能力を必要とします。\n"
+                    "外部ソースの情報をそのまま引用するのではなく、あなた自身の高度な思考能力と論理的推論力をフルに活用し、思考プロセスを順を追って（ステップ・バイ・ステップで）説明した上で、正確に回答してください。\n\n"
+                    + prompt
+                )
             
             # 古い presearch_results の再利用で話題ずれが起こるため、毎回クリアして再検索する
             current_query = (query or "").strip()
@@ -1303,19 +1396,69 @@ def _generate_assistant_response(query: str) -> None:
                 or re.search(r"(この|その).*(要約|まとめ|概要)", current_query)
             )
             previous_presearch_results = st.session_state.get("presearch_results")
+            
+            # Heuristic: 連続質問の文脈が切れないよう、参照語・短文・語彙重なりでもフォローアップ判定する
+            treat_as_fresh = False
+            followup_like = True
             previous_user_query = ""
+            recent_query = (query or "").strip()
             try:
-                for m in reversed((st.session_state.get("messages") or [])[:-1]):
+                # 直前ユーザー質問を取得（現在質問は messages の末尾に入っている前提）
+                msgs = st.session_state.get("messages") or []
+                for m in reversed(msgs[:-1]):
                     if m.get("role") == "user":
                         previous_user_query = str(m.get("content") or "").strip()
                         break
+
+                has_detail_request = "詳しく" in recent_query
+                explicit_follow = bool(re.search(r"続き|前回|さっき|先ほど|その件|もう少し|補足|それで|ちなみに|じゃあ", recent_query))
+                if has_detail_request and (len(recent_query) <= 15 or not re.search(r"について|の件|の件について", recent_query)):
+                    explicit_follow = True
+
+                referential = bool(re.search(r"これ|それ|あれ|上記|前者|後者|同じ|その|どれ|どの|あの", recent_query))
+                short_follow = len(recent_query) <= 24
+                elliptical_follow = bool(
+                    re.search(r"^(無料|有料|料金|値段|価格|いくら|使える|使えますか|できますか|可能ですか|対応していますか).*[？?]?$", recent_query)
+                    or re.search(r"(無料|有料|料金|値段|価格|いくら).*(ですか|ますか|\?|？)$", recent_query)
+                )
+                marketplace_follow = bool(
+                    re.search(
+                        r"amazon|アマゾン|楽天|yahoo|ヤフー|価格\.com|モノタロウ|ヨドバシ|通販|ショップ|販売",
+                        recent_query,
+                        re.IGNORECASE,
+                    )
+                )
+
+                # 内容語の重なりで関連度を推定
+                stop_words = {
+                    "について", "です", "ます", "したい", "ください", "教えて", "知りたい", "何", "なに", "どこ", "いつ",
+                    "これ", "それ", "あれ", "その", "この", "で", "を", "が", "は", "に", "の", "と", "も", "か",
+                    "詳しく", "説明", "解説", "図解", "概要", "要約", "詳細", "方法", "意味", "定義", "関係", "内容", "記事", "などで"
+                }
+                cur_terms = [t for t in re.findall(r"[a-zA-Z0-9ぁ-んァ-ヶー一-龠々]{2,}", recent_query) if t not in stop_words]
+                prev_terms = [t for t in re.findall(r"[a-zA-Z0-9ぁ-んァ-ヶー一-龠々]{2,}", previous_user_query) if t not in stop_words]
+                overlap = len(set(cur_terms) & set(prev_terms))
+
+                # 「このPDF」系は履歴汚染を避けるため常に新規扱い
+                if is_file_referential_query:
+                    treat_as_fresh = True
+                # 「について」が含まれ、かつ内容語の重複がない場合は新規扱い
+                elif "について" in recent_query and overlap == 0:
+                    followup_like = False
+                    treat_as_fresh = True
+                # 参照語+短文、または語彙重なりがあるときは会話継続扱い
+                elif explicit_follow or (referential and short_follow) or overlap >= 1 or (marketplace_follow and short_follow) or (elliptical_follow and short_follow):
+                    followup_like = True
+                    treat_as_fresh = False
             except Exception:
-                previous_user_query = ""
+                treat_as_fresh = True
+                followup_like = False
+
             st.session_state.presearch_results = None
 
             # LLM呼び出し前に、毎回ローカルコーパス検索を実行して結果を最新化する
             try:
-                if retriever_available:
+                if retriever_available and not _is_reasoning_or_math_query(query):
                     retriever = get_retriever()
                     _append_run_log(f"DEBUG: retriever_available={retriever_available} retriever={'exists' if retriever else 'None'}")
                     if retriever:
@@ -1437,9 +1580,10 @@ def _generate_assistant_response(query: str) -> None:
                             stop_words = {
                                 "について", "です", "ます", "したい", "ください", "教えて", "探して", "知りたい",
                                 "とは", "こと", "もの", "ため", "から", "そして", "また", "それ", "これ",
+                                "詳しく", "説明", "解説", "図解", "概要", "要約", "詳細", "方法", "意味", "定義", "関係", "内容", "記事", "などで"
                             }
-                            # ひらがな2文字以上 or カタカナ/漢字2文字以上を抽出
-                            raw_terms = _re_kw.findall(r"[ぁ-ん]{2,}|[ァ-ヶー一-龠々]{2,}", query or "")
+                            # アルファベット・数字・ひらがな/カタカナ/漢字の2文字以上を抽出
+                            raw_terms = _re_kw.findall(r"[a-zA-Z0-9ぁ-んァ-ヶー一-龠々]{2,}", query or "")
                             keywords = [t for t in raw_terms if t not in stop_words]
 
                             def _norm_text(s: str) -> str:
@@ -1481,8 +1625,9 @@ def _generate_assistant_response(query: str) -> None:
                                 except Exception:
                                     pass
 
-                            # それでも空なら、前回の検索結果を暫定利用して文脈断絶を防ぐ
-                            if not local_pre and isinstance(previous_presearch_results, list) and previous_presearch_results and not is_file_referential_query:
+                            # それでも空で、かつ会話が継続（フォローアップ）している場合のみ、前回の検索結果を暫定利用して文脈断絶を防ぐ
+                            # (無関係な新規クエリへの文脈混入・トピックずれを防ぐため)
+                            if not local_pre and followup_like and isinstance(previous_presearch_results, list) and previous_presearch_results and not is_file_referential_query:
                                 local_pre = previous_presearch_results[:top_k]
                         except Exception:
                             pass
@@ -1656,7 +1801,7 @@ def _generate_assistant_response(query: str) -> None:
                             "1) 結論（Qに対する答え）を最初にわかりやすく述べる。",
                             "2) 結論に至る理由や技術的詳細、背景情報を詳しく解説する。段落や見出し（Markdown）を適切に使い、詳細に構成してください。",
                             "3) 根拠となる箇所は必ず出典ID `[source_id]` を明記してください。",
-                            "3.1) 重要: 本文中に生のURLを貼り付けないでください。本文では必ず出典ID（[source_id]）のみを使い、URLは文末 of注釈としてまとめてください。",
+                            "3.1) 重要: 本文中に生のURLを貼り付けないでください。本文では必ず出典ID（[source_id]）のみを使い、URLは文末の注釈としてまとめてください。",
                             "3.2) 重要: 組織名とモデル名は明確に区別してください。混同しないこと。",
                             "4) すべて日本語で答えること。",
                         ]
@@ -1695,53 +1840,7 @@ def _generate_assistant_response(query: str) -> None:
                     prompt = directive + prompt
             except Exception:
                 pass
-            # Heuristic: 連続質問の文脈が切れないよう、参照語・短文・語彙重なりでもフォローアップ判定する
-            import re as _re_local
-            recent_query = (query or "").strip()
-            treat_as_fresh = True
-            followup_like = False
-            try:
-                # 直前ユーザー質問を取得（現在質問は messages の末尾に入っている前提）
-                prev_user_query = ""
-                msgs = st.session_state.get("messages") or []
-                for m in reversed(msgs[:-1]):
-                    if m.get("role") == "user":
-                        prev_user_query = str(m.get("content") or "").strip()
-                        break
-
-                explicit_follow = bool(_re_local.search(r"続き|前回|さっき|先ほど|その件|もう少し|詳しく|補足|それで|ちなみに|じゃあ", recent_query))
-                referential = bool(_re_local.search(r"これ|それ|あれ|上記|前者|後者|同じ|その|どれ|どの", recent_query))
-                short_follow = len(recent_query) <= 24
-                elliptical_follow = bool(
-                    _re_local.search(r"^(無料|有料|料金|値段|価格|いくら|使える|使えますか|できますか|可能ですか|対応していますか).*[？?]?$", recent_query)
-                    or _re_local.search(r"(無料|有料|料金|値段|価格|いくら).*(ですか|ますか|\?|？)$", recent_query)
-                )
-                marketplace_follow = bool(
-                    _re_local.search(
-                        r"amazon|アマゾン|楽天|yahoo|ヤフー|価格\.com|モノタロウ|ヨドバシ|通販|ショップ|販売",
-                        recent_query,
-                        _re_local.IGNORECASE,
-                    )
-                )
-
-                # 内容語の重なりで関連度を推定
-                stop_words = {
-                    "について", "です", "ます", "したい", "ください", "教えて", "知りたい", "何", "なに", "どこ", "いつ",
-                    "これ", "それ", "あれ", "その", "この", "で", "を", "が", "は", "に", "の", "と", "も", "か"
-                }
-                cur_terms = [t for t in _re_local.findall(r"[ぁ-んァ-ヶー一-龠々]{2,}", recent_query) if t not in stop_words]
-                prev_terms = [t for t in _re_local.findall(r"[ぁ-んァ-ヶー一-龠々]{2,}", prev_user_query) if t not in stop_words]
-                overlap = len(set(cur_terms) & set(prev_terms))
-
-                # 「このPDF」系は履歴汚染を避けるため常に新規扱い
-                if is_file_referential_query:
-                    treat_as_fresh = True
-                # 参照語+短文、または語彙重なりがあるときは会話継続扱い
-                elif explicit_follow or (referential and short_follow) or overlap >= 1 or (marketplace_follow and short_follow) or (elliptical_follow and short_follow):
-                    followup_like = True
-                    treat_as_fresh = False
-            except Exception:
-                treat_as_fresh = True
+            # (followup_like, treat_as_fresh, previous_user_query, recent_query はすでに前段で計算されています)
 
             # Web検索結果がある場合でも、フォローアップ質問は会話継続を優先する
             presearch_has_docs = bool(presearch_docs and isinstance(presearch_docs, list) and len(presearch_docs) > 0)
@@ -1823,6 +1922,34 @@ def _generate_assistant_response(query: str) -> None:
                 )
                 _append_run_log("beginner_learning_request_detected: enforcing_actionable_study_plan=True")
 
+            needs_counting_verification = _query_requests_counting(current_query)
+            if needs_counting_verification:
+                prompt = (
+                    prompt
+                    + "\n\n【計算・カウント・パズル問題の必須要件】\n"
+                    + "- ユーザーは文字のカウントや計算、論理パズルを求めています。\n"
+                    + "- 直感的に答えを出さず、必ず以下のステップを踏んで思考を書き出してください。\n"
+                    + "  1) 対象の文字列を1文字ずつ分解（リスト化）して、カウント対象の文字がどこに存在するかを正確に数える。漢字の形が完全に一致するもの（部首などの一部ではなく、文字そのもの）のみを正確にカウントし、「社」や「者」といった異なる漢字は絶対に「車」としてカウントしないでください。\n"
+                    + "  2) 同音異義語や複数の意味を持つ単語がある場合、それぞれの単語の意味とスペルをすべて書き出す。英単語の文字数を数える際は、必ずスペルを1文字ずつリスト化（例: 'your' -> y,o,u,r = 4文字）して、絶対に数え間違いのないように数えてください。\n"
+                    + "  3) 各ステップでの中間計算（例: 各単語の文字数）を個別に書き出し、最後にすべての数値を算術的に合計する。\n"
+                    + "- 最後に自己検証（ダブルチェック）を行い、矛盾やカウントミスがないか確認した上で結論を出力してください。\n\n"
+                    + "【具体的な思考プロセスと検証の例】\n"
+                    + "例：文章「貴社の記者が汽車で帰社した」の中の漢字「車」の回数と、各単語の英訳アルファベット総数の合計を求める場合：\n"
+                    + "1. 文字列の分解と漢字の確認：\n"
+                    + "   1.貴 (否)、2.社 (否)、3.の (否)、4.記 (否)、5.者 (否)、6.が (否)、7.汽 (否)、8.車 (合致 - 1回目)、9.で (否)、10.帰 (否)、11.社 (否)、12.し (否)、13.た (否)\n"
+                    + "   よって「車」という漢字そのものは 1回 のみ使われています。（「社」や「者」は「車」とは異なる漢字ですので、絶対にカウントに含めてはなりません）\n"
+                    + "2. 同音異義語「きしゃ」の英訳と文字数カウント：\n"
+                    + "   - 貴社 -> your company: y,o,u,r(4) + c,o,m,p,a,n,y(7) = 11文字\n"
+                    + "   - 記者 -> reporter: r,e,p,o,r,t,e,r = 8文字\n"
+                    + "   - 汽車 -> train: t,r,a,i,n = 5文字\n"
+                    + "   - 帰社 -> return to office: r,e,t,u,r,n(6) + t,o(2) + o,f,f,i,c,e(6) = 14文字\n"
+                    + "3. 各英訳の文字数合計：\n"
+                    + "   11 + 8 + 5 + 14 = 38文字\n"
+                    + "4. 最終合計：\n"
+                    + "   1 (「車」の数) + 38 (アルファベット数) = 39\n"
+                )
+                _append_run_log("counting_request_detected: enforcing_step_by_step_verification=True")
+
             # 会話履歴から推定したユーザー志向を反映（セッション内のみ）
             try:
                 # 前倒しで推論済みの st.session_state.response_preference_profile または inferred_profile を使用
@@ -1834,18 +1961,80 @@ def _generate_assistant_response(query: str) -> None:
             except Exception as e:
                 _append_run_log(f"response_style_profile_failed: {e}")
 
+            # ======= 日本語出力の厳格化と二重制約の緩和 (User Prompt 末尾への念押し) =======
+            prompt = (
+                prompt
+                + "\n\n【重要な最終指示】\n"
+                + "- 必ず日本語のみで回答してください（英語の専門用語はカタカナにするか、日本語訳を併記すること）。中国語や英語などの多言語での出力は絶対に禁止します。\n"
+                + "- もしユーザーの質問に「詳しく説明せよ」と「1文字で答えて（Yes/Noなど）」のような、矛盾する条件（二重制約）が含まれている場合、一方のみを優先してもう一方を無視するのを避けてください。まず要求された短いフォーマット（「No」など）で簡潔に回答した上で、その後に改行して明確な判断基準や説明を詳しく述べるようにしてください。"
+            )
+            # =========================================================
+
             # LLM 呼び出しを実行し、例外は捕捉してログに残す
             try:
                 _append_run_log(f"DEBUG: About to call LLM with prompt_len={len(prompt)} model={st.session_state.llm_model}")
                 _append_run_log(f"DEBUG: prompt_start={prompt[:300]}")  # Log first 300 chars
-                response = call_llm(
-                    prompt=prompt,
-                    model=st.session_state.llm_model,
-                    system_prompt=system_prompt,
-                    chat_history=chat_history if chat_history else None,
-                    temperature=st.session_state.temperature,
-                    max_tokens=st.session_state.max_tokens,
-                )
+                if container is not None:
+                    with container:
+                        with st.chat_message("assistant", avatar="🤖"):
+                            generator = call_llm(
+                                prompt=prompt,
+                                model=st.session_state.llm_model,
+                                system_prompt=system_prompt,
+                                chat_history=chat_history if chat_history else None,
+                                temperature=st.session_state.temperature,
+                                max_tokens=st.session_state.max_tokens,
+                                stream=True,
+                            )
+                            if hasattr(generator, "__iter__") and not isinstance(generator, (str, bytes)):
+                                response = st.write_stream(generator)
+                            else:
+                                response = generator
+                                st.markdown(response)
+
+                            # 新規生成した応答に Mermaid ブロックがある場合のレンダリング
+                            try:
+                                if _has_mermaid_block(response):
+                                    diagram_mode = normalize_diagram_mode(st.session_state.get("diagram_render_mode", "mermaid"))
+                                    latest_user_q = current_query if 'current_query' in locals() else ""
+                                    if diagram_mode == DIAGRAM_MODE_MERMAID:
+                                        # Mermaidモード時は送信完了後の st.rerun() によって
+                                        # 履歴側の _render_markdown_with_mermaid で美しくインライン描画されるため、
+                                        # ここでは二重描画を防ぐために何もしない
+                                        pass
+                                    else:
+                                        st.markdown("**図解:**")
+                                        parsed_steps = []
+                                        try:
+                                            for m in _MERMAID_BLOCK_RE.finditer(response):
+                                                code = m.group(1) or ""
+                                                parsed_steps.extend(_parse_mermaid_steps(code))
+                                        except Exception as pe:
+                                            _append_run_log(f"Error parsing steps for new response: {pe}")
+                                        if not parsed_steps:
+                                            parsed_steps = diagram_steps_for_query(latest_user_q)
+
+                                        _render_safe_flow_diagram(
+                                            diagram_title_for_query(latest_user_q),
+                                            parsed_steps,
+                                        )
+                                        with st.expander("📊 図解のコード（Mermaid形式）を表示", expanded=False):
+                                            for m in _MERMAID_BLOCK_RE.finditer(response):
+                                                code = (m.group(1) or "").strip()
+                                                if code:
+                                                    st.code(code, language="mermaid")
+                            except Exception as e:
+                                _append_run_log(f"Error rendering diagram for new response: {e}")
+                else:
+                    response = call_llm(
+                        prompt=prompt,
+                        model=st.session_state.llm_model,
+                        system_prompt=system_prompt,
+                        chat_history=chat_history if chat_history else None,
+                        temperature=st.session_state.temperature,
+                        max_tokens=st.session_state.max_tokens,
+                        stream=False,
+                    )
                 _append_run_log(f"DEBUG: LLM returned, type={type(response)} len={len(str(response))}")
                 # 軽いサニティログを残す（プロンプト長とレスポンス先頭）
                 try:
@@ -2106,27 +2295,12 @@ def _generate_assistant_response(query: str) -> None:
 
             # If response is a normal string, run provenance verification; otherwise handle fallback summary.
             if isinstance(response, str) and not str(response).startswith("Error") and response.strip():
-                # SIMPLE RULE: If Web search was performed, ALWAYS store sources
-                # Otherwise, only store sources if response contains references
-                
-                if presearch_docs and isinstance(presearch_docs, list) and len(presearch_docs) > 0:
-                    # Web search was performed -> accept response and store sources
-                    ok = True
-                    provenance = sources
-                    _append_run_log(f"✅ WEB SEARCH MODE: Web search performed with {len(presearch_docs)} results -> ok=True, storing {len(provenance)} sources")
-                else:
-                    # No web search -> check if response has references
-                    has_ref_pattern = bool(re.search(r"\[web_\d+\]|\[\d+\]", str(response)))
-                    if has_ref_pattern:
-                        ok = True
-                        provenance = sources
-                        _append_run_log(f"✅ REFERENCE MODE: Response contains URL references -> ok=True, storing {len(provenance)} sources")
-                    else:
-                        # No web search, no references -> reject
-                        ok = False
-                        provenance = sources
-                        _append_run_log(f"❌ NO SOURCES MODE: No web search, no references -> ok=False")
-
+                # 以前はここで出典(citation)が含まれていないと「hallucination」として回答を破棄・置換する
+                # 厳格なチェックがありましたが、ユーザー体験を損ねる（回答が消える）ためチェックを緩和し、
+                # 常に回答を受け入れて表示するように変更します。
+                ok = True
+                provenance = sources
+                _append_run_log(f"✅ ACCEPT RESPONSE: Saving generated response. sources={len(provenance)}")
 
                 if ok:
                     # record audit & persist log if agent available
@@ -2223,25 +2397,64 @@ def _generate_assistant_response(query: str) -> None:
                 # LLMがエラーまたは空文字を返した場合の既存のフォールバック処理
                 _append_run_log(f"LLM returned error/empty response: {repr(response)[:400]}")
                 if pre and auto_enabled:
-                    lines = ["以下は自動で取得した外部検索結果の簡易要約です。最新情報の確認には必ず公式サイトをご確認ください。\n"]
-                    import re as _re
-                    def _format_line(d):
-                        tid = d.get("id") or "-"
-                        meta_url = (d.get("meta") or {}).get("source") if isinstance(d.get("meta"), dict) else d.get("url")
-                        text_content = str(d.get("text", "")).replace("\n", " ")[:400]
-                        m = _re.search(r"Title:\s*(.*?)(?:URL:|Body:|$)", text_content)
-                        title = m.group(1).strip() if m else None
-                        if title:
-                            return f"・出典 [{tid}]: {title} ({meta_url})\n  要約: {text_content[:200]}"
-                        else:
-                            return f"・出典 [{tid}]: {text_content} ({meta_url})"
+                    # 検索結果を元に、LLMに自然な要約を生成させることを試みる
+                    fallback_system_prompt = (
+                        "あなたは親切なAIアシスタントです。提供された検索結果をもとに、ユーザーの質問に対する回答を自然で分かりやすい日本語で作成してください。"
+                        "検索結果にない情報は推測で補わず、事実に基づいた丁寧な回答を心がけてください。"
+                    )
+                    
+                    docs_text = ""
+                    for i, d in enumerate(pre[:5], 1):
+                        docs_text += f"[出典 {i}]\n{d.get('text', '')}\n\n"
+                    
+                    fallback_prompt = (
+                        f"ユーザーの質問: {query}\n\n"
+                        f"【検索結果】\n{docs_text}\n"
+                        f"上記の検索結果から、ユーザーの質問に対する回答を自然な日本語で作成してください。"
+                        f"回答の最後には、どの出典を参考にしたか（例：[出典 1]など）を明記してください。"
+                    )
+                    
+                    fallback_success = False
+                    try:
+                        _append_run_log("Attempting fallback LLM generation using search results...")
+                        fallback_response = call_llm(
+                            prompt=fallback_prompt,
+                            model=st.session_state.llm_model,
+                            system_prompt=fallback_system_prompt,
+                            chat_history=None,
+                            temperature=0.3,
+                            max_tokens=600,
+                            stream=False,
+                        )
+                        if isinstance(fallback_response, str) and fallback_response.strip() and not fallback_response.startswith("Error"):
+                            _append_run_log("Fallback LLM generation succeeded.")
+                            # 出典元情報を構築
+                            _store_assistant_message({"text": fallback_response, "sources": sources})
+                            fallback_success = True
+                    except Exception as fe:
+                        _append_run_log(f"Fallback LLM generation failed: {fe}")
+                    
+                    if not fallback_success:
+                        # LLMがやはり失敗した場合は、出典のみを表示するが、より親切な文言にする
+                        lines = ["申し訳ありません。回答の直接生成中に一時的なエラーが発生したため、自動で取得した外部検索結果の要約と参照リンクのみを提示いたします。最新情報の確認には必ず公式サイトをご確認ください。\n"]
+                        import re as _re
+                        def _format_line(d):
+                            tid = d.get("id") or "-"
+                            meta_url = (d.get("meta") or {}).get("source") if isinstance(d.get("meta"), dict) else d.get("url")
+                            text_content = str(d.get("text", "")).replace("\n", " ")[:400]
+                            m = _re.search(r"Title:\s*(.*?)(?:URL:|Body:|$)", text_content)
+                            title = m.group(1).strip() if m else None
+                            if title:
+                                return f"・出典 [{tid}]: {title} ({meta_url})\n  要約: {text_content[:200]}"
+                            else:
+                                return f"・出典 [{tid}]: {text_content} ({meta_url})"
 
-                    for d in pre[:3]:
-                        lines.append(_format_line(d))
-                    summary_text = "\n".join(lines)
-                    _store_assistant_message(summary_text)
+                        for d in pre[:3]:
+                            lines.append(_format_line(d))
+                        summary_text = "\n".join(lines)
+                        _store_assistant_message(summary_text)
                 else:
-                    _store_assistant_message(f"申し訳ありません。回答の生成に失敗しました: {response}")
+                    _store_assistant_message(f"申し訳ありません。回答の直接生成中にエラーが発生しました。しばらく経ってから再度お試しください。 ({response})")
             st.session_state.attached_file_contents = []
     except Exception as e:
         logger.error(f"LLM呼び出しエラー: {e}")
@@ -2351,6 +2564,18 @@ def display_app():
         """,
         unsafe_allow_html=True,
     )
+    # 会話フォントサイズを動的に反映
+    font_size = st.session_state.get("font_size", 16)
+    st.markdown(
+        f"""
+        <style>
+            .stApp, .stChatMessage, .chat-scroll-host, .chat-scroll-host p, .chat-scroll-host li {{
+                font-size: {font_size}px !important;
+            }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
     st.title("🤖 自律型RAGエージェント")
     logger.debug("display_app function is being called...")
     
@@ -2358,7 +2583,7 @@ def display_app():
 
     st.subheader("💬 会話")
 
-    chat_scroll_container = st.container(height=560, border=False)
+    chat_scroll_container = st.container(height=720, border=False)
     with chat_scroll_container:
         if st.session_state.messages:
             last_user_query = ""
@@ -2465,7 +2690,7 @@ def display_app():
                             norm_concl = _replace_simplified_chinese(norm_concl)
                         except Exception:
                             pass
-                        st.markdown(f"**回答（簡潔）:** {norm_concl}")
+                        # st.markdown(f"**回答（簡潔）:** {norm_concl}")
 
                         # 初学者向け質問では、結論だけで終わらず実行ステップを主表示に補う
                         try:
@@ -2577,10 +2802,11 @@ def display_app():
                                         )
                                     ][:6]
 
-                                if uniq:
-                                    st.markdown("**最初にやること（要点）:**")
-                                    for ln in uniq:
-                                        st.markdown(f"- {ln}")
+                                # if uniq:
+                                #     st.markdown("**最初にやること（要点）:**")
+                                #     for ln in uniq:
+                                #         st.markdown(f"- {ln}")
+                                pass
                         except Exception:
                             pass
     
@@ -2588,7 +2814,7 @@ def display_app():
                     raw_content_for_diagram = str(message.get("content") or "")
                     if _has_mermaid_block(raw_content_for_diagram):
                         st.markdown("**図解:**")
-                        diagram_mode = normalize_diagram_mode(st.session_state.get("diagram_render_mode", "stable"))
+                        diagram_mode = normalize_diagram_mode(st.session_state.get("diagram_render_mode", "mermaid"))
                         try:
                             latest_user_q = ""
                             for mm in reversed(st.session_state.get("messages") or []):
@@ -2600,12 +2826,29 @@ def display_app():
                         if diagram_mode == DIAGRAM_MODE_MERMAID:
                             _safe_render_mermaid_blocks(raw_content_for_diagram)
                         else:
+                            parsed_steps = []
+                            try:
+                                for m in _MERMAID_BLOCK_RE.finditer(raw_content_for_diagram):
+                                    code = m.group(1) or ""
+                                    parsed_steps.extend(_parse_mermaid_steps(code))
+                            except Exception as pe:
+                                _append_run_log(f"Error parsing steps in history: {pe}")
+                            if not parsed_steps:
+                                parsed_steps = diagram_steps_for_query(latest_user_q)
+
                             _render_safe_flow_diagram(
                                 diagram_title_for_query(latest_user_q),
-                                diagram_steps_for_query(latest_user_q),
+                                parsed_steps,
                             )
+                            with st.expander("📊 図解のコード（Mermaid形式）を表示", expanded=False):
+                                for m in _MERMAID_BLOCK_RE.finditer(raw_content_for_diagram):
+                                    code = (m.group(1) or "").strip()
+                                    if code:
+                                        st.code(code, language="mermaid")
     
                     # show sources as concise bullets and collect URLs as footnotes
+                    footnotes = []
+                    src_lines = []
                     if sources:
                         # load any prior presearch results from session state
                         pre_search = st.session_state.get("presearch_results") or []
@@ -2621,8 +2864,6 @@ def display_app():
                                 st.warning(f"検索スクレイピングの警告: {w}")
     
                         import re as _re
-                        src_lines = []
-                        footnotes = []
     
                         # build maps from pre_search for canonicalization
                         pre_by_id = {str(d.get('id')): d for d in pre_search}
@@ -2739,7 +2980,11 @@ def display_app():
                                 title_display = f"[{title}]({url})"
                             else:
                                 title_display = title
-                            src_lines.append(f"- [URL{url_to_note.get(url, 0)}]: {title}{retrieved_text}" if url else f"- [{cid}]: {title}{retrieved_text}")
+                            src_lines.append(f"- [URL{url_to_note.get(url, 0)}]: {title_display}{retrieved_text}" if url else f"- [{cid}]: {title_display}{retrieved_text}")
+
+                    if src_lines:
+                        with st.expander(f"📚 参考ソース一覧 ({len(src_lines)}件)", expanded=False):
+                            st.markdown("\n".join(src_lines))
 
                     # provide full raw content in an expander for context
                     if message.get("content"):
@@ -2767,207 +3012,192 @@ def display_app():
                             norm_raw = _replace_simplified_chinese(norm_raw)
                         except Exception:
                             norm_raw = raw
-                        with st.expander("詳細表示（元の応答）", expanded=False):
-                            if footnotes:
-                                st.markdown("**出典URL:**\n" + "\n".join([f"- URL{n}: [リンク]({u})" for n,u in footnotes]))
-                            detail_text = _normalize_mermaid_blocks(norm_raw)
-                            detail_text = re.sub(r"\[web_(\d+)\]", r"[URL\1]", detail_text)
+                        detail_text = _normalize_mermaid_blocks(norm_raw)
+                        detail_text = re.sub(r"\[web_(\d+)\]", r"[URL\1]", detail_text)
 
-                            # 詳細表示は生ログ由来テキストが1行に潰れやすいため、可読性を補正
-                            detail_text = detail_text.replace("・出典 [URL", "\n\n・出典 [URL")
-                            detail_text = detail_text.replace(") 要約: Title:", ")\n  要約: Title:")
-                            detail_text = re.sub(r"\s+要約:\s*Title:", "\n  要約: Title:", detail_text)
-                            detail_text = re.sub(r"\s+URL:\s*", "\n  URL: ", detail_text)
-                            detail_text = re.sub(r"\s+Body:\s*", "\n  Body: ", detail_text)
-                            detail_text = re.sub(r"\s+Bod\b", "\n  Body", detail_text)
-                            detail_text = detail_text.replace("(//duckduckgo.com", "(https://duckduckgo.com")
-                            detail_text = re.sub(r"\bURL:\s*//", "URL: https://", detail_text)
+                        # 詳細表示は生ログ由来テキストが1行に潰れやすいため、可読性を補正
+                        detail_text = detail_text.replace("・出典 [URL", "\n\n・出典 [URL")
+                        detail_text = detail_text.replace(") 要約: Title:", ")\n  要約: Title:")
+                        detail_text = re.sub(r"\s+要約:\s*Title:", "\n  要約: Title:", detail_text)
+                        detail_text = re.sub(r"\s+URL:\s*", "\n  URL: ", detail_text)
+                        detail_text = re.sub(r"\s+Body:\s*", "\n  Body: ", detail_text)
+                        detail_text = re.sub(r"\s+Bod\b", "\n  Body", detail_text)
+                        detail_text = detail_text.replace("(//duckduckgo.com", "(https://duckduckgo.com")
+                        detail_text = re.sub(r"\bURL:\s*//", "URL: https://", detail_text)
 
-                            # Web要約形式は生テキストだと詰まりやすいので、出典単位で整形して表示
-                            is_web_digest = (
-                                "・出典 [URL" in detail_text and "要約: Title:" in detail_text and not _has_mermaid_block(detail_text)
+                        # Web要約形式は生テキストだと詰まりやすいので、出典単位で整形して表示
+                        is_web_digest = (
+                            "・出典 [URL" in detail_text and "要約: Title:" in detail_text and not _has_mermaid_block(detail_text)
+                        )
+                        if is_web_digest:
+                            header = detail_text.split("・出典 [URL", 1)[0].strip()
+                            chunks = re.findall(
+                                r"・出典 \[URL(\d+)\]:\s*(.*?)(?=・出典 \[URL\d+\]:|$)",
+                                detail_text,
+                                re.DOTALL,
                             )
-                            if is_web_digest:
-                                header = detail_text.split("・出典 [URL", 1)[0].strip()
-                                chunks = re.findall(
-                                    r"・出典 \[URL(\d+)\]:\s*(.*?)(?=・出典 \[URL\d+\]:|$)",
-                                    detail_text,
-                                    re.DOTALL,
-                                )
-                                lines = []
-                                if header:
-                                    lines.append(header)
-                                if chunks:
-                                    if lines:
-                                        lines.append("")
-                                    lines.append("**出典要約（整形）:**")
-                                    for idx, chunk in chunks[:8]:
-                                        one = re.sub(r"\s+", " ", chunk).strip()
-                                        title = one.split(" (", 1)[0].strip(" -") if one else f"URL{idx}"
-                                        u = re.search(r"URL:\s*(https?://[^\s)]+)", one)
-                                        url = u.group(1).rstrip(").,") if u else ""
-                                        s = re.search(r"要約:\s*Title:\s*(.+?)(?:\s+URL:|\s+Body:|$)", one)
-                                        summary = s.group(1).strip() if s else ""
-                                        if url:
-                                            lines.append(f"- URL{idx}: {title} ([リンク]({url}))")
-                                        else:
-                                            lines.append(f"- URL{idx}: {title}")
-                                        if summary and summary != title:
-                                            lines.append(f"  要約: {summary}")
+                            lines = []
+                            if header:
+                                lines.append(header)
+                            if chunks:
                                 if lines:
-                                    st.markdown("\n".join(lines))
-                                else:
-                                    st.text(detail_text)
+                                    lines.append("")
+                                lines.append("**出典要約（整形）:**")
+                                for idx, chunk in chunks[:8]:
+                                    one = re.sub(r"\s+", " ", chunk).strip()
+                                    title = one.split(" (", 1)[0].strip(" -") if one else f"URL{idx}"
+                                    u = re.search(r"URL:\s*(https?://[^\s)]+)", one)
+                                    url = u.group(1).rstrip(").,") if u else ""
+                                    s = re.search(r"要約:\s*Title:\s*(.+?)(?:\s+URL:|\s+Body:|$)", one)
+                                    summary = s.group(1).strip() if s else ""
+                                    if url:
+                                        lines.append(f"- URL{idx}: {title} ([リンク]({url}))")
+                                    else:
+                                        lines.append(f"- URL{idx}: {title}")
+                                    if summary and summary != title:
+                                        lines.append(f"  要約: {summary}")
+                            if lines:
+                                st.markdown("\n".join(lines))
                             else:
-                                st.markdown(detail_text)
-                            if _has_mermaid_block(detail_text) or re.search(r"図解|図で|フロー図|構成図|diagram", detail_text, re.IGNORECASE):
-                                diagram_mode = normalize_diagram_mode(st.session_state.get("diagram_render_mode", "stable"))
-                                if diagram_mode == DIAGRAM_MODE_MERMAID:
-                                    mermaid_source = detail_text
-                                    if not _has_mermaid_block(mermaid_source):
-                                        mermaid_source = mermaid_source + _fallback_mermaid_for_query("質問")
-                                    _safe_render_mermaid_blocks(mermaid_source)
-                                else:
-                                    latest_user_q = ""
-                                    try:
-                                        for mm in reversed(st.session_state.get("messages") or []):
-                                            if mm.get("role") == "user":
-                                                latest_user_q = str(mm.get("content") or "")
-                                                break
-                                    except Exception:
-                                        latest_user_q = ""
-                                    _render_safe_flow_diagram(
-                                        diagram_title_for_query(latest_user_q),
-                                        diagram_steps_for_query(latest_user_q),
-                                    )
+                                clean_detail = _MERMAID_BLOCK_RE.sub("", detail_text).strip()
+                                st.markdown(clean_detail)
+                        else:
+                            clean_detail = _MERMAID_BLOCK_RE.sub("", detail_text).strip()
+                            st.markdown(clean_detail)
+
+                        # アコーディオン（詳細表示）内での図解の重複描画は完全に廃止し、外側の主表示のみに1つだけ表示する
+                        pass
+                        if footnotes:
+                            links = ", ".join([f'<a href="{u}" target="_blank" style="color: #666; text-decoration: underline;">URL{n}</a>' for n,u in footnotes])
+                            st.markdown(f'<div style="font-size: 0.75em; color: gray; margin-top: 8px;">※出典: {links}</div>', unsafe_allow_html=True)
                 st.markdown("---")
         else:
             st.info("💬 クエリを入力して、会話を開始してください")
 
     _render_inline_feedback_panel()
         
-    # ===== ファイルアップロード機能 =====
-    st.markdown("---")
-    st.subheader("📎 ファイル添付")
-    
-    uploaded_query_files = st.file_uploader(
-        "クエリに添付するファイル（PDF・画像など）",
-        type=["pdf", "png", "jpg", "jpeg", "txt"],
-        accept_multiple_files=True,
-        key="query_files_upload"
-    )
-    
-    file_processing_info = []
-    if uploaded_query_files:
-        col1, col2, col3 = st.columns([0.5, 0.25, 0.25])
-        with col1:
-            st.caption(f"📁 {len(uploaded_query_files)} 個のファイルを選択")
-        with col2:
-            if st.button("📤 インデックスに追加", key="add_query_files_btn"):
-                if retriever_available:
-                    retriever = get_retriever()
-                    if retriever:
-                        with st.spinner("ファイルを処理中..."):
-                            total_chunks = 0
-                            failed_files = []
-                            
+    # ===== 添付ファイル・音声入力統合アコーディオン =====
+    # st.markdown("---")
+    with st.expander("📎 添付ファイル・🎙️ 音声入力", expanded=False):
+        tab_attach, tab_voice = st.tabs(["📎 ファイル添付", "🎙️ 音声入力"])
+        
+        with tab_attach:
+            uploaded_query_files = st.file_uploader(
+                "クエリに添付するファイル（PDF・画像など）",
+                type=["pdf", "png", "jpg", "jpeg", "txt"],
+                accept_multiple_files=True,
+                key="query_files_upload"
+            )
+            
+            file_processing_info = []
+            if uploaded_query_files:
+                col1, col2, col3 = st.columns([0.5, 0.25, 0.25])
+                with col1:
+                    st.caption(f"📁 {len(uploaded_query_files)} 個のファイルを選択")
+                with col2:
+                    if st.button("📤 インデックスに追加", key="add_query_files_btn"):
+                        if retriever_available:
+                            retriever = get_retriever()
+                            if retriever:
+                                with st.spinner("ファイルを処理中..."):
+                                    total_chunks = 0
+                                    failed_files = []
+                                    
+                                    for uploaded_file in uploaded_query_files:
+                                        try:
+                                            fname_lower = uploaded_file.name.lower()
+                                            if fname_lower.endswith(".pdf"):
+                                                result = retriever.add_pdf(uploaded_file)
+                                            elif fname_lower.endswith((".txt", ".md", ".csv", ".json",
+                                                                        ".py", ".js", ".html", ".xml",
+                                                                        ".yaml", ".yml")):
+                                                raw = uploaded_file.read()
+                                                content = _decode_text_bytes(raw)
+                                                if content.strip():
+                                                    chunks = _chunk_text(content)
+                                                    count = retriever.add_texts(
+                                                        chunks,
+                                                        source_info={"source": uploaded_file.name}
+                                                    )
+                                                    result = {"chunks_added": count, "status": "ok"}
+                                                else:
+                                                    result = {"chunks_added": 0, "status": "ファイルが空です"}
+                                            else:
+                                                result = retriever.add_image(uploaded_file)
+                                            
+                                            if result.get("chunks_added", 0) > 0:
+                                                total_chunks += result["chunks_added"]
+                                                file_processing_info.append(f"✅ {uploaded_file.name}: {result['chunks_added']}チャンク")
+                                            else:
+                                                failed_files.append(uploaded_file.name)
+                                                file_processing_info.append(f"⚠️ {uploaded_file.name}: {result.get('status', 'エラー')}")
+                                        except Exception as e:
+                                            failed_files.append(uploaded_file.name)
+                                            file_processing_info.append(f"❌ {uploaded_file.name}: {str(e)[:30]}")
+                                    
+                                    if total_chunks > 0:
+                                        retriever.save()
+                                        st.success(f"✅ 合計 {total_chunks} 個のチャンクを追加しました")
+                                        for info in file_processing_info:
+                                            st.caption(info)
+                                    else:
+                                        st.error(f"❌ ファイル処理に失敗しました")
+                                        for info in file_processing_info:
+                                            st.caption(info)
+                            else:
+                                st.error("❌ Retrieverが初期化できませんでした")
+                        else:
+                            st.error("❌ Retrieverモジュールが利用できません")
+                
+                with col3:
+                    if st.button("💡 コンテキストに読込", key="load_files_context_btn"):
+                        # ファイルの内容を抽出してセッション状態に保存
+                        st.session_state.attached_file_contents = []
+                        
+                        with st.spinner("ファイルを読み込み中..."):
                             for uploaded_file in uploaded_query_files:
                                 try:
-                                    fname_lower = uploaded_file.name.lower()
-                                    if fname_lower.endswith(".pdf"):
-                                        result = retriever.add_pdf(uploaded_file)
-                                    elif fname_lower.endswith((".txt", ".md", ".csv", ".json",
-                                                                ".py", ".js", ".html", ".xml",
-                                                                ".yaml", ".yml")):
-                                        raw = uploaded_file.read()
-                                        content = _decode_text_bytes(raw)
-                                        if content.strip():
-                                            chunks = _chunk_text(content)
-                                            count = retriever.add_texts(
-                                                chunks,
-                                                source_info={"source": uploaded_file.name}
-                                            )
-                                            result = {"chunks_added": count, "status": "ok"}
-                                        else:
-                                            result = {"chunks_added": 0, "status": "ファイルが空です"}
-                                    else:
-                                        result = retriever.add_image(uploaded_file)
-                                    
-                                    if result.get("chunks_added", 0) > 0:
-                                        total_chunks += result["chunks_added"]
-                                        file_processing_info.append(f"✅ {uploaded_file.name}: {result['chunks_added']}チャンク")
-                                    else:
-                                        failed_files.append(uploaded_file.name)
-                                        file_processing_info.append(f"⚠️ {uploaded_file.name}: {result.get('status', 'エラー')}")
-                                except Exception as e:
-                                    failed_files.append(uploaded_file.name)
-                                    file_processing_info.append(f"❌ {uploaded_file.name}: {str(e)[:30]}")
-                            
-                            if total_chunks > 0:
-                                retriever.save()
-                                st.success(f"✅ 合計 {total_chunks} 個のチャンクを追加しました")
-                                for info in file_processing_info:
-                                    st.caption(info)
-                            else:
-                                st.error(f"❌ ファイル処理に失敗しました")
-                                for info in file_processing_info:
-                                    st.caption(info)
-                    else:
-                        st.error("❌ Retrieverが初期化できませんでした")
-                else:
-                    st.error("❌ Retrieverモジュールが利用できません")
-        
-        with col3:
-            if st.button("💡 コンテキストに読込", key="load_files_context_btn"):
-                # ファイルの内容を抽出してセッション状態に保存
-                st.session_state.attached_file_contents = []
-                
-                with st.spinner("ファイルを読み込み中..."):
-                    for uploaded_file in uploaded_query_files:
-                        try:
-                            file_content = ""
-                            filename = str(uploaded_file.name)
-                            
-                            if filename.lower().endswith(".txt"):
-                                # テキストファイル（エンコーディング自動検出）
-                                file_content = _decode_text_bytes(uploaded_file.read())
-                            elif filename.lower().endswith(".pdf"):
-                                # PDF処理
-                                try:
-                                    import pypdf
-                                    pdf_reader = pypdf.PdfReader(uploaded_file)
                                     file_content = ""
-                                    for page_num, page in enumerate(pdf_reader.pages):
+                                    filename = str(uploaded_file.name)
+                                    
+                                    if filename.lower().endswith(".txt"):
+                                        # テキストファイル（エンコーディング自動検出）
+                                        file_content = _decode_text_bytes(uploaded_file.read())
+                                    elif filename.lower().endswith(".pdf"):
+                                        # PDF処理
                                         try:
-                                            text = page.extract_text()
-                                            if text:
-                                                file_content += f"[ページ {page_num + 1}]\n{text}\n\n"
+                                            import pypdf
+                                            pdf_reader = pypdf.PdfReader(uploaded_file)
+                                            file_content = ""
+                                            for page_num, page in enumerate(pdf_reader.pages):
+                                                try:
+                                                    text = page.extract_text()
+                                                    if text:
+                                                        file_content += f"[ページ {page_num + 1}]\n{text}\n\n"
+                                                except Exception as e:
+                                                    file_content += f"[ページ {page_num + 1} - 読み込みエラー]\n"
                                         except Exception as e:
-                                            file_content += f"[ページ {page_num + 1} - 読み込みエラー]\n"
+                                            file_content = f"[PDF読み込みエラー: {str(e)[:50]}]"
+                                    elif filename.lower().endswith((".png", ".jpg", ".jpeg")):
+                                        # 画像ファイル
+                                        file_content = f"[画像ファイル: {filename}]"
+                                    
+                                    if file_content:
+                                        # 内容を最初の2000文字に制限
+                                        content_limited = file_content[:2000]
+                                        st.session_state.attached_file_contents.append({
+                                            "filename": filename,
+                                            "content": content_limited
+                                        })
+                                        st.caption(f"✅ {filename} を読み込みました ({len(file_content)}文字)")
                                 except Exception as e:
-                                    file_content = f"[PDF読み込みエラー: {str(e)[:50]}]"
-                            elif filename.lower().endswith((".png", ".jpg", ".jpeg")):
-                                # 画像ファイル
-                                file_content = f"[画像ファイル: {filename}]"
-                            
-                            if file_content:
-                                # 内容を最初の2000文字に制限
-                                content_limited = file_content[:2000]
-                                st.session_state.attached_file_contents.append({
-                                    "filename": filename,
-                                    "content": content_limited
-                                })
-                                st.caption(f"✅ {filename} を読み込みました ({len(file_content)}文字)")
-                        except Exception as e:
-                            logger.error(f"ファイル読み込みエラー: {e}")
-                            st.caption(f"❌ {uploaded_file.name}: {str(e)[:40]}")
-    
-    st.markdown("---")
+                                    logger.error(f"ファイル読み込みエラー: {e}")
+                                    st.caption(f"❌ {uploaded_file.name}: {str(e)[:40]}")
+        
+        with tab_voice:
+            _render_voice_input_section()
 
-    # ===== 音声入力セクション =====
-    _render_voice_input_section()
-
-    st.markdown("---")
+    # st.markdown("---")
 
     # ===== 曖昧性確認フロー =====
     # If a clarification question is active (set by _store_assistant_message), show UI to collect user's clarification
@@ -3044,7 +3274,7 @@ def display_app():
             st.session_state.pop('clarification_input', None)
             st.session_state.pop('clar_radio', None)
             # call generation with augmented query
-            _generate_assistant_response(augmented)
+            _generate_assistant_response(augmented, container=chat_scroll_container)
 
         def _clar_cancel():
             st.session_state.clarification_active = False
@@ -3116,7 +3346,10 @@ def display_app():
             st.session_state.last_query_processed = query
             st.rerun()
 
-        _generate_assistant_response(query)
+        with chat_scroll_container:
+            with st.chat_message("user", avatar="🙋"):
+                st.markdown(query)
+        _generate_assistant_response(query, container=chat_scroll_container)
         st.session_state.last_query_processed = query
         st.rerun()
 

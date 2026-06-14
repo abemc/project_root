@@ -41,3 +41,5 @@ uvicorn>=0.22.0
 dateparser>=1.1.1
 requests>=2.31.0
 beautifulsoup4>=4.12.0
+RestrictedPython>=6.0
+tabulate>=0.9.0

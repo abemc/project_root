@@ -6,7 +6,7 @@ services:
     ports:
       - "8520:80"
     volumes:
-      - ./nginx-phase4.conf:/etc/nginx/nginx.conf:ro
+      - ../nginx/nginx-phase4.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - app-production
     networks:
@@ -25,7 +25,7 @@ services:
     ports:
       - "8525:8501"
     volumes:
-      - .:/app
+      - ../..:/app
     working_dir: /app
     environment:
       - APP_ENV=production
@@ -49,7 +49,7 @@ services:
     ports:
       - "9093:9090"
     volumes:
-      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../../config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./prometheus-phase4-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'

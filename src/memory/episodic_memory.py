@@ -61,3 +61,48 @@ class EpisodicMemory:
 
         scored.sort(key=lambda x: x[0], reverse=True)
         return [ep for _, ep in scored[:top_k]]
+
+    def compress_memory(self, compressor = None) -> dict:
+        """Compress old episodes and extract general rules (Garbage Collection)."""
+        original_count = len(self.episodes)
+        if original_count == 0:
+            return {
+                "original_count": 0,
+                "pruned_count": 0,
+                "remaining_count": 0,
+                "extracted_rules_count": 0,
+                "compression_ratio": 0.0
+            }
+
+        if compressor is None:
+            from src.memory.memory_compressor import MemoryCompressor
+            compressor = MemoryCompressor()
+
+        pruned_episodes, rules = compressor.compress_episodes(self.episodes)
+        remaining_count = len(pruned_episodes)
+
+        # 1. Update memory episodes and overwrite episodes.jsonl
+        self.episodes = pruned_episodes
+        try:
+            with open(self.file_path, 'w', encoding='utf-8') as f:
+                for ep in self.episodes:
+                    f.write(json.dumps(ep, ensure_ascii=False) + '\n')
+        except Exception:
+            pass
+
+        # 2. Save extracted rules to rules.jsonl in storage_dir
+        rules_path = self.storage_dir / 'rules.jsonl'
+        try:
+            with open(rules_path, 'a', encoding='utf-8') as f:
+                for r in rules:
+                    f.write(json.dumps(r, ensure_ascii=False) + '\n')
+        except Exception:
+            pass
+
+        return {
+            "original_count": original_count,
+            "pruned_count": original_count - remaining_count,
+            "remaining_count": remaining_count,
+            "extracted_rules_count": len(rules),
+            "compression_ratio": (original_count - remaining_count) / original_count if original_count > 0 else 0.0
+        }

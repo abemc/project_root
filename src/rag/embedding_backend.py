@@ -28,7 +28,7 @@ class BatchedEmbedder:
             return
 
         if self.device is None:
-            self.device = "cuda" if torch.cuda.is_available() else "cpu"
+            self.device = os.environ.get("EMBEDDING_DEVICE", "cuda" if torch.cuda.is_available() else "cpu")
 
         try:
             # load model and tokenizer lazily

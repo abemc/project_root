@@ -202,7 +202,7 @@ class AutonomousRAGAgent:
             return self._generate_answer(question, sources), "fallback-no-llm"
 
         prompt = self._build_rag_prompt(question, sources)
-        model = self.config.get("llm_model", "qwen2.5:7b")
+        model = self.config.get("llm_model", "qwen2.5-coder:7b")
         temperature = float(self.config.get("temperature", 0.3))
         max_tokens = int(self.config.get("max_tokens", 2048))
 

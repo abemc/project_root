@@ -1,11 +1,29 @@
+```mermaid
 graph TD;
-    A[README.md] --> B[ProjectStructure.md];
-    A --> C[Code.md];
-    B --> D[SourceCodeFolder];
-    D --> E[src/main.py];
-    D --> F[src/utils.py];
-    C --> G[TestFilesFolder];
-    G --> H[test_main.py];
+    Root["📁 project_root (Project Root)"]
+    
+    %% Entry points
+    Root --> App["💻 app.py (Main Streamlit UI)"]
+    Root --> DashApp["📊 dashboard_app.py"]
+    Root --> CLI["🤖 autonomous_rag_agent.py"]
+    Root --> MainPy["⚡ main.py / manage_kb.py"]
+    
+    %% Directories
+    Root --> Src["📁 src/ (Core Application Logic)"]
+    Root --> Tests["📁 tests/ (Comprehensive Test Suite)"]
+    Root --> Scripts["📁 scripts/ (Utility & Setup Scripts)"]
+    Root --> Deploy["📁 deploy/ (Docker & Nginx Deployment configs)"]
+    Root --> ProjDocs["📁 project_docs/ (Deployment & Assessment Reports)"]
+    Root --> Scratch["📁 scratch/ (Temporary developer files)"]
+    
+    %% Subfolders
+    Src --> RAG["📁 src/rag/"]
+    Src --> UI["📁 src/ui/"]
+    Src --> Utils["📁 src/utils/"]
+    
+    Deploy --> Docker["🐳 deploy/docker/ (docker-compose files)"]
+    Deploy --> Nginx["🌐 deploy/nginx/ (nginx configs)"]
+```
 
 ---
 

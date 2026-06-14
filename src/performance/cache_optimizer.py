@@ -8,7 +8,11 @@ try:
 except ImportError:
     redis = None
 from functools import lru_cache
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
+
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +23,8 @@ class CacheOptimizer:
     """
 
     def __init__(self):
-        load_dotenv()
+        if load_dotenv is not None:
+            load_dotenv()
         self.enabled = os.getenv("RAG_CACHE_ENABLED", "true").lower() == "true"
         self.ttl = int(os.getenv("RAG_CACHE_TTL", "3600"))
         

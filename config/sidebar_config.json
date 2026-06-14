@@ -1,35 +1,56 @@
 {
-  "basic": {
-    "llm_model": "qwen2.5:7b",
-    "max_steps": 5
-  },
-  "search": {
+  "settings": {
+    "font_size": 16,
+    "sidebar_width": 380,
+    "llm_model": "gpt-5.4-mini",
+    "max_steps": 5,
+    "depth": "標準",
+    "diagram_render_mode": "mermaid",
+    "use_web_search": false,
+    "use_autonomous_rag": false,
+    "include_reasoning": true,
+    "stream_output": true,
     "retrieval_top_k": 5,
     "reranker_model": "BAAI/bge-reranker-base",
     "rerank_top_k": 3,
-    "rerank_threshold": 0.1
-  },
-  "multimodal": {
-    "enabled": true,
+    "rerank_threshold": 0.1,
+    "enable_multimodal": true,
     "vision_model": "clip",
     "enable_ocr": true,
-    "audio_transcription_model": "whisper-small",
+    "audio_model": "whisper-small",
     "tts_engine": "edge-tts",
     "supported_languages": [
       "ja",
       "en"
     ],
-    "show_history": false
+    "show_history": false,
+    "show_logs": true,
+    "show_debug": false,
+    "show_memories": true,
+    "show_pref_profile": false,
+    "auto_train_enabled": false,
+    "rlhf_gate_min_entries": 20,
+    "rlhf_gate_min_csat": 3.2,
+    "rlhf_gate_min_adoption_rate": 0.3,
+    "rlhf_gate_min_nps": 0.0,
+    "rlaif_ai_weight": 0.35,
+    "rlaif_min_ai_entries": 30,
+    "rlaif_min_ai_confidence": 0.6,
+    "rlaif_auto_aggregate_ai": true,
+    "rlaif_enable_delta_cap": true,
+    "rlaif_max_weight_delta": 0.25,
+    "value_tuning_bias_enabled": true,
+    "value_tuning_min_items": 5,
+    "value_tuning_max_bias": 0.12,
+    "rlhf_show_gate_logs": true,
+    "sidebar_history_days": 5
   },
-  "debug": {
-    "show_logs": false,
-    "show_memories": false,
-    "show_debug": true,
-    "auto_train_enabled": true
+  "history": {
+    "history_days": 5
   },
   "metadata": {
-    "created_at": "2026-04-15T21:27:09.049185",
-    "updated_at": "2026-04-15T21:27:09.049185",
+    "created_at": "2026-06-12T12:19:26.198420",
+    "updated_at": "2026-06-14T00:44:32.951979",
     "version": "1.0"
   }
 }
